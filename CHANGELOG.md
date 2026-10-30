@@ -1,3 +1,6 @@
+- Cálculo de columnas.
+- Se reagrega agregar variable al diccionario.
+- Fix botón derecho en celulares.
 - Fix a openauth multiservidor.
 - Agregado de delimitaciones en explorar.
 - Versión preliminar guía actualizada.

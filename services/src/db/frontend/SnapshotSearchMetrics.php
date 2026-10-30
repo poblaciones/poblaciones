@@ -21,7 +21,7 @@ class SnapshotSearchMetrics extends BaseModel
 	{
 		$query = Str::AppendFullTextEndsWithAndRequiredSigns($originalQuery);
 
-		$fields = [ 'mvw_metric_caption', 'mvw_caption', 'mvw_metric_caption', 'mvw_variable_captions',
+		$fields = [ 'mvw_metric_caption', 'mvw_metric_keywords', 'mvw_caption', 'mvw_variable_captions',
 											 'mvw_variable_value_captions', 'mvw_work_caption', 'mvw_work_authors', 'mvw_work_institutions' ];
 		$specialWordsCondition = self::calculateSpecialWordsCondition($originalQuery, $fields);
 		$args = array($query, $query);
@@ -36,10 +36,10 @@ class SnapshotSearchMetrics extends BaseModel
 										mvw_metric_caption Caption,
 										GROUP_CONCAT(mvw_caption ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') Extra,
 										'L' Type,
-										MAX(MATCH (`mvw_metric_caption`, `mvw_caption`, `mvw_variable_captions`,
+										MAX(MATCH (`mvw_metric_caption`, `mvw_metric_keywords`, `mvw_caption`, `mvw_variable_captions`,
 										`mvw_variable_value_captions`, `mvw_work_caption`, mvw_work_authors, mvw_work_institutions) AGAINST (?)) Relevance
 										FROM snapshot_metric_version
-										WHERE (MATCH (`mvw_metric_caption`, `mvw_caption`, `mvw_variable_captions`, `mvw_variable_value_captions`,
+										WHERE (MATCH (`mvw_metric_caption`, `mvw_metric_keywords`, `mvw_caption`, `mvw_variable_captions`, `mvw_variable_value_captions`,
 										`mvw_work_caption`, mvw_work_authors, mvw_work_institutions) AGAINST (? IN BOOLEAN MODE) " .
 										$specialWordsCondition . ") AND (" . $currentWorkCondition . " IsAccessibleWork(?, mvw_work_id, mvw_work_is_indexed, mvw_work_is_private)
 										)

@@ -43,28 +43,12 @@ class cHandle extends cPublicController
 		// (C) /handle/workid/metricid/regionid/regionItemId/regionItemName_metricName
 		//		 /handle/123/12/1/1012/catamarca_segregacion
 		// (D) /handle/boundaries/boundaryId
-		$parts = explode('/', $uri);
-		array_shift($parts);
-		if ($parts[0] !== 'handle')
-			throw new PublicException("Ruta inválida.");
-		array_shift($parts);
-
-		$type = 'M';
-		if ($parts[0] === 'boundaries')
-		{
-			array_shift($parts);
-			$type = 'B';
-		}
-
-		// Al último le saca el posible sufijo textual
-		$last = sizeof($parts) - 1;
-		if (Str::Contains($parts[$last], "_"))
-			 $parts[$last] = Str::EatFrom($parts[$last], "_");
-
+		$route = $this->ParseRoute($uri);
+		$type = $route['type'];
+		$workId = $route['workId'];
+		$metricId = $route['metricId'];
+		$regionItemId = $route['regionItemId'];
 		$this->AddValue("debugParam", Params::Get("debug"));
-		$workId = Params::CheckParseIntValue($parts[0]);
-		$metricId = $this->GetMetricId($parts);
-		$regionItemId = $this->GetRegionItemId($parts);
 		//////////////
 
 		if ($type === "B")
@@ -121,6 +105,52 @@ class cHandle extends cPublicController
 				return $this->RedirectBoundary($workId);
 			}
 		}
+	}
+
+	private function ParseRoute($uri)
+	{
+		$path = $this->GetPathWithoutParameters($uri);
+		$parts = explode('/', $path);
+		array_shift($parts);
+		if ($parts[0] !== 'handle')
+			throw new PublicException("Ruta inválida.");
+		array_shift($parts);
+
+		$type = 'M';
+		if ($parts[0] === 'boundaries')
+		{
+			array_shift($parts);
+			$type = 'B';
+		}
+
+		$last = sizeof($parts) - 1;
+		$parts[$last] = $this->GetSegmentWithoutTextSuffix($parts[$last]);
+
+		return [
+			'type' => $type,
+			'workId' => Params::CheckParseIntValue($parts[0]),
+			'metricId' => $this->GetMetricId($parts),
+			'regionItemId' => $this->GetRegionItemId($parts)
+		];
+	}
+
+	// Google puede agregar parámetros con '&' sin '?' previo (ej. &gsessionid=...)
+	private function GetPathWithoutParameters($uri)
+	{
+		$path = $uri;
+		foreach (['?', '&'] as $separator)
+		{
+			if (Str::Contains($path, $separator))
+				$path = Str::EatFrom($path, $separator);
+		}
+		return $path;
+	}
+
+	private function GetSegmentWithoutTextSuffix($segment)
+	{
+		if (Str::Contains($segment, "_"))
+			return Str::EatFrom($segment, "_");
+		return $segment;
 	}
 
 	private function GetMetricId($parts)
