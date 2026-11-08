@@ -55,19 +55,19 @@ var numericOperations = [
 		Description: 'Retorna el valor absoluto de un valor numérico.'
 	},
 	{
-		Key: 'equals', Group: 'Comparación', Caption: 'EsIgual(valor, contra)', Count: 2, Types: [NUMBER, NUMBER], Labels: ['Comparar', 'Contra'], AllowNull: true,
+		Key: 'equals', Group: 'Comparación', Caption: 'EsIgual(número1, número 2)', Count: 2, Types: [NUMBER, NUMBER], Labels: ['Número1', 'Número 2'], AllowNull: true,
 		Description: 'Retorna 1 si el primer valor es igual al segundo y 0 en caso contrario. Dos valores nulos se consideran iguales.'
 	},
 	{
-		Key: 'notEquals', Group: 'Comparación', Caption: 'EsDistinto(valor, contra)', Count: 2, Types: [NUMBER, NUMBER], Labels: ['Comparar', 'Contra'], AllowNull: true,
+		Key: 'notEquals', Group: 'Comparación', Caption: 'EsDistinto(número1, número 2)', Count: 2, Types: [NUMBER, NUMBER], Labels: ['Número1', 'Número 2'], AllowNull: true,
 		Description: 'Retorna 1 si el primer valor es distinto del segundo y 0 en caso contrario. Un valor nulo se considera distinto de cualquier valor no nulo.'
 	},
 	{
-		Key: 'greater', Group: 'Comparación', Caption: 'EsMayor(valor, contra)', Count: 2, Types: [NUMBER, NUMBER], Labels: ['Comparar', 'Contra'],
+		Key: 'greater', Group: 'Comparación', Caption: 'EsMayor(número1, número 2)', Count: 2, Types: [NUMBER, NUMBER], Labels: ['Número1', 'Número 2'],
 		Description: 'Retorna 1 si el primer valor es mayor que el segundo y 0 en caso contrario. Retorna nulo si alguno de los valores es nulo.'
 	},
 	{
-		Key: 'less', Group: 'Comparación', Caption: 'EsMenor(valor, contra)', Count: 2, Types: [NUMBER, NUMBER], Labels: ['Comparar', 'Contra'],
+		Key: 'less', Group: 'Comparación', Caption: 'EsMenor(número1, número 2)', Count: 2, Types: [NUMBER, NUMBER], Labels: ['Número1', 'Número 2'],
 		Description: 'Retorna 1 si el primer valor es menor que el segundo y 0 en caso contrario. Retorna nulo si alguno de los valores es nulo.'
 	},
 	{
@@ -75,19 +75,19 @@ var numericOperations = [
 		Description: 'Retorna 1 si el valor se encuentra entre desde y hasta, ambos inclusive, y 0 en caso contrario. Retorna nulo si alguno de los valores es nulo.'
 	},
 	{
-		Key: 'equalsText', Group: 'Comparación', Caption: 'EsIgualCadena(cadena, contra)', Count: 2, Types: [TEXT, TEXT], Labels: ['Comparar', 'Contra'], AllowNull: true,
+		Key: 'equalsText', Group: 'Comparación', Caption: 'EsIgualCadena(cadena1, cadena2)', Count: 2, Types: [TEXT, TEXT], Labels: ['Cadena1', 'Cadena 2'], AllowNull: true,
 		Description: 'Retorna 1 si la primera cadena es igual a la segunda y 0 en caso contrario. Dos valores nulos se consideran iguales.'
 	},
 	{
-		Key: 'notEqualsText', Group: 'Comparación', Caption: 'EsDistintoCadena(cadena, contra)', Count: 2, Types: [TEXT, TEXT], Labels: ['Comparar', 'Contra'], AllowNull: true,
+		Key: 'notEqualsText', Group: 'Comparación', Caption: 'EsDistintoCadena(cadena1, cadena2)', Count: 2, Types: [TEXT, TEXT], Labels: ['Cadena1', 'Cadena 2'], AllowNull: true,
 		Description: 'Retorna 1 si la primera cadena es distinta de la segunda y 0 en caso contrario. Un valor nulo se considera distinto de cualquier valor no nulo.'
 	},
 	{
-		Key: 'greaterText', Group: 'Comparación', Caption: 'EsMayorCadena(cadena, contra)', Count: 2, Types: [TEXT, TEXT], Labels: ['Comparar', 'Contra'],
+		Key: 'greaterText', Group: 'Comparación', Caption: 'EsMayorCadena(cadena1, cadena2)', Count: 2, Types: [TEXT, TEXT], Labels: ['Cadena1', 'Cadena 2'],
 		Description: 'Retorna 1 si la primera cadena es mayor que la segunda y 0 en caso contrario. Retorna nulo si alguno de los valores es nulo.'
 	},
 	{
-		Key: 'lessText', Group: 'Comparación', Caption: 'EsMenorCadena(cadena, contra)', Count: 2, Types: [TEXT, TEXT], Labels: ['Comparar', 'Contra'],
+		Key: 'lessText', Group: 'Comparación', Caption: 'EsMenorCadena(cadena1, cadena2)', Count: 2, Types: [TEXT, TEXT], Labels: ['Cadena1', 'Cadena 2'],
 		Description: 'Retorna 1 si la primera cadena es menor que la segunda y 0 en caso contrario. Retorna nulo si alguno de los valores es nulo.'
 	},
 	{

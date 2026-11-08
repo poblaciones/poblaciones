@@ -57,7 +57,7 @@
 
 /* ---------- Ícono de ítem de lista ---------- */
 .list-icon {
-	color: #666;
+	color: var(--mp-primary);
 	font-size: 20px;
 	width: 24px;
 	text-align: center;

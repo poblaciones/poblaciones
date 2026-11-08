@@ -16,8 +16,8 @@
 
 					<div class="md-layout-item md-size-50" v-if="!variable.Id">
 						<div class="mp-label labelSeparator">Tipo</div>
-						<md-radio v-model="variable.Format" class="md-primary" :value="1">Texto</md-radio>
 						<md-radio v-model="variable.Format" class="md-primary" :value="5">Numérica</md-radio>
+						<md-radio v-model="variable.Format" class="md-primary" :value="1">Texto</md-radio>
 					</div>
 
 					<div class="md-layout-item md-size-50">

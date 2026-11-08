@@ -3,7 +3,7 @@
 		<div>
 			<div v-if="metadata !== null" ref="barBody" class="mp-surface workPanelBody"
 					 :style="'    text-shadow: rgb(118 118 118) 0px 0px 5px;rgba(76, 76, 76, 0.32) 0px 0px 6px 0px inset; background-color: ' + backgroundColor ">
-				<div class="floatBox mp-float-right exp-hiddable-block" style="margin-top: -1px">
+				<div class="floatBox mp-float-right-toolbar exp-hiddable-block" style="margin-top: -1px; background: inherit;">
 					<button type="button" class="mp-btn mp-btn--on-dark" v-if="hasOnboarding() && !isMobile"
 									title="Bienvenida" aria-label="Bienvenida" @click="showOnboarding">
 						<help-circle-icon style="color: #fff" title="Bienvenida" />

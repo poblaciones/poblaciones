@@ -1,7 +1,7 @@
 <template>
 	<v-popover popoverClass="tooltipInPopup tooltipNoBorder colorTooltip"
 						 style=" display: inline-block;" :style="(child ? 'width: 100%;': (floatRight ? ' float: right;' : ''))"
-						 popoverArrowClass="noArrow" :open="showDropDown"
+						 popoverArrowClass="noArrow" :placement="popoverPlacement" :open="showDropDown"
 						 :disabled="false" @hide="dropDownClosed" @show="dropDownOpened" @apply-show="adjustMenuToViewport"
 						 popoverInnerClass="tooltipNoBorder">
 
@@ -20,7 +20,7 @@
 		</button>
 
 		<div slot="popover">
-			<ul ref="menu" class="mp-menu dropFilter" :style="menuStyle" aria-labelledby="filterDropId">
+			<ul ref="menu" class="mp-menu dropFilter" :class="menuClass" :style="menuStyle" aria-labelledby="filterDropId">
 				<template v-for="(item, index) in items">
 					<li v-if="!item.items" style="position: relative" :class="(item.separator ? 'mp-menu__item--divided' : '') + ' ' + (item.liClass ? item.liClass : '')" :key="index">
 						<a v-if="!item.items && !item.separator" :href="item.href" :target="item.target" :style="'padding-right: 28px; padding-left: '+ (15 + (item.level ? item.level : 0) * 14) +'px' "
@@ -56,6 +56,9 @@
 		name: 'dropdown',
 		props: {
 			floatRight: { type: Boolean, default: true },
+			// Borde del disparador con el que se alinea el menú: 'end' (derecho) o 'start' (izquierdo).
+			// Si no entra en la pantalla, se usa el otro.
+			align: { type: String, default: 'end' },
 			// 'ghost' (glifo suave de cabecera), 'icon' (circular de 32 px), 'float' (40 px sobre el mapa) o 'pill' (texto con fondo al pasar el mouse)
 			variant: { type: String, default: 'ghost' },
 			items: { type: Array, default: function () { return []; } },
@@ -77,6 +80,7 @@
 				showDropDown: false,
 				isDropDownOpen: false,
 				menuShiftX: 0,
+				flippedAlign: null,
 			};
 		},
 		methods: {
@@ -103,7 +107,11 @@
 			},
 			adjustMenuToViewport() {
 				this.menuShiftX = 0;
-				// Popper posiciona el popover en el primer frame; recién en el segundo la medición es válida.
+				this.flippedAlign = null;
+				this.measureMenuAfterPositioning();
+			},
+			// Popper posiciona el popover en el primer frame; recién en el segundo la medición es válida.
+			measureMenuAfterPositioning() {
 				requestAnimationFrame(() => {
 					requestAnimationFrame(() => {
 						this.shiftMenuInsideViewport();
@@ -111,10 +119,26 @@
 				});
 			},
 			// Popper no ve el menú (es absolute dentro del popover), por eso no lo acota al viewport.
+			// Primero se prueba con el otro borde del disparador; si tampoco entra, se desplaza.
 			shiftMenuInsideViewport() {
-				var menuLeft = this.$refs.menu.getBoundingClientRect().left;
-				if (menuLeft < VIEWPORT_MARGIN_PX) {
-					this.menuShiftX = VIEWPORT_MARGIN_PX - menuLeft;
+				var rect = this.$refs.menu.getBoundingClientRect();
+				var maxRight = window.innerWidth - VIEWPORT_MARGIN_PX;
+				if (!this.child && this.flippedAlign === null) {
+					if (this.align === 'end' && rect.left < VIEWPORT_MARGIN_PX) {
+						this.flippedAlign = 'start';
+						this.measureMenuAfterPositioning();
+						return;
+					}
+					if (this.align === 'start' && rect.right > maxRight) {
+						this.flippedAlign = 'end';
+						this.measureMenuAfterPositioning();
+						return;
+					}
+				}
+				if (rect.left < VIEWPORT_MARGIN_PX) {
+					this.menuShiftX = VIEWPORT_MARGIN_PX - rect.left;
+				} else if (rect.right > maxRight) {
+					this.menuShiftX = maxRight - rect.right;
 				}
 			}
 		},
@@ -149,8 +173,27 @@
 				currentItem() {
 					return { label: this.label, level: this.level, key: this.key, separator: this.separator };
 				},
+				effectiveAlign() {
+					if (this.flippedAlign !== null) {
+						return this.flippedAlign;
+					}
+					return this.align;
+				},
+				popoverPlacement() {
+					if (this.child) {
+						return 'bottom';
+					}
+					return 'bottom-' + this.effectiveAlign;
+				},
+				menuClass() {
+					return { 'mp-menu--start': !this.child && this.effectiveAlign === 'start' };
+				},
 				menuStyle() {
-					return { '--menu-shift-x': this.menuShiftX + 'px' };
+					var offsetX = '0px';
+					if (this.child) {
+						offsetX = '20px';
+					}
+					return { '--menu-offset-x': offsetX, '--menu-shift-x': this.menuShiftX + 'px' };
 				}
 		},
 	};
@@ -164,7 +207,7 @@
 
 	.dropFilter {
 		margin-top: 0px;
-		transform: translate(calc(20px + var(--menu-shift-x, 0px)), 4px);
+		transform: translate(calc(var(--menu-offset-x, 0px) + var(--menu-shift-x, 0px)), 4px);
 		cursor: pointer;
 		overflow: hidden;
 	}

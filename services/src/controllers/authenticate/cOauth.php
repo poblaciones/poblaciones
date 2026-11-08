@@ -34,6 +34,9 @@ class cOauth extends cController
 		$state = Params::SafeGet('state');
 		if($code != '' && $state != '')
 		{
+			if($this->oauth->ClaimState($state) == false)
+				$this->oauth->RedirectStateUsed();
+
 			$data = $this->oauth->RequestData($code, $state);
 			if ($data != null) {
 				if ($data->email == '' || $data->verified == false)

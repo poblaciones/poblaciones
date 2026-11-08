@@ -128,7 +128,7 @@ class DeploymentService extends BaseService
 				throw new ErrorException('Archivo no encontrado.');
 
 			// que borre la subcarpeta web/static para que no se acumulen los compilados
-			IO::RemoveDirectory(Context::Paths()->GetRoot() . "/web/static");
+			IO::ClearFilesOlderThan(Context::Paths()->GetRoot() . "/web/static", 120);
 			// mueve el nuevo contenido
 			IO::MoveDirectoryContents($source, Context::Paths()->GetRoot());
 

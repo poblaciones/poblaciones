@@ -179,7 +179,7 @@ class StatisticsService extends BaseService
 		$ret[] = [ 'Caption' => 'Hits de GoogleBot', 'Hits' => $crawler ];
 
 		$mapsKey = Arr::SummarizeValues($dailyTable['MapsOpened']);
-		$ret[] = [ 'Caption' => 'Uso de Google Maps key', 'Hits' => $mapsKey ];
+		$ret[] = [ 'Caption' => 'Aperturas de mapa', 'Hits' => $mapsKey ];
 
 		$addressKey = Arr::SummarizeValues($dailyTable['AddressQuery']);
 		$ret[] = [ 'Caption' => 'Uso de Google Geocoder key', 'Hits' => $addressKey ];

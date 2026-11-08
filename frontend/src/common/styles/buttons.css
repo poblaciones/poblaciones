@@ -169,7 +169,18 @@
 .mp-btn-group > .mp-btn.is-selected {
 	z-index: 2;
 }
+.mp-icon-info {
+	color: #cb710beb !important;
+}
+	/* var(--mp-primary)!important */
 
+	.mp-icon-info:hover {
+		opacity: 1!important;
+	}
+
+.mp-icon-info.mp-icon-btn--muted {
+	opacity: .75;
+}
 /* ---------- .mp-icon-btn ---------- */
 .mp-icon-btn {
 	display: flex;

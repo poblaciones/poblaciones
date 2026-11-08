@@ -188,8 +188,8 @@ class Account
 			}
 			if (App::Settings()->Servers()->IsMainServerRequest() && !App::Settings()->Servers()->IsTransactionServerRequest())
 				$this->loadUserRemote();
-			else
-				$this->loadUserFromDatabase($throwException);
+			else if ($this->loadUserFromDatabase($throwException) === false)
+				return false;
 		}
 		return true;
 	}

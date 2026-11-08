@@ -376,10 +376,11 @@ class FabService extends BaseService
 	private function GetRecommended($providers)
 	{
 		$stats = new StatisticsService();
-		$rows = $stats->GetLastMonthTopMetrics(10);
+		$rows = $stats->GetLastMonthTopMetrics(9);
 		if (sizeof($rows) === 0)
 			return null;
 
+		Arr::SortByNamedValue($rows, "myv_metric_caption");
 		$metrics = $this->createMetricInfos($rows, $providers);
 		// Listo
 		return [
