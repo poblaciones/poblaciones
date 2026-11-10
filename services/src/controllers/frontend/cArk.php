@@ -5,6 +5,7 @@ namespace helena\controllers\frontend;
 use helena\controllers\common\cPublicController;
 use minga\framework\Request;
 use minga\framework\Params;
+use minga\framework\Str;
 use helena\classes\App;
 use helena\classes\Session;
 use helena\classes\Links;
@@ -21,6 +22,7 @@ class cArk extends cPublicController
 		// Tiene las posibles estructuras:
 		// (A) /ark:/13683/<workId>
 		// (B) /ark:/13683/<workId>/<metricId>
+		// (C) /ark:/13683/b<boundaryId>
 
 		$parts = explode('/', $uri);
 		array_shift($parts);
@@ -31,6 +33,9 @@ class cArk extends cPublicController
 		if ($naan != App::Settings()->Map()->NAAN)
 			throw new PublicException("NAAN en ruta inválido.");
 		array_shift($parts);
+
+		if (Str::StartsWith($parts[0], 'b'))
+			return $this->RedirectBoundary(substr($parts[0], 1));
 
 		$workId = Params::CheckParseIntValue($parts[0]);
 		if ($denied = Session::CheckIsWorkPublicOrAccessible($workId)) return $denied;
@@ -50,6 +55,14 @@ class cArk extends cPublicController
 	{
 		// http://localhost:8000/map/3701
 		return $this->RedirectJs(Links::GetWorkUrl($workId));
+	}
+
+	private function RedirectBoundary($boundaryIdText)
+	{
+		// http://localhost:8000/map/b26
+		$boundaryId = Params::CheckParseIntValue($boundaryIdText);
+		if ($denied = Session::CheckIsBoundaryPublicOrAccessible($boundaryId)) return $denied;
+		return $this->RedirectJs(Links::GetBoundaryUrl($boundaryId));
 	}
 
 	private function RedirectWorkMetric($workId, $metricId)

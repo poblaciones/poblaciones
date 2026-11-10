@@ -245,6 +245,10 @@ export default {
 	position: initial;
 	width: 100%;
 }
+.floatBox {
+		float: right;
+}
+
 .littleRow {
 	width: 100%;
 	text-overflow: ellipsis;
