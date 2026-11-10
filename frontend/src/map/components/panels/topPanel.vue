@@ -256,6 +256,9 @@ export default {
 	text-transform: uppercase;
 	margin-bottom: 3px;
 	margin-top: -4px;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: clip;
 }
 .postTitleRow {
 	margin-bottom: -2px;

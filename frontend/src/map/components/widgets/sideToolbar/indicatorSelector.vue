@@ -269,7 +269,7 @@
                 </div>
                 <div class="indicator-actions">
                   <button v-if="!isMobile && hasInfo(row.item)"
-                          class="mp-icon-btn mp-icon-btn--muted"
+                          class="mp-icon-btn mp-icon-info mp-icon-btn--muted"
                           :aria-label="'Información de ' + row.item.Name"
                           @mouseenter="showTooltip($event, row.item)"
                           @mouseleave="hideTooltip"
@@ -1339,12 +1339,12 @@ export default {
 .category-card.featured { background: linear-gradient(135deg, #c3c3c3 0%, #818181 100%); color: white; border: none; }
 .category-card.featured .category-name { color: white; }
 .category-card.featured .category-count { color: rgba(255, 255, 255, 0.8); }
-        .category-icon {
-                font-size: 32px;
-                color: #666;
-                display: block;
-                margin-bottom: 12px;
-        }
+	.category-icon {
+		font-size: 32px;
+		color: var(--mp-primary);
+		display: block;
+		margin-bottom: 12px;
+	}
 .category-icon.featured { text-shadow: none; color: #69bad5; }
 .category-name { font-size: 15px; color: #333; margin-bottom: 4px; line-height: 1.3; font-weight: 500; }
 .category-count { font-size: 13px; color: #999; padding-top: 2px; line-height: 1.3; }
