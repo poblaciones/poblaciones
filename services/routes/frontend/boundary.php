@@ -50,6 +50,24 @@ $getBoundary = function (Request $request) {
 App::$app->get('/services/frontend/boundaries/GetBoundaryTile', $getBoundary);
 App::$app->get('/services/frontend/boundaries/GetBaseBoundaryTile', $getBoundary);
 
+// ej. http://mapas/services/frontend/boundaries/GetBoundaryByEnvelope?b=8&v=12
+// La geometría binaria de la base no es JSON válido: viaja en base64.
+App::$app->get('/services/frontend/boundaries/GetBoundaryByEnvelope', function (Request $request) {
+	$controller = new services\BoundaryService();
+	$boundaryId = Params::GetIntMandatory('b');
+	$boundaryVersionId = Params::GetIntMandatory('v');
+
+	if ($denied = Session::CheckIsBoundaryVersionPublicOrAccessible($boundaryId, $boundaryVersionId)) return $denied;
+
+	$features = [];
+	foreach ($controller->GetBoundaryByEnvelope($boundaryVersionId) as $row)
+	{
+		$row['value'] = base64_encode($row['value']);
+		$features[] = $row;
+	}
+	return App::Json(['features' => $features]);
+});
+
 // ej. http://mapas//services/frontend/boundaries/GetBoundarySummary?b=8&r=7160
 App::$app->get('/services/frontend/boundaries/GetBoundarySummary', function (Request $request) {
 	$controller = new services\BoundaryService();

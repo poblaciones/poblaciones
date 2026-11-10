@@ -69,6 +69,29 @@ class BoundaryService extends BaseService
 		return $data;
 	}
 
+	// Zoom con el que se elige la geometría más detallada (biw_geometry_r3).
+	const FULL_DETAIL_ZOOM = 18;
+
+	// Todas las regiones de una versión con su geometría completa, sin recorte ni
+	// envolvente: es lo que consume el WFS. Cada fila trae FID, Description y value
+	// (binario de la base).
+	public function GetBoundaryByEnvelope($boundaryVersionId)
+	{
+		$table = new SnapshotBoundaryVersionItemModel($boundaryVersionId);
+		$table->zoom = self::FULL_DETAIL_ZOOM;
+
+		$ret = [];
+		foreach ($table->GetAllRows() as $row)
+		{
+			$ret[] = [
+				'FID' => $row['FID'],
+				'Description' => $row['Caption'],
+				'value' => $row['value'],
+			];
+		}
+		return $ret;
+	}
+
 	public function GetSelectedBoundary($boundaryId)
 	{
 		$data = null;

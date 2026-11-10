@@ -110,13 +110,13 @@ class WfsGetFeatureService extends BaseService
 
 	private function HandleBoundary(WfsTypeName $typeName, $bbox, $outputFormat, $count, $startIndex, $hits)
 	{
-		$cache = new WfsGeometryCache(WfsDatasetType::SHAPES, $typeName->BoundaryVersionId);
+		$cache = new WfsGeometryCache(WfsDatasetType::BOUNDARIES, $typeName->BoundaryVersionId);
 
-		if (!$cache->IsPopulated()) {
+		if (!$cache->IsFresh(WfsConfig::TTL_BOUNDARY_SECONDS)) {
 			// Siempre trae el conjunto completo para que el caché quede íntegro.
 			// Los filtros por BBOX se aplican después desde SQLite.
-			$data = WfsRemoteClient::GetBoundaryByEnvelope($typeName->BoundaryVersionId);
-			$cache->Populate($data['features']);
+			$rows = WfsRemoteClient::GetBoundaryByEnvelope($typeName->BoundaryId, $typeName->BoundaryVersionId);
+			$cache->Populate($rows);
 		}
 
 		if ($bbox !== null) {

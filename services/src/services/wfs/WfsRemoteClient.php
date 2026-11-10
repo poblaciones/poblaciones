@@ -20,40 +20,56 @@ class WfsRemoteClient
 		return $ret;
 	}
 
+	// Local: se llama a GetSelectedMetric directamente. PublicGetSelectedInfos registra
+	// una visita en las estadísticas por cada versión de cada métrica, y GetCapabilities
+	// recorre todo el catálogo: serían cientos de escrituras y visitas falsas por consulta.
 	public static function GetSelectedInfos($metricsId)
 	{
 		if (self::IsLocal())
 		{
 			$controller = new services\SelectedMetricService();
-			return App::JsonClone($controller->PublicGetSelectedInfos($metricsId));
+			$ret = [];
+			foreach (explode(',', $metricsId) as $metricId)
+			{
+				$metric = $controller->GetSelectedMetric(intval($metricId), false, true, true);
+				if ($metric !== null)
+					$ret[] = App::JsonClone($metric);
+			}
+			return $ret;
 		}
-		else
-		{
-			return self::Get('/services/metrics/GetSelectedInfos', ['l' => $metricsId]);
-		}
-
+		return self::Get('/services/metrics/GetSelectedInfos', ['l' => $metricsId]);
 	}
+
 	public static function GetSelectedMetric($metricId)
 	{
 		if (self::IsLocal())
 		{
 			$controller = new services\SelectedMetricService();
-			return App::JsonClone($controller->PublicGetSelectedMetric($metricId));
+			return App::JsonClone($controller->GetSelectedMetric(intval($metricId), false, true, true));
 		}
-		else
-		{
-			return self::Get('/services/metrics/GetSelectedMetric', ['l' => $metricId]);
-		}
+		return self::Get('/services/metrics/GetSelectedMetric', ['l' => $metricId]);
 	}
-	public static function GetBoundaryByEnvelope($boundaryVersionId)
+
+	// Devuelve las filas FID, Description y value (binario de la base) de la versión completa.
+	public static function GetBoundaryByEnvelope($boundaryId, $boundaryVersionId)
 	{
 		if (self::IsLocal())
-			throw new PublicException("Las delimitaciones todavía no se publican por WFS en este servidor.");
+		{
+			$controller = new services\BoundaryService();
+			return $controller->GetBoundaryByEnvelope($boundaryVersionId);
+		}
 
-		$data = self::Get('/services/frontend/boundaries/GetBoundaryByEnvelope', $boundaryVersionId);
-		if ($data === null || isset($data['features']) == false)
+		$data = self::Get('/services/frontend/boundaries/GetBoundaryByEnvelope', ['b' => $boundaryId, 'v' => $boundaryVersionId]);
+		if ($data === null)
 			throw new PublicException("No se pudo obtener la delimitación {$boundaryVersionId}.");
-		return $data;
+
+		$rows = [];
+		foreach ($data['features'] as $feature)
+		{
+			$feature['value'] = base64_decode($feature['value']);
+			$rows[] = $feature;
+		}
+		return $rows;
 	}
 
 	public static function GetShapesByEnvelope($datasetId, $envelope)

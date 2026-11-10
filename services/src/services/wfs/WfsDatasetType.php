@@ -10,4 +10,5 @@ class WfsDatasetType
 	const CENSUS = 'D'; // Polígonos censales - geometría viene de MySQL vía GetGeographyByEnvelope
 	const SHAPES = 'S'; // Polígonos propios  - geometría viene de ShapesService vía GetShapesByEnvelope
 	const POINTS = 'L'; // Puntos             - lat/lon incluidos en GetMetricData
+	const BOUNDARIES = 'B'; // Delimitaciones   - geometría de snapshot_boundary_version_item
 }

@@ -10,17 +10,20 @@ use minga\framework\settings\CacheSettings;
 // Gestiona el caché SQLite de geometrías.
 // Para tipo D (censal): archivos geom_geo_{geographyId}.sqlite
 // Para tipo S (shapes propios): archivos geom_ds_{datasetId}.sqlite
+// Para tipo B (delimitaciones): archivos geom_bv_{boundaryVersionId}.sqlite
 // Esquema: geography_item_id INTEGER PRIMARY KEY, name TEXT, wkt TEXT,
 //          bbox_min_lat REAL, bbox_max_lat REAL, bbox_min_lon REAL, bbox_max_lon REAL
 class WfsGeometryCache
 {
-	private $sourceKey; // "geo_{geographyId}" o "ds_{datasetId}"
+	private $sourceKey; // "geo_{geographyId}", "ds_{datasetId}" o "bv_{boundaryVersionId}"
 	private $db;
 
 	public function __construct($datasetType, $geographyIdOrDatasetId)
 	{
 		if ($datasetType === WfsDatasetType::CENSUS)
 			$this->sourceKey = "geo_{$geographyIdOrDatasetId}";
+		else if ($datasetType === WfsDatasetType::BOUNDARIES)
+			$this->sourceKey = "bv_{$geographyIdOrDatasetId}";
 		else
 			$this->sourceKey = "ds_{$geographyIdOrDatasetId}";
 	}
@@ -60,9 +63,26 @@ class WfsGeometryCache
 		}
 	}
 
+	// True si el caché se pobló hace menos de $ttlSeconds. Un caché sin fecha de carga
+	// (anterior a este control) se considera vencido.
+	public function IsFresh($ttlSeconds)
+	{
+		if (!$this->IsPopulated())
+			return false;
+		$db = $this->GetDb();
+		$hasMeta = $db->querySingle("SELECT count(*) FROM sqlite_master WHERE type = 'table' AND name = 'meta'");
+		if ((int)$hasMeta === 0)
+			return false;
+		$populatedAt = $db->querySingle('SELECT populated_at FROM meta LIMIT 1');
+		return $populatedAt !== null && (time() - (int)$populatedAt) < $ttlSeconds;
+	}
+
 	public function Populate($geojsonFeatures)
 	{
 		$db = $this->GetDb();
+		$db->exec('DROP TABLE IF EXISTS meta');
+		$db->exec('CREATE TABLE meta (populated_at INTEGER)');
+		$db->exec('INSERT INTO meta VALUES (' . time() . ')');
 		$db->exec('DROP TABLE IF EXISTS geom');
 		$db->exec('CREATE TABLE geom (
 			geography_item_id INTEGER PRIMARY KEY,
