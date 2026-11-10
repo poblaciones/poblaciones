@@ -3,14 +3,14 @@
 		<div class="tst-buttons">
 			<button class="mp-icon-btn mp-icon-btn--lg mp-icon-btn--accent"
 							:class="{ 'is-selected': activePanel === 'indicators' }"
-							@click.stop="toggle('indicators', $event)"
+							@click="toggle('indicators', $event)"
 							title="Indicadores" aria-label="Indicadores"
 							:aria-pressed="$ariaPressed(activePanel === 'indicators')">
 				<i class="fas fa-plus"></i>
 			</button>
 			<button class="mp-icon-btn mp-icon-btn--lg"
 							:class="{ 'is-selected': activePanel === 'filters' }"
-							@click.stop="toggle('filters', $event)"
+							@click="toggle('filters', $event)"
 							title="Filtrar" aria-label="Filtrar"
 							:aria-pressed="$ariaPressed(activePanel === 'filters')">
 				<i class="fas fa-filter"></i>
