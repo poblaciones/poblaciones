@@ -145,20 +145,18 @@ XlsxWriter.prototype._writeSources = function (ws, lastRow) {
 	var sources = this.sources();
 	if (!sources.length) return;
 	var row = lastRow + 3;   // 2 filas en blanco (lastRow+1, lastRow+2) antes de la primera cita
-	var isFirst = false;
 	if (sources.length > 1) {
 		var cell = ws.getCell(row, 1);
 		cell.value = "Fuentes:";
 		cell.font = { size: 9, italic: true, color: { argb: 'FF78909C' } };
 		row++;
 	}
-	var fistLine = true;
 	sources.forEach(function (line) {
 		var cell = ws.getCell(row, 1);
 		cell.value = line;
-		if (sources.length == 1 && firstLine) {
-			cell.value = "Fuente: " + cell.value;
-			fistLine = false;
+		// Con una sola fuente no hay rótulo "Fuentes:" arriba: la cita lo lleva.
+		if (sources.length === 1) {
+			cell.value = 'Fuente: ' + cell.value;
 		}
 		cell.font = { size: 9, italic: true, color: { argb: 'FF78909C' } };
 		row++;

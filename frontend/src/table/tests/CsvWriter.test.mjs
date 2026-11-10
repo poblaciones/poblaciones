@@ -21,7 +21,7 @@ function headerCell(label) { return { isHeader: true, Label: label }; }
 function valueCell(v) { return { Value: v }; }
 
 // Pivot falso: un indicador con dos tuplas (total y una categoría), un
-// region-header y dos filas de datos.
+// encabezado de nivel y dos filas de datos.
 function fakePivot() {
 	var headers = [
 		tuple({ metricName: 'Población', isTotal: true }),
@@ -30,9 +30,9 @@ function fakePivot() {
 	return {
 		MetricTuples: { headers: headers },
 		Rows: [
-			[{ isHeader: true, isRegionHeader: true, Label: 'Provincias' }, headerCell('Provincias'), headerCell('')],
-			[{ isHeader: true, Label: 'Buenos Aires' }, valueCell(100), valueCell(40)],
-			[{ isHeader: true, Label: 'Córdoba, La Docta' }, valueCell(50), valueCell(20)]
+			[{ isHeader: true, isLevelHeader: true, Label: 'Provincias', depth: 0 }, headerCell('Provincias'), headerCell('')],
+			[{ isHeader: true, isItem: true, Label: 'Buenos Aires', depth: 1 }, valueCell(100), valueCell(40)],
+			[{ isHeader: true, isItem: true, Label: 'Córdoba, La Docta', depth: 1 }, valueCell(50), valueCell(20)]
 		]
 	};
 }
@@ -47,9 +47,9 @@ describe('CsvWriter — grilla', function () {
 	});
 	it('clasifica el indentado por jerarquía', function () {
 		var rows = new CsvWriter(fakePivot()).dataRows();
-		expect(rows[0].indent).toBe(0);   // region-header
+		expect(rows[0].indent).toBe(0);   // encabezado de nivel
 		expect(rows[0].bold).toBeTruthy();
-		expect(rows[1].indent).toBe(1);   // item sin padre
+		expect(rows[1].indent).toBe(1);   // elemento de la raíz
 	});
 });
 
@@ -78,7 +78,7 @@ describe('CsvWriter — columna de código', function () {
 		return {
 			MetricTuples: { headers: headers },
 			Rows: [
-				[{ isHeader: true, isRegionHeader: true, Label: 'Provincias' }, headerCell('Provincias')],
+				[{ isHeader: true, isLevelHeader: true, Label: 'Provincias' }, headerCell('Provincias')],
 				[{ isHeader: true, Label: 'Buenos Aires', Code: '06' }, valueCell(100)],
 				[{ isHeader: true, Label: 'Córdoba', Code: '14' }, valueCell(50)]
 			]
@@ -100,19 +100,24 @@ describe('CsvWriter — columna de código', function () {
 		var csv = new CsvWriter(fakePivot()).build();
 		expect(csv.split('\n')[0].indexOf('Código') === -1).toBeTruthy();
 	});
-	it('el agrupador (isGroupHeader) exporta su propio Code', function () {
+	it('el encabezado de nivel va sin código e indentado según la profundidad', function () {
 		var headers = [tuple({ metricName: 'Población', isTotal: true })];
 		var pivot = {
 			MetricTuples: { headers: headers },
 			Rows: [
-				[{ isHeader: true, isRegionHeader: true, Label: 'Departamentos' }, headerCell('Departamentos')],
-				[{ isHeader: true, isGroupHeader: true, Label: 'Buenos Aires', Code: '02' }, valueCell(150)],
-				[{ isHeader: true, Label: 'La Plata', Code: '02-001', Parent: 'Buenos Aires' }, valueCell(100)]
+				[{ isHeader: true, isLevelHeader: true, Label: 'Provincias (1)', depth: 0 }, headerCell('Provincias')],
+				[{ isHeader: true, isItem: true, open: true, Label: 'Buenos Aires', Code: '06', depth: 1 }, valueCell(150)],
+				[{ isHeader: true, isLevelHeader: true, Label: 'Departamentos (1)', depth: 2 }, valueCell(100)],
+				[{ isHeader: true, isItem: true, Label: 'La Plata', Code: '06-001', depth: 3 }, valueCell(100)]
 			]
 		};
 		var rows = new CsvWriter(pivot).dataRows();
-		expect(rows[1].code).toBe('02');       // agrupador con su código
-		expect(rows[2].code).toBe('02-001');   // hoja
+		expect(rows[0].code).toBe('');
+		expect(rows[0].bold).toBe(true);
+		expect(rows[1].bold).toBe(true);       // elemento desplegado
+		expect(rows[3].code).toBe('06-001');
+		expect(rows[3].indent).toBe(3);
+		expect(rows[3].bold).toBe(false);
 	});
 });
 
@@ -125,7 +130,7 @@ describe('CsvWriter — fuentes al pie', function () {
 			MetricTuples: { headers: headers },
 			Metrics: [{ Selections: [sel] }],
 			Rows: [
-				[{ isHeader: true, isRegionHeader: true, Label: 'Provincias' }, headerCell('Provincias')],
+				[{ isHeader: true, isLevelHeader: true, Label: 'Provincias' }, headerCell('Provincias')],
 				[{ isHeader: true, Label: 'Buenos Aires' }, valueCell(100)]
 			]
 		};

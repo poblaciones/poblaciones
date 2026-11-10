@@ -7,6 +7,7 @@
 			<i class="fas fa-columns"></i>
 		</button>
 		<button v-if="useRanking" type="button" title="Ránkings" aria-label="Ránkings" :aria-pressed="$ariaPressed(valueRanking)" @click="clickRanking" class="mp-btn mp-btn--icon" :class="{ 'is-selected': valueRanking }"><i class="fas fa-list-ol"></i></button>
+		<button v-if="useTable" type="button" title="Ver como tabla" aria-label="Ver como tabla" @click="clickTable" class="mp-btn mp-btn--icon"><i class="fas fa-table"></i></button>
 		<button type="button" title="Descargar" aria-label="Descargar" @click="clickDescargar" class="mp-btn mp-btn--icon"><i class="fas fa-download"></i></button>
 		<button type="button" :title="sourceLabel" :aria-label="sourceLabel" @click="clickFuente" class="mp-btn mp-btn--icon"><i class="fas fa-link"></i></button>
 
@@ -25,6 +26,7 @@ export default {
 		valueCompare: { type: Boolean, default: false },
 		valueRanking: { type: Boolean, default: false },
 		useRanking: { type: Boolean, default: false },
+		useTable: { type: Boolean, default: false },
 		compareTitle: { type: String, default: '' }
 	},
 	data() {
@@ -52,6 +54,10 @@ export default {
 				e.preventDefault();
 			this.$emit("clickRanking", e);
 			},
+		clickTable(e) {
+			e.preventDefault();
+			this.$emit("clickTable", e);
+		},
 		clickDescargar(e) {
 			e.preventDefault();
 			this.$emit("clickDownload", e);

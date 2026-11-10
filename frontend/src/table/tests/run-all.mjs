@@ -22,8 +22,6 @@ await import('./ActiveDataset.test.mjs');
 console.log('\n=== ActivePivot ===');
 await import('./ActivePivot.test.mjs');
 
-await import('./CollapseState.test.mjs');
-
 await import('./ActiveMultiselectedMetric.test.mjs');
 
 await import('./ActivePivotMultiVersion.test.mjs');
@@ -37,10 +35,12 @@ console.log('\n=== ColumnDragController ===');
 await import('./ColumnDragController.test.mjs');
 console.log('\n=== CsvWriter ===');
 await import('./CsvWriter.test.mjs');
-console.log('\n=== ActiveBoundarySet ===');
-await import('./ActiveBoundarySet.test.mjs');
 console.log('\n=== Distribution ===');
 await import('./Distribution.test.mjs');
+console.log('\n=== BoundaryHierarchy ===');
+await import('./BoundaryHierarchy.test.mjs');
+console.log('\n=== ActiveRowTree ===');
+await import('./ActiveRowTree.test.mjs');
 console.log('\n=== MapUrlBuilder ===');
 await import('./MapUrlBuilder.test.mjs');
 console.log('\n=== logicalVariableName ===');

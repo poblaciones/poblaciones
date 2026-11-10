@@ -242,6 +242,29 @@ ActiveMultiselectedMetric.prototype.SelectByCaption = function (variableName, ve
 	return this.Selections;
 };
 
+// Cambia la variable lógica desde el encabezado: conserva los censos vigentes que
+// también la miden y el nivel de referencia. Si ninguno de los censos vigentes la
+// mide, queda el más reciente que sí lo haga.
+ActiveMultiselectedMetric.prototype.ChangeVariable = function (variableName) {
+	var available = this.VersionsForVariable(variableName);
+	var versionIds = [];
+	for (var i = 0; i < available.length; i++) {
+		var id = available[i].Version.Id;
+		if (this.hasVersion(id)) {
+			versionIds.push(id);
+		}
+	}
+	if (versionIds.length === 0 && available.length > 0) {
+		versionIds.push(available[available.length - 1].Version.Id);
+	}
+	var levelName = null;
+	var level = this.referenceLevel();
+	if (level) {
+		levelName = level.Name;
+	}
+	return this.SelectByCaption(variableName, versionIds, levelName);
+};
+
 // Restringe los censos activos (años) dentro de la variable lógica vigente.
 ActiveMultiselectedMetric.prototype.SelectVersions = function (versionIds) {
 	return this.SelectByCaption(this._variableName, versionIds);

@@ -71,29 +71,24 @@ TabularWriter.prototype._value = function (tuple, cell) {
 };
 
 // Filas de datos con metadatos de presentación: cells (label + valores), nivel
-// de indentado por jerarquía y si van en negrita.
-//   indent 0 = encabezado de delimitación, 1 = corte de control o item sin
-//   padre, 2 = item bajo un corte de control.
+// de indentado por jerarquía (la profundidad en el árbol de filas) y si van en
+// negrita (encabezados de nivel y elementos desplegados).
 TabularWriter.prototype.dataRows = function () {
 	var headers = this.pivot.MetricTuples.headers;
 	var loc = this;
 	var out = [];
 	this.pivot.Rows.forEach(function (row) {
 		var head = row[0];
-		var indent = 1;
-		var bold = false;
-		if (head.isRegionHeader) { indent = 0; bold = true; }
-		else if (head.isGroupHeader) { indent = 1; bold = true; }
-		else if (head.Parent != null) { indent = 2; }
+		var indent = head.depth || 0;
+		var bold = !!(head.isLevelHeader || head.open);
 
-		var cells = [];
-		for (var j = 0; j < row.length; j++) {
-			var cell = row[j];
-			if (cell.isHeader) cells.push(cell.Label);
-			else cells.push(loc._value(headers[j - 1], cell));
+		// Las celdas de un tipo de hijo colapsado son null (aún sin calcular).
+		var cells = [head.Label];
+		for (var j = 1; j < row.length; j++) {
+			cells.push(loc._value(headers[j - 1], row[j]));
 		}
-		// El Code solo lo traen los items hoja; agrupadores y encabezados de
-		// delimitación van con código vacío.
+		// El Code solo lo traen los elementos; los encabezados de nivel van con
+		// código vacío.
 		out.push({ cells: cells, indent: indent, bold: bold, code: (head.Code != null ? head.Code : '') });
 	});
 	return out;

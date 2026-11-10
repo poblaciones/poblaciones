@@ -23,7 +23,16 @@ function makePivot() {
 			{ versionId: () => 4, version: versions[3], level: lvl, variable: lvl.Variables[0], labels: [] }
 		]
 	};
-	return { Metrics: [metric], FilterSet: { items: [] }, Regions: { items: [] } };
+	return { Metrics: [metric], RowTree: withSelection([]) };
+}
+
+// Árbol de filas mínimo: solo los elementos elegidos (SelectionLeaves).
+function withSelection(fids) {
+	return {
+		SelectionLeaves: function () {
+			return fids.map(function (fid) { return { level: null, item: { FID: fid } }; });
+		}
+	};
 }
 
 var opts = { origin: 'https://x.org', basePath: '/map/' };
@@ -35,29 +44,30 @@ describe('MapUrlBuilder', function () {
 		expect(url).toBe('https://x.org/map/#/&r79537/l=6301!v3');
 	});
 
-	it('clic en un tipo de delimitación lo agrega como capa boundary', function () {
-		var url = new MapUrlBuilder(makePivot(), opts).build({ kind: 'boundaryType', boundaryId: 5550 });
-		expect(url).toBe('https://x.org/map/#/l=6301!v3;5550!tb');
+	it('un nivel se agrega como capa, recortado en el elemento del que cuelga', function () {
+		var url = new MapUrlBuilder(makePivot(), opts).build({ kind: 'level', boundaryId: 5550, parentFid: 10 });
+		expect(url).toBe('https://x.org/map/#/&r10/l=6301!v3;5550!tb');
 	});
 
-	it('un elemento de fila recorta en sí mismo aunque haya filtros (la elección manda)', function () {
+	it('el nivel raíz se recorta en la selección vigente', function () {
 		var pivot = makePivot();
-		// Un filtro activo (FID 100): NO debe pisar el elemento clickeado.
-		pivot.FilterSet = { items: [ { SelectedVersion: function () { return { Selection: { Items: [ { FID: 100 } ] } }; } } ] };
+		pivot.RowTree = withSelection([100, 101]);
+		var url = new MapUrlBuilder(pivot, opts).build({ kind: 'level', boundaryId: 5550, parentFid: null });
+		expect(url).toBe('https://x.org/map/#/&r100,101/l=6301!v3;5550!tb');
+	});
+
+	it('un elemento de fila recorta en sí mismo aunque haya selección (la elección manda)', function () {
+		var pivot = makePivot();
+		pivot.RowTree = withSelection([100]);
 		var url = new MapUrlBuilder(pivot, opts).build({ kind: 'item', regionId: 79537 });
 		expect(url).toBe('https://x.org/map/#/&r79537/l=6301!v3');
 	});
 
-	it('el mundo de un chip de filtro abre con los filtros como recorte', function () {
+	it('sin destino, usa la selección vigente como recorte', function () {
 		var pivot = makePivot();
-		pivot.FilterSet = { items: [ { SelectedVersion: function () { return { Selection: { Items: [ { FID: 100 } ] } }; } } ] };
-		var url = new MapUrlBuilder(pivot, opts).build({ kind: 'filter' });
+		pivot.RowTree = withSelection([100]);
+		var url = new MapUrlBuilder(pivot, opts).build();
 		expect(url).toBe('https://x.org/map/#/&r100/l=6301!v3');
-	});
-
-	it('un corte de control se trata igual que un elemento', function () {
-		var url = new MapUrlBuilder(makePivot(), opts).build({ kind: 'group', regionId: 42 });
-		expect(url).toBe('https://x.org/map/#/&r42/l=6301!v3');
 	});
 });
 

@@ -305,6 +305,21 @@ class ClippingService extends BaseService
 		return $info;
 	}
 
+	// Item de recorte que contiene el punto (el de mayor prioridad, como la
+	// descripción "Selección en ..." de un círculo), con sus ancestros. Lo usa el
+	// salto del visor a la tabla para traducir un círculo o la vista actual a una
+	// selección de filas.
+	public function GetRegionItemByLocation($coordinate)
+	{
+		$table = new SnapshotClippingRegionItemModel();
+		$item = $table->GetTopClippingRegionItemAt($coordinate);
+		if (!$item)
+			return null;
+		$model = new ClippingRegionItemModel();
+		return ['Id' => intval($item['Id']), 'Name' => $item['Name'],
+						'Ancestors' => $model->GetAncestorIds($item['Id'])];
+	}
+
 	private function CalculateRegionFromCircle($circle, $levelId, $urbanity)
 	{
 		$table = new SnapshotClippingRegionItemModel();

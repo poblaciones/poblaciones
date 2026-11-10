@@ -15,12 +15,13 @@ import { makeMultiVersionProperties } from './fixtures-multiversion.mjs';
 // Boundary simulado: su región declara con qué geografías tiene relación. Una
 // relación vacía ([]) significa "no hay datos a ese nivel" → fuerza drill-down;
 // ausente significa "relación no cargada" → no fuerza nada.
-function fakeBoundary(relations) {
-	return {
-		SelectedVersion: function () {
-			return { Selection: { Region: { GeographyRelations: relations } } };
-		}
-	};
+// RegionSet mínimo de un nivel visible: solo sus relaciones geográficas.
+function fakeRegion(relations) {
+	return { GeographyRelations: relations };
+}
+
+function displaying(pivot, region) {
+	pivot.RowTree.OpenRegions = function () { return [region]; };
 }
 
 function makeMetric() {
@@ -41,9 +42,7 @@ describe('Auto-drill por Selection (dos censos)', function () {
 		p.Metrics = [m];
 		// Provincias-2010 (G10P) sin relación → debe bajar a Departamentos (G10D).
 		// Provincias-2022 (G22P) con relación → se queda.
-		p.AllBoundaries = function () {
-			return [fakeBoundary({ 'G10P': [], 'G10D': [1], 'G22P': [1], 'G22R': [1] })];
-		};
+		displaying(p, fakeRegion({ 'G10P': [], 'G10D': [1], 'G22P': [1], 'G22R': [1] }));
 		var drilled = p.NeedAutoDrillDown();
 		expect(drilled).toBe(true);
 		var s2010 = m.Selections.filter(function (s) { return s.versionId() === '2010'; })[0];
@@ -57,9 +56,7 @@ describe('Auto-drill por Selection (dos censos)', function () {
 		m.SelectByCaption('Hogares con NBI');
 		var p = new ActivePivot();
 		p.Metrics = [m];
-		p.AllBoundaries = function () {
-			return [fakeBoundary({ 'G10P': [], 'G10D': [1], 'G22P': [1] })];
-		};
+		displaying(p, fakeRegion({ 'G10P': [], 'G10D': [1], 'G22P': [1] }));
 		p.NeedAutoDrillDown();
 		var tuples = m.GetTuples();
 		// Una tupla (total) por censo, cada una con su nivel resuelto.
@@ -79,9 +76,7 @@ describe('Auto-drill por Selection (dos censos)', function () {
 		var p = new ActivePivot();
 		p.Metrics = [m];
 		// El padre de Departamentos es Provincias (G10P); con relación → puede subir.
-		p.AllBoundaries = function () {
-			return [fakeBoundary({ 'G10P': [1], 'G10D': [1] })];
-		};
+		displaying(p, fakeRegion({ 'G10P': [1], 'G10D': [1] }));
 		var up = p.CanAutoDrillUp();
 		expect(up).toBe(true);
 		expect(m.Selections[0].levelName()).toBe('Provincias');

@@ -212,28 +212,19 @@ describe('RegionDistribution', function () {
 		expect(row.total).toBeCloseTo(15000, 1e-9);   // 8000 + 7000, no la suma cruda (~42mil ballpark)
 	});
 
-	it('incluye agrupadores (isGroup) y excluye hijos de grupos colapsados', function () {
-		// Dataset con un agrupador (group-header) y dos hijos.
-		var cols = edu.categoryColumns();
-		var hierDataset = {
+	it('grafica una barra por cada fila del nivel de análisis', function () {
+		var levelDataset = {
 			columns: dataset.columns,
 			dataRows: function () {
 				return [
-					{ type: 'group-header', label: 'Buenos Aires', parentLabel: null, fid: null, values: dataset.dataRows()[0].values },
 					{ type: 'data', label: 'La Plata', parentLabel: 'Buenos Aires', fid: 1, values: dataset.dataRows()[0].values },
 					{ type: 'data', label: 'Mar del Plata', parentLabel: 'Buenos Aires', fid: 2, values: dataset.dataRows()[1].values }
 				];
 			}
 		};
-		// Sin colapso: agrupador + 2 hijos = 3 filas; el agrupador marcado isGroup.
-		var full = new RegionDistribution(edu, hierDataset, {});
-		expect(full.rows()).toHaveLength(3);
-		expect(full.rows()[0].isGroup).toBe(true);
-		expect(full.rows()[1].isGroup).toBe(false);
-		// Con el grupo colapsado: queda solo el agrupador (sus hijos se excluyen).
-		var collapsed = new RegionDistribution(edu, hierDataset, { excludedGroups: ['Buenos Aires'] });
-		expect(collapsed.rows()).toHaveLength(1);
-		expect(collapsed.rows()[0].isGroup).toBe(true);
+		var rd = new RegionDistribution(edu, levelDataset, {});
+		expect(rd.rows()).toHaveLength(2);
+		expect(rd.rows()[0].label).toBe('La Plata');
 	});
 
 	it('Camino 1 también excluye las regiones sin dato en ningún indicador (no solo el Camino 2)', function () {
@@ -265,32 +256,6 @@ describe('RegionDistribution', function () {
 		var rd = new RegionDistribution(edu, hierDataset, { pivot: fakePivot });
 		var fids = rd.rows().map(function (r) { return r.fid; });
 		expect(fids).toEqual([100, 200]);   // sin la 300
-	});
-
-	it('Camino 1 también excluye los hijos de grupos colapsados (no solo el Camino 2)', function () {
-		var hierDataset = {
-			columns: dataset.columns,
-			dataRows: function () {
-				return [
-					{ type: 'group-header', label: 'Buenos Aires', parentLabel: null, fid: null, values: dataset.dataRows()[0].values },
-					{ type: 'data', label: 'La Plata', parentLabel: 'Buenos Aires', fid: 1, values: dataset.dataRows()[0].values },
-					{ type: 'data', label: 'Mar del Plata', parentLabel: 'Buenos Aires', fid: 2, values: dataset.dataRows()[1].values }
-				];
-			}
-		};
-		var fakePivot = {
-			ResolveAllCategoriesByRegion: function () {
-				// El universo resuelto no sabe de colapso: trae los dos hijos igual.
-				return [
-					{ label: 'La Plata', fid: 1, parts: [{ labelId: 101, name: 'A', color: '#a', value: 10, valueOnUniverse: 10 }] },
-					{ label: 'Mar del Plata', fid: 2, parts: [{ labelId: 101, name: 'A', color: '#a', value: 20, valueOnUniverse: 20 }] }
-				];
-			}
-		};
-		var full = new RegionDistribution(edu, hierDataset, { pivot: fakePivot });
-		expect(full.rows()).toHaveLength(2);
-		var collapsed = new RegionDistribution(edu, hierDataset, { pivot: fakePivot, excludedGroups: ['Buenos Aires'] });
-		expect(collapsed.rows()).toHaveLength(0);   // Camino 1 no genera fila propia del agrupador
 	});
 });
 

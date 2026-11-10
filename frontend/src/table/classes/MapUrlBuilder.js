@@ -9,7 +9,6 @@
  *   /@<lat>,<lon>,<zoom>z&<clipping>   ← frame + clipping (mismo segmento; el
  *                                         clipping arranca con '&')
  *   /l=<metric>;<metric>;...           ← indicadores y delimitaciones (SelectedInfo)
- *   /j=r<id>                           ← zoom a un elemento (ZoomFeature)
  *
  * Reglas de serialización (de SaveRoute.appendValue):
  *   - item [id]            → "id"            (solo el id, sin letra)
@@ -169,80 +168,48 @@ MapUrlBuilder.prototype._clippingBlock = function (regionIds, levelRevision) {
 	return body ? '&' + body : '';
 };
 
-// ── Bloque de zoom a un elemento (signature 'j=') ───────────────────────────
+// ── Selección de la tabla → regiones de recorte ─────────────────────────────
 
-MapUrlBuilder.prototype._zoomBlock = function (regionId) {
-	if (regionId == null) return '';
-	return 'j=r' + regionId;
-};
-
-// ── Filtros de la tabla → regiones de recorte ───────────────────────────────
-
-// Ids de los elementos de filtro activos (FilterSet), para usarlos como recorte.
-MapUrlBuilder.prototype._filterRegionIds = function () {
+// Ids de los elementos elegidos en el árbol de filas (el más profundo de cada
+// rama), para usarlos como recorte.
+MapUrlBuilder.prototype._selectionRegionIds = function () {
 	var ids = [];
-	var fs = this.pivot && this.pivot.FilterSet;
-	if (!fs || !fs.items) return ids;
-	for (var b = 0; b < fs.items.length; b++) {
-		var version = fs.items[b].SelectedVersion ? fs.items[b].SelectedVersion() : null;
-		var region = version && version.Selection ? version.Selection : null;
-		var items = region && region.Items ? region.Items : [];
-		for (var i = 0; i < items.length; i++) {
-			if (items[i].FID != null) ids.push(items[i].FID);
-		}
+	var tree = this.pivot ? this.pivot.RowTree : null;
+	if (!tree) return ids;
+	var leaves = tree.SelectionLeaves();
+	for (var i = 0; i < leaves.length; i++) {
+		ids.push(leaves[i].item.FID);
 	}
 	return ids;
 };
 
-MapUrlBuilder.prototype._hasFilters = function () {
-	return this._filterRegionIds().length > 0;
-};
-
 // ── API pública ─────────────────────────────────────────────────────────────
 
-// Construye la URL para abrir el mapa según el encabezado de fila clickeado.
-// target describe qué se clickeó:
-//   { kind: 'boundaryType', boundaryId, versionIndex }   ← fila de un tipo (Provincias)
-//   { kind: 'item', regionId }                            ← un elemento concreto
-//   { kind: 'group', regionId }                           ← un corte de control (= item)
-// Construye la URL para abrir el mapa según lo clickeado.
-// target describe el origen del clic:
-//   { kind: 'boundaryType', boundaryId, versionIndex }  ← fila de un tipo (Provincias)
-//   { kind: 'item', regionId }                           ← un elemento de las filas
-//   { kind: 'group', regionId }                          ← un corte de control (= item)
-//   { kind: 'filter' }                                   ← el mundo de un chip de filtro
+// Construye la URL para abrir el mapa según lo clickeado. target:
+//   { kind: 'level', boundaryId, parentFid }  ← encabezado de un nivel (Municipios)
+//   { kind: 'item', regionId }                ← un elemento de las filas
 //
-// Criterio: lo que se clickeó manda. Si se clickeó un elemento de las filas
-// (item/group), el mapa recorta en ESE elemento aunque haya filtros activos —el
-// filtro no pisa la elección explícita del usuario. Los filtros se usan como
-// recorte solo cuando el clic proviene del propio filtro (kind 'filter'), o como
-// contexto de una capa de delimitación (boundaryType).
+// Criterio: lo que se clickeó manda. Un elemento recorta en ese elemento. Un
+// nivel se agrega como capa de delimitación, recortado en el elemento del que
+// cuelga (Municipios de Catamarca → Catamarca); si es la raíz, en la selección
+// vigente. Sin target, se usa la selección vigente como recorte.
 MapUrlBuilder.prototype.build = function (target) {
 	target = target || {};
 	var segments = [];
-
-	var filterIds = this._filterRegionIds();
-	var hasFilters = filterIds.length > 0;
-
 	var extraBoundaryGroups = null;
 	var clippingIds = null;
-	var zoomId = null;
 
-	if (target.kind === 'boundaryType' && target.boundaryId != null) {
-		// Clic en un tipo de delimitación: se agrega como capa de boundary; los
-		// filtros, si los hay, dan el recorte de contexto.
+	if (target.kind === 'level' && target.boundaryId != null) {
 		extraBoundaryGroups = [this._boundaryGroup(target.boundaryId, target.versionIndex)];
-		if (hasFilters) clippingIds = filterIds;
-	} else if (target.kind === 'item' || target.kind === 'group') {
-		// Clic en un elemento de las filas: recorta en ese elemento, ignorando los
-		// filtros. La elección explícita manda sobre el filtro vigente.
-		clippingIds = (target.regionId != null) ? [target.regionId] : null;
-	} else if (target.kind === 'filter') {
-		// Clic en el mundo de un chip de filtro: se abre con los filtros como recorte.
-		if (hasFilters) clippingIds = filterIds;
+		if (target.parentFid != null) {
+			clippingIds = [target.parentFid];
+		} else {
+			clippingIds = this._selectionRegionIds();
+		}
+	} else if (target.kind === 'item' && target.regionId != null) {
+		clippingIds = [target.regionId];
 	} else {
-		// Sin target específico: solo el estado actual (filtros como recorte).
-		if (hasFilters) clippingIds = filterIds;
+		clippingIds = this._selectionRegionIds();
 	}
 
 	// Bloque frame+clipping. El frame (centro/zoom) lo resuelve el visor solo si no
@@ -252,9 +219,6 @@ MapUrlBuilder.prototype.build = function (target) {
 
 	var info = this._selectedInfoBlock(extraBoundaryGroups);
 	if (info) segments.push(info);
-
-	var zoom = this._zoomBlock(zoomId);
-	if (zoom) segments.push(zoom);
 
 	var hash = '#';
 	for (var s = 0; s < segments.length; s++) hash += '/' + segments[s];

@@ -2,7 +2,6 @@ import axios from 'axios';
 import str from '@/common/framework/str';
 import err from '@/common/framework/err';
 import session from '@/common/framework/session';
-import { findBoundaryNode, flattenLeaves } from '@/table/classes/boundaryTree';
 
 export default StartTable;
 
@@ -56,15 +55,13 @@ StartTable.prototype.RestoreWork = function (workId, link, applyStartup) {
 	});
 };
 
-// Aplica el startup del work al pivot: métricas y región/filtro inicial.
-// Equivalente a ReceiveWorkStartup + LoadStartMetrics de StartMap, adaptado
-// a la pivot: el clipping se traduce a FilterSet y la región de filas se
-// resuelve desde los defaults de configuración.
+// Aplica el startup del work al pivot: métricas y filas iniciales. Equivalente a
+// ReceiveWorkStartup + LoadStartMetrics de StartMap, adaptado a la pivot: el
+// recorte del work se traduce a la selección de filas.
 StartTable.prototype.ApplyWorkStartup = function (startup) {
 	var loc = this;
 	var tasks = [];
 
-	// ── Métricas ──────────────────────────────────────────────────────────────
 	// startup.ActiveMetrics: lista separada por comas de metricIds.
 	// Si no hay, se toma la única métrica del work; si hay más de una sin
 	// preselección, se deja la pivot sin columnas y el usuario elige.
@@ -80,85 +77,20 @@ StartTable.prototype.ApplyWorkStartup = function (startup) {
 		}
 	}
 
-	// ── Región de filas y filtro ──────────────────────────────────────────────
-	var regionTask = loc._applyStartupRegion(startup);
-	if (regionTask) tasks.push(regionTask);
-
+	loc._applyStartupRegion(startup);
 	return Promise.all(tasks);
 };
 
-// Resuelve qué boundary usar como filas y, si aplica, cuál como filtro.
-//
-// Con ClippingRegionItemId (startup.Type === 'R'):
-//   - El item de clipping se agrega al FilterSet (semántica AND).
-//   - Para las filas se elige un boundary más desagregado:
-//       · Si el boundary del item coincide con DefaultPivotBoundaryId
-//         → filas = DefaultPivotSubBoundaryId.
-//       · Si no coincide (el item ya es de un sub-nivel)
-//         → filas = DefaultPivotSubSubBoundaryId.
-//
-// Sin ClippingRegionItemId (cualquier otro tipo de startup):
-//   - Filas = DefaultPivotBoundaryId completo.
+// Con un recorte por región (startup.Type === 'R'), ese elemento pasa a ser la
+// selección de filas (con su cadena desde la raíz, desplegado). Sin recorte, las
+// filas quedan en la raíz por defecto.
 StartTable.prototype._applyStartupRegion = function (startup) {
-	var loc = this;
-	var config = loc.config;
-
-	if (startup.Type !== 'R' || startup.ClippingRegionItemId == null) {
-		if (config.DefaultPivotBoundaryId == null) return null;
-		return loc.pivot.AddRegionById(config.DefaultPivotBoundaryId);
+	var tree = this.pivot.RowTree;
+	if (startup.Type === 'R' && startup.ClippingRegionItemId != null) {
+		var chain = tree.Hierarchy().ChainForCandidates([startup.ClippingRegionItemId]);
+		if (chain.length) {
+			tree.ReplaceSelection(chain);
+		}
 	}
-
-	var itemId = startup.ClippingRegionItemId;
-	var clippingBoundaryId = _findBoundaryIdForItem(itemId);
-
-	var rowBoundaryId;
-	/* eslint-disable-next-line eqeqeq */
-	if (clippingBoundaryId != null && clippingBoundaryId == config.DefaultPivotBoundaryId) {
-		rowBoundaryId = config.DefaultPivotSubBoundaryId;
-	} else {
-		rowBoundaryId = config.DefaultPivotSubSubBoundaryId;
-	}
-
-	var tasks = [];
-	if (clippingBoundaryId != null) {
-		tasks.push(loc.pivot.AddFilterItemsById(clippingBoundaryId, [itemId]));
-	}
-	if (rowBoundaryId != null) {
-		tasks.push(loc.pivot.AddRegionById(rowBoundaryId));
-	}
-	return Promise.all(tasks);
+	tree.EnsureRoot();
 };
-
-// Busca en el árbol de boundaries (window.Context.Boundaries, ya cargado)
-// el boundaryId (Id del nodo "tipo") al que pertenece un itemId dado.
-// Usa findBoundaryNode/flattenLeaves de boundaryTree para respetar la
-// estructura del árbol (Items planos o agrupados por Parent).
-// Devuelve el boundaryId o null si no se encuentra.
-function _findBoundaryIdForItem(itemId) {
-	var boundaries = window.Context ? window.Context.Boundaries : null;
-	if (!boundaries) return null;
-	return _searchNodes(boundaries, itemId);
-}
-
-function _searchNodes(nodes, itemId) {
-	for (var i = 0; i < nodes.length; i++) {
-		var node = nodes[i];
-		// Nodo "tipo" seleccionable: tiene VersionId. Se busca el itemId entre
-		// sus hojas usando flattenLeaves, que maneja tanto Items planos como
-		// agrupados por Parent.
-		if (node.VersionId != null) {
-			var leaves = flattenLeaves(node);
-			for (var j = 0; j < leaves.length; j++) {
-				/* eslint-disable-next-line eqeqeq */
-				if (leaves[j].FID == itemId) return node.Id;
-			}
-		}
-		// Sub-categorías navegables: nodos intermedios sin VersionId.
-		if (Array.isArray(node.Items) && node.Items.length &&
-				node.Items[0] && node.Items[0].Items !== undefined) {
-			var found = _searchNodes(node.Items, itemId);
-			if (found != null) return found;
-		}
-	}
-	return null;
-}

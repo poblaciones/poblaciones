@@ -169,8 +169,7 @@ export default {
 	components: { CategoryChart, RegionBars, CategoryPicker },
 	mixins: [widgetMixin],
 	props: {
-		pivot: { type: Object, default: null },
-		excludedGroups: { type: Array, default: function () { return []; } }
+		pivot: { type: Object, default: null }
 	},
 	data() {
 		var cfg = this.config || {};
@@ -213,18 +212,18 @@ export default {
 		categoryByPanel() {
 			var out = {};
 			if (!this.model) return out;
-			var ds = this.dataset, pv = this.pivot, ex = this.excludedGroups;
+			var ds = this.dataset, pv = this.pivot;
 			this.model.panels().forEach(function (p) {
-				out[p.key()] = new CategoryDistribution(p, ds, pv, ex);
+				out[p.key()] = new CategoryDistribution(p, ds, pv);
 			});
 			return out;
 		},
 		regionByPanel() {
 			var out = {};
 			if (!this.model || this.axisMode !== 'regions') return out;
-			var ds = this.dataset, pv = this.pivot, ex = this.excludedGroups;
+			var ds = this.dataset, pv = this.pivot;
 			this.model.panels().forEach(function (p) {
-				out[p.key()] = new RegionDistribution(p, ds, { pivot: pv, excludedGroups: ex });
+				out[p.key()] = new RegionDistribution(p, ds, { pivot: pv });
 			});
 			return out;
 		}

@@ -269,7 +269,7 @@
                 </div>
                 <div class="indicator-actions">
                   <button v-if="!isMobile && hasInfo(row.item)"
-                          class="mp-icon-btn mp-icon-info mp-icon-btn--muted"
+                          class="mp-icon-btn mp-icon-btn--muted"
                           :aria-label="'Información de ' + row.item.Name"
                           @mouseenter="showTooltip($event, row.item)"
                           @mouseleave="hideTooltip"
@@ -438,6 +438,8 @@ export default {
     return {
       searchQuery: '',
       navStack: [],
+      // Se eligió algo desde que se abrió el panel: al cerrarse vuelve a la raíz.
+      chosenSinceOpen: false,
       showAllSuggestions: false,
       keepTooltip: false,
       internalMulti: this.multiSelect,
@@ -720,6 +722,11 @@ export default {
     showingCards() {
       return !this.searchQuery && !this.listModeActive && this.currentBranches.length > 0;
     },
+    // Título del tramo de resultados de búsqueda, según lo que lista el panel
+    // ("Indicadores", "Delimitaciones", "Regiones").
+    searchResultsTitle() {
+      return this.itemNounPlural.charAt(0).toUpperCase() + this.itemNounPlural.slice(1);
+    },
     renderRows() {
       if (this.searchQuery) {
         const rowsHelper = this.searchRows;
@@ -743,8 +750,8 @@ export default {
         });
         // Las ramas coincidentes (contenedores) van primero, para entrar en ellas.
         let all = branchRows.concat(itemRows);
-        // Separador "Indicadores" arriba de los matches de indicadores,
-        // SIEMPRE que los haya (aunque no haya delimitaciones): en la raíz
+        // Separador con el título de lo que lista el panel arriba de sus
+        // matches, SIEMPRE que los haya (aunque no haya delimitaciones): en la raíz
         // la búsqueda convive con resultados de boundaries, así que cada
         // tramo de la lista queda tipificado con su propio corte de control.
         if (all.length) {
@@ -752,7 +759,7 @@ export default {
             type: 'header',
             key: 'h__search_indicators__',
             sectionKey: '__search_indicators__',
-            name: 'Indicadores',
+            name: this.searchResultsTitle,
             count: all.length,
             selectable: false,
           }].concat(all);
@@ -895,8 +902,13 @@ export default {
       } else {
         this.kbd.detach();
         // Al cerrarse, el panel se oculta pero conserva su estado de navegación
-        // (rama, listado, búsqueda), para reabrir donde estaba. La navegación se
-        // reinicia con las acciones explícitas (inicio/breadcrumb), no al cerrar.
+        // (rama, listado, búsqueda), para reabrir donde estaba; salvo que se haya
+        // elegido algo: entonces reabre en la raíz, que es lo que se espera tras
+        // haber completado una elección.
+        if (this.chosenSinceOpen) {
+          this.goHome();
+          this.chosenSinceOpen = false;
+        }
         this.panelStyle = null;
         this.hideTooltip();
         this.keepTooltip = false;
@@ -1022,6 +1034,7 @@ export default {
       // Si está activo, se navega. Solo aplica a delimitaciones (no a grupos de
       // tipo ni a hojas).
       if (this.selectableBranches && !this.drillIntoElements && this.tree.IsDelimitation(node)) {
+        this.chosenSinceOpen = true;
         this.$emit('select-group', node);
         if (!this.isMulti && this.closeOnSelect) this.closePanel();
         return;
@@ -1063,6 +1076,7 @@ export default {
     },
     // Emisión con o sin contenedor según emitContainer.
     emitSelect(items, container) {
+      this.chosenSinceOpen = true;
       if (this.emitContainer) this.$emit('select', items, container);
       else this.$emit('select', items);
     },
@@ -1096,6 +1110,7 @@ export default {
     // hojas; emite el nodo contenedor para que el consumidor use su Id.
     onSelectGroup() {
       if (!this.currentNode) return;
+      this.chosenSinceOpen = true;
       this.$emit('select-group', this.currentNode);
       if (!this.isMulti && this.closeOnSelect) this.closePanel();
     },
@@ -1123,6 +1138,7 @@ export default {
         this.$emit('deselect', [{ Id: node.Id, Type: 'B', Name: node.Name }]);
         return;
       }
+      this.chosenSinceOpen = true;
       this.$emit('select-group', node);
       if (!this.isMulti && this.closeOnSelect) this.closePanel();
     },
@@ -1163,6 +1179,7 @@ export default {
       // Misma lógica invertida que enterBranch: inactivo (default) agrega todos
       // los elementos de la delimitación; activo, entra a navegarla.
       if (this.selectableBranches && !this.drillIntoElements && this.tree.IsDelimitation(branch)) {
+        this.chosenSinceOpen = true;
         this.$emit('select-group', branch);
         if (!this.isMulti && this.closeOnSelect) this.closePanel();
         return;
@@ -1322,12 +1339,12 @@ export default {
 .category-card.featured { background: linear-gradient(135deg, #c3c3c3 0%, #818181 100%); color: white; border: none; }
 .category-card.featured .category-name { color: white; }
 .category-card.featured .category-count { color: rgba(255, 255, 255, 0.8); }
-	.category-icon {
-		font-size: 32px;
-		color: var(--mp-primary);
-		display: block;
-		margin-bottom: 12px;
-	}
+        .category-icon {
+                font-size: 32px;
+                color: #666;
+                display: block;
+                margin-bottom: 12px;
+        }
 .category-icon.featured { text-shadow: none; color: #69bad5; }
 .category-name { font-size: 15px; color: #333; margin-bottom: 4px; line-height: 1.3; font-weight: 500; }
 .category-count { font-size: 13px; color: #999; padding-top: 2px; line-height: 1.3; }

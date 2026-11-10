@@ -188,83 +188,79 @@ function extractRaw(pivotRow, workColumns) {
 	return out;
 }
 
-// Devuelve la fila del dataset (region-header | group-header | data), o null si
-// la fila de pivot viene vacía.
-function rowRecord(pr, workColumns, currentBoundaryId) {
+// Devuelve la fila del dataset, o null si la fila de pivot viene vacía. Tipos:
+//   'level-header' encabezado de un nivel (Provincias, Municipios de Catamarca…)
+//   'data'         elemento del nivel de análisis (lo que analizan los widgets)
+//   'item'         elemento de otro nivel (se muestra, pero no se analiza)
+function rowRecord(pr, workColumns) {
 	if (!pr || !pr.length) return null;
 	var head = pr[0];
+	var parentItem = head.level ? head.level.parentItem : null;
+	var parentFid = null;
+	var parentLabel = null;
+	if (parentItem) {
+		parentFid = parentItem.FID;
+		parentLabel = parentItem.Caption;
+	}
+	var levelCaption = head.level ? head.level.boundary.Name : null;
 	var common = {
-		boundaryId: currentBoundaryId,
+		boundaryId: head.boundaryId != null ? head.boundaryId : null,
+		levelCaption: levelCaption,
+		parentLabel: parentLabel,
+		depth: head.depth || 0,
 		values:  extractValues(pr, workColumns),
 		weights: extractWeights(pr, workColumns),
 		raw:     extractRaw(pr, workColumns)
 	};
+	var prefix = 'b:' + common.boundaryId + '|p:' + parentFid;
 
-	if (head.isRegionHeader) {
+	if (head.isLevelHeader) {
 		return Object.assign({
-			id: 'b:' + currentBoundaryId + '|h',
-			type: 'region-header',
+			id: prefix + '|h',
+			type: 'level-header',
 			label: head.Label,
-			parentLabel: null,
-			depth: 0,
-			fid: null
-		}, common);
-	}
-	if (head.isGroupHeader) {
-		return Object.assign({
-			id: 'b:' + currentBoundaryId + '|g:' + encodeURIComponent(head.Label || ''),
-			type: 'group-header',
-			label: head.Label,
-			parentLabel: null,
-			depth: 1,
 			fid: null
 		}, common);
 	}
 
 	var fid = head.FID != null ? head.FID : null;
-	var idTail = (fid != null) ? ('f:' + fid) : ('f:label:' + encodeURIComponent(head.Label || ''));
+	var type = 'item';
+	if (head.inAnalysis) {
+		type = 'data';
+	}
 	return Object.assign({
-		id: 'b:' + currentBoundaryId + '|' + idTail,
-		type: 'data',
+		id: prefix + '|f:' + fid,
+		type: type,
 		label: head.Label,
-		parentLabel: head.Parent != null ? head.Parent : null,
-		depth: (head.Parent != null) ? 2 : 1,
 		fid: fid
 	}, common);
 }
 
-// El boundaryId se arrastra desde el último region-header visto.
 function rowsFromPivot(pivot, workColumns) {
 	var out = [];
 	var pivotRows = pivot.Rows || [];
-	var currentBoundaryId = null;
 	for (var r = 0; r < pivotRows.length; r++) {
-		var pr = pivotRows[r];
-		if (pr && pr.length && pr[0].isRegionHeader) {
-			currentBoundaryId = pr[0].boundaryId != null ? pr[0].boundaryId : null;
-		}
-		var record = rowRecord(pr, workColumns, currentBoundaryId);
+		var record = rowRecord(pivotRows[r], workColumns);
 		if (record) out.push(record);
 	}
 	return out;
 }
 
+// Elementos elegidos explícitamente en el árbol de filas (el más profundo de cada
+// rama), agrupados por delimitación.
 function describeFilters(pivot) {
 	var out = [];
-	var filters = pivot.FilterSet.items || [];
-	for (var i = 0; i < filters.length; i++) {
-		var f = filters[i];
-		var sel = f.SelectedVersion ? f.SelectedVersion().Selection : null;
-		var rawItems = (sel && sel.Items) ? sel.Items : [];
-		var items = [];
-		for (var j = 0; j < rawItems.length; j++) {
-			items.push({ fid: rawItems[j].FID, caption: rawItems[j].Caption });
+	var byBoundary = {};
+	var leaves = pivot.RowTree ? pivot.RowTree.SelectionLeaves() : [];
+	for (var i = 0; i < leaves.length; i++) {
+		var boundary = leaves[i].level.boundary;
+		var entry = byBoundary[boundary.Id];
+		if (!entry) {
+			entry = { boundaryId: boundary.Id, caption: boundary.Name, items: [] };
+			byBoundary[boundary.Id] = entry;
+			out.push(entry);
 		}
-		out.push({
-			boundaryId: f.__boundaryId,
-			caption: f.properties && f.properties.Name ? f.properties.Name : '',
-			items: items
-		});
+		entry.items.push({ fid: leaves[i].item.FID, caption: leaves[i].item.Caption });
 	}
 	return out;
 }
@@ -279,14 +275,15 @@ function stripInternal(col) {
 	return clone;
 }
 
+// Nombres de las delimitaciones de las filas analizadas ("Municipios").
 function regionTypesFrom(rows) {
 	var seen = {};
 	var list = [];
 	for (var i = 0; i < rows.length; i++) {
 		var r = rows[i];
-		if (r.type === 'region-header' && r.label && !seen[r.label]) {
-			seen[r.label] = true;
-			list.push(r.label);
+		if (r.type === 'data' && r.levelCaption && !seen[r.levelCaption]) {
+			seen[r.levelCaption] = true;
+			list.push(r.levelCaption);
 		}
 	}
 	return list;
@@ -328,11 +325,8 @@ function ActiveDataset(pivot, options) {
 ActiveDataset.prototype.dataRows = function () {
 	return this.rows.filter(function (r) { return r.type === 'data'; });
 };
-ActiveDataset.prototype.groupRows = function () {
-	return this.rows.filter(function (r) { return r.type === 'group-header'; });
-};
-ActiveDataset.prototype.regionHeaders = function () {
-	return this.rows.filter(function (r) { return r.type === 'region-header'; });
+ActiveDataset.prototype.levelHeaders = function () {
+	return this.rows.filter(function (r) { return r.type === 'level-header'; });
 };
 
 ActiveDataset.prototype.column = function (key) {

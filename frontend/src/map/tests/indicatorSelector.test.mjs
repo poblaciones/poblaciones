@@ -137,6 +137,12 @@ it('en búsqueda, los resultados de indicadores van bajo un separador "Indicador
 	expect(rows).toHaveLength(4);
 });
 
+it('el separador de resultados de búsqueda usa el sustantivo del panel (p. ej. "Regiones")', () => {
+	const panel = mountSelector({ props: { itemNounPlural: 'regiones' } });
+	panel.searchQuery = 'proyeccion';
+	expect(panel.renderRows[0].name).toBe('Regiones');
+});
+
 it('en navegación, las secciones con nombre entran como cortes de control colapsables', () => {
 	const panel = mountSelector();
 	panel.navStack = [panel.categories[2]]; // Educación (diccionario)

@@ -1,12 +1,8 @@
 import arr from '@/common/framework/arr';
-import promises from '@/common/framework/promises';
-import RegionSelection from '@/table/classes/RegionSelection';
 import { cellValue } from '@/table/classes/pivotValue.js';
-import { resolveBoundary } from '@/table/classes/boundaryTree.js';
-import ActiveBoundary from '@/map/classes/ActiveBoundary';
 import ActiveData from '@/table/classes/ActiveData.js';
 import ActiveMetricTuples, { LABEL_SORT_KEY } from '@/table/classes/ActiveMetricTuples.js';
-import ActiveBoundarySet from '@/table/classes/ActiveBoundarySet.js';
+import ActiveRowTree from '@/table/classes/ActiveRowTree.js';
 import ActiveDataset from '@/table/classes/ActiveDataset.js';
 import ActiveRoute from '@/table/classes/ActiveRoute.js';
 import logicalVariableName from '@/table/classes/logicalVariableName.js';
@@ -19,29 +15,23 @@ function _addKeepNull(acc, val) {
 	return (acc == null ? 0 : acc) + Number(val);
 }
 
-// Construye el ActiveBoundary y su RegionSet desde el árbol ya cargado
-// (GetFabBoundaries), sin la llamada GetRegion. Devuelve { activeBoundary, region }
-// o null si el boundaryId no está en el árbol.
-function buildBoundaryFromTree(boundaryId) {
-	var resolved = resolveBoundary(boundaryId);
-	if (!resolved) return null;
-	// El catálogo de regiones lo mantiene el contexto (es un servicio global, no
-	// algo que el pivot posea), así que se consulta por window.Context.
-	var region = window.Context.RegionStore.GetRegionFromItems(resolved.versionId, resolved.name, resolved.items);
-	var activeBoundary = new ActiveBoundary({
-		Id: boundaryId,
-		Name: resolved.name,
-		SelectedVersionIndex: 0,
-		Versions: [{ Id: resolved.versionId, Name: resolved.name, Selection: null }]
-	});
-	return { activeBoundary: activeBoundary, region: region };
+// El catálogo de delimitaciones y sus RegionSets los mantiene el contexto (son
+// servicios globales, no algo que la pivot posea), así que se consultan por
+// window.Context.
+function contextHierarchy() {
+	return window.Context.BoundaryHierarchy;
+}
+
+function contextRegionFor(boundary) {
+	return window.Context.RegionStore.GetRegionFromItems(boundary.VersionId, boundary.Name, boundary.Items);
 }
 
 
 export default ActivePivot;
 export { ActivePivot };
 
-function ActivePivot() {
+function ActivePivot(options) {
+	options = options || {};
 	this.Rows = [];
 	this.Metrics = [];
 
@@ -56,16 +46,13 @@ function ActivePivot() {
 	this.MetricTuples = new ActiveMetricTuples(this);
 	this.Data = new ActiveData(this);
 
-	// Regiones de filas (OR) y filtros (AND): misma mecánica, distinto extremo de
-	// inserción. Las dependencias del proyecto se inyectan al set.
-	var boundaryDeps = {
-		buildBoundary: buildBoundaryFromTree,
-		makeSelection: function (region) { return new RegionSelection(region); },
-		ready: function (v) { return promises.ReadyPromise(v); },
-		removeItem: function (a, item) { arr.Remove(a, item); }
-	};
-	this.Regions = new ActiveBoundarySet(this, Object.assign({ prepend: true }, boundaryDeps));
-	this.FilterSet = new ActiveBoundarySet(this, Object.assign({ prepend: false }, boundaryDeps));
+	// Filas: árbol de niveles (delimitación raíz, elementos desplegables y sus
+	// tipos de hijo). Las dependencias del catálogo se inyectan para poder
+	// probarlo en aislamiento.
+	this.RowTree = new ActiveRowTree(this, {
+		hierarchy: options.hierarchy || contextHierarchy,
+		regionFor: options.regionFor || contextRegionFor
+	});
 
 	this.Router = new ActiveRoute(this);
 
@@ -96,202 +83,290 @@ ActivePivot.prototype.RefreshData = function () {
 			loc.MetricTuples.headers.push(loc.MetricTuples.metricTuples[s]);
 		}
 		arr.Clear(loc.Rows);
-		for (var activeBoundary of loc.Regions.items) {
-			var version = activeBoundary.SelectedVersion();
-			var boundaryRows = [];
-			var totals = [];
-			var region = version.Selection;
-			for (var item of region.Items) {
-				var row = [];
-				row.push({
-					'Label': item.Caption, FID: item.FID,
-					Code: (item.Code != null ? item.Code : null),
-					isHeader: true,
-					boundaryId: activeBoundary.__boundaryId,
-					Parent: (item.Parent != null ? item.Parent : null),
-					ParentId: (item.ParentId != null ? item.ParentId : null),
-					ParentCode: (item.ParentCode != null ? item.ParentCode : null)
-				});
-				for (var ci = 0; ci < loc.MetricTuples.metricTuples.length; ci++) {
-					var tuple = loc.MetricTuples.metricTuples[ci];
-					var value = loc.ResolveCell(tuple, region.Region, item);
-					row.push(value);
-					if (totals.length < row.length - 1) {
-						totals.push({
-							Value: value.Value, Total: value.Total, Area: value.Area,
-							ValueGap: value.ValueGap, TotalGap: value.TotalGap
-						});
-					} else {
-						var i = row.length - 2;
-						// Se suma solo lo no nulo y se conserva null cuando ningún aporte
-						// tuvo valor: la suma de puros '-' debe quedar '-', no 0 (un 0 daría
-						// a entender que se midió y el resultado fue cero).
-						totals[i].Value = _addKeepNull(totals[i].Value, value.Value);
-						totals[i].Total = _addKeepNull(totals[i].Total, value.Total);
-						totals[i].Area  = _addKeepNull(totals[i].Area,  value.Area);
-						// Brecha: se agregan los dos universos para que el delta del
-						// encabezado del boundary se calcule sobre las sumas.
-						if (value.ValueGap != null) totals[i].ValueGap = (totals[i].ValueGap ?? 0) + value.ValueGap;
-						if (value.TotalGap != null) totals[i].TotalGap = (totals[i].TotalGap ?? 0) + value.TotalGap;
-					}
-				}
-				boundaryRows.push(row);
-			}
-			// Solo filas con al menos un valor (no muestra filas totalmente vacías).
-			// Sin indicadores no hay valores en ninguna fila: en ese caso se muestran
-			// todas las regiones igual (no se filtra), para que la selección de
-			// delimitaciones siga visible al quitar el último indicador.
-			if (loc.MetricTuples.metricTuples.length > 0) {
-				boundaryRows = boundaryRows.filter(function (r) {
-					for (var c = 1; c < r.length; c++) {
-						if (r[c] && r[c].Value !== null && r[c].Value !== undefined) return true;
-					}
-					return false;
-				});
-			}
-
-			// Totales verticales por columna (Value y Area) dentro de esta delimitación.
-			var columnTotals = [];
-			var columnAreaTotals = [];
-			for (var ci2 = 0; ci2 < loc.MetricTuples.metricTuples.length; ci2++) {
-				var sum = 0, sumArea = 0;
-				for (var ri = 0; ri < boundaryRows.length; ri++) {
-					var cv = boundaryRows[ri][ci2 + 1];
-					if (cv && cv.Value !== null && cv.Value !== undefined) sum    += Number(cv.Value);
-					if (cv && cv.Area  !== null && cv.Area  !== undefined) sumArea += Number(cv.Area);
-				}
-				columnTotals.push(sum);
-				columnAreaTotals.push(sumArea);
-			}
-			boundaryRows.forEach(function (r) {
-				for (var ci3 = 0; ci3 < loc.MetricTuples.metricTuples.length; ci3++) {
-					if (r[ci3 + 1]) {
-						r[ci3 + 1].ColumnTotal = columnTotals[ci3];
-						r[ci3 + 1].ColumnArea  = columnAreaTotals[ci3];
-					}
-				}
-			});
-
-			// RowGroupTotal: para cada fila, suma de Value entre columnas que
-			// comparten (metricId, versionId, levelId, variableId), excluyendo
-			// la columna Total del grupo (que sería doble conteo). Habilita el
-			// modo FIL (% horizontal). El grupo está identificado por la tupla
-			// 'metricId:versionId:levelId:variableId'.
-			var groupIndices = {};
-			for (var gs = 0; gs < loc.MetricTuples.metricTuples.length; gs++) {
-				var sp = loc.MetricTuples.metricTuples[gs];
-				var gk = sp.metricId + ':' + sp.versionId + ':' + sp.levelId + ':' + sp.variableId;
-				if (!groupIndices[gk]) groupIndices[gk] = [];
-				groupIndices[gk].push(gs);
-			}
-			boundaryRows.forEach(function (r) {
-				Object.keys(groupIndices).forEach(function (gk) {
-					var idxs = groupIndices[gk];
-					var sumRG = 0;
-					for (var n = 0; n < idxs.length; n++) {
-						var spn = loc.MetricTuples.metricTuples[idxs[n]];
-						if (spn.isTotal) continue;
-						var cellN = r[idxs[n] + 1];
-						if (cellN && cellN.Value !== null && cellN.Value !== undefined) sumRG += Number(cellN.Value);
-					}
-					for (var m = 0; m < idxs.length; m++) {
-						var spm = loc.MetricTuples.metricTuples[idxs[m]];
-						var cellM = r[idxs[m] + 1];
-						if (!cellM) continue;
-						// La columna Total se normaliza contra sí misma (FIL = 100);
-						// las categorías reparten 100% entre las seleccionadas.
-						if (spm.isTotal) {
-							cellM.RowGroupTotal = (cellM.Value !== null && cellM.Value !== undefined) ? Number(cellM.Value) : sumRG;
-						} else {
-							cellM.RowGroupTotal = sumRG;
-						}
-					}
-				});
-			});
-			// También propaga RowGroupTotal a la fila de totales (header de delimitación).
-			// Las categorías comparten la suma de sus Values (reparten 100% entre sí).
-			// La celda Total usa su propio Value como RowGroupTotal, de modo que su
-			// FIL dé 100 aun cuando no estén seleccionadas todas las categorías
-			// (el Total bruto puede superar la suma de las categorías mostradas).
-			Object.keys(groupIndices).forEach(function (gk) {
-				var idxs = groupIndices[gk];
-				var sumRG = 0;
-				for (var n = 0; n < idxs.length; n++) {
-					var spn = loc.MetricTuples.metricTuples[idxs[n]];
-					if (spn.isTotal) continue;
-					var t = totals[idxs[n]];
-					if (t && t.Value !== null && t.Value !== undefined) sumRG += Number(t.Value);
-				}
-				for (var m = 0; m < idxs.length; m++) {
-					var spm = loc.MetricTuples.metricTuples[idxs[m]];
-					var tt = totals[idxs[m]];
-					if (!tt) continue;
-					if (spm.isTotal) {
-						tt.RowGroupTotal = (tt.Value !== null && tt.Value !== undefined) ? Number(tt.Value) : sumRG;
-					} else {
-						tt.RowGroupTotal = sumRG;
-					}
-				}
-			});
-
-			// Valor calculado que se muestra en cada celda (según el modo y la
-			// variable). Lo usa el orden y el render.
-			boundaryRows.forEach(function (r) {
-				for (var ci4 = 0; ci4 < loc.MetricTuples.metricTuples.length; ci4++) {
-					var cell = r[ci4 + 1];
-					if (!cell) continue;
-					var sp4 = loc.MetricTuples.metricTuples[ci4];
-					var cv = cellValue(sp4.metric, sp4.variable, cell);
-					cell.ComputedValue = (cv === '-' || cv === null || cv === undefined) ? null : Number(cv);
-				}
-			});
-
-			// Ordena las filas al interior de esta delimitación según el criterio
-			// activo (columna o label), sin mezclar entre delimitaciones distintas.
-			loc.SortBoundaryRows(boundaryRows);
-
-			// Header de delimitación: totales agregados, con ColumnTotal/ColumnArea/RowGroupTotal.
-			var headerRow = [];
-			var boundaryLabel = activeBoundary.properties.Name;
-			if (version.Name && version.Name !== activeBoundary.properties.Name) {
-				boundaryLabel += ' [' + version.Name + ']';
-			}
-			// Conteo entre paréntesis: cuántas filas quedan LISTADAS debajo de este
-			// encabezado tras el filtro por datos (boundaryRows, ya filtrado arriba).
-			// No es "seleccionadas/universo": un indicador sin datos en la mayoría de
-			// los hijos de la delimitación oculta esas filas (ver el filtro de arriba),
-			// y el número debe reflejar lo que efectivamente se lista, no el universo
-			// de la delimitación. Sin indicadores (nada que pueda faltar), no se
-			// muestra número: todas las filas están, no hay nada que contar de más.
-			if (loc.MetricTuples.metricTuples.length > 0) {
-				boundaryLabel += ' (' + boundaryRows.length + ')';
-			}
-			headerRow.push({ 'Label': boundaryLabel, isHeader: true, isRegionHeader: true, boundaryId: activeBoundary.__boundaryId });
-			for (var ti = 0; ti < totals.length; ti++) {
-				totals[ti].ColumnTotal = columnTotals[ti];
-				totals[ti].ColumnArea  = columnAreaTotals[ti];
-				var sp5 = loc.MetricTuples.metricTuples[ti];
-				// Columna placeholder (indicador sin versiones activas): el total
-				// es vacío, no 0.
-				if (sp5.isEmpty) {
-					totals[ti].Empty = true;
-					totals[ti].Value = null;
-					totals[ti].ComputedValue = null;
-					continue;
-				}
-				// ComputedValue del total para que pueda ordenarse / mostrarse coherente.
-				var cv5 = cellValue(sp5.metric, sp5.variable, totals[ti]);
-				totals[ti].ComputedValue = (cv5 === '-' || cv5 === null || cv5 === undefined) ? null : Number(cv5);
-			}
-			arr.AddRange(headerRow, totals);
-			loc.Rows.push(headerRow);
-
-			var grouped = loc.GroupRowsByParent(boundaryRows);
-			arr.AddRange(loc.Rows, grouped);
+		if (loc.RowTree.root) {
+			arr.AddRange(loc.Rows, loc._levelRows(loc.RowTree.root, 0, loc.RowTree.AnalysisLevel()));
 		}
 		// Las filas ya están armadas: se reconstruye la vista plana de resultados.
 		loc.RebuildDataset();
 	});
+};
+
+// Filas de un nivel (encabezado y elementos) y, debajo de cada elemento
+// desplegado, las de sus tipos de hijo. Con indicadores, un tipo de hijo abierto
+// sin filas no se ofrece (diría "(0)"), y un elemento desplegado sin datos se
+// conserva solo si debajo hay elementos con datos.
+ActivePivot.prototype._levelRows = function (level, depth, analysisLevel) {
+	if (!level.IsTypeOpen()) {
+		return this._collapsedLevelRows(level, depth);
+	}
+	var block = this._buildLevelBlock(level);
+	var hasTuples = this.MetricTuples.metricTuples.length > 0;
+	var body = [];
+	var listed = 0;
+	for (var r = 0; r < block.rows.length; r++) {
+		var row = block.rows[r];
+		var nested = [];
+		if (row[0].open) {
+			var types = level.Types(row[0].item);
+			for (var t = 0; t < types.length; t++) {
+				arr.AddRange(nested, this._levelRows(types[t], depth + 2, analysisLevel));
+			}
+		}
+		if (!hasTuples || rowHasValue(row) || hasItemRows(nested)) {
+			row[0].depth = depth + 1;
+			row[0].inAnalysis = (level === analysisLevel);
+			body.push(row);
+			arr.AddRange(body, nested);
+			listed++;
+		}
+	}
+	if (!level.IsRoot() && hasTuples && listed === 0) {
+		return [];
+	}
+	if (listed !== block.rows.length) {
+		block.header[0] = this._levelHeaderCell(level, listed);
+	}
+	block.header[0].depth = depth;
+	return [block.header].concat(body);
+};
+
+// Un tipo de hijo colapsado muestra solo su encabezado, con la cantidad de
+// elementos y sin valores: sus datos se calculan recién al abrirlo, porque pueden
+// exigir un nivel geográfico mucho más fino (p. ej. todos los radios del país).
+ActivePivot.prototype._collapsedLevelRows = function (level, depth) {
+	var header = [this._levelHeaderCell(level, level.ShownItems().length)];
+	for (var t = 0; t < this.MetricTuples.metricTuples.length; t++) {
+		header.push(null);
+	}
+	header[0].depth = depth;
+	return [header];
+};
+
+function hasItemRows(rows) {
+	for (var i = 0; i < rows.length; i++) {
+		if (rows[i][0].isItem) return true;
+	}
+	return false;
+}
+
+function rowHasValue(row) {
+	for (var c = 1; c < row.length; c++) {
+		if (row[c] && row[c].Value !== null && row[c].Value !== undefined) return true;
+	}
+	return false;
+}
+
+// Resuelve las filas de los elementos visibles de un nivel y su encabezado con
+// los totales agregados (Value, Total, Area, brecha) y los denominadores de los
+// modos normalizados (ColumnTotal, ColumnArea, RowGroupTotal).
+ActivePivot.prototype._buildLevelBlock = function (level) {
+	var tuples = this.MetricTuples.metricTuples;
+	var region = this.RowTree.RegionFor(level);
+	var items = level.ShownItems();
+	var totals = [];
+	for (var t = 0; t < tuples.length; t++) {
+		totals.push({ Value: null, Total: null, Area: null, ValueGap: null, TotalGap: null });
+	}
+	var levelRows = [];
+	for (var n = 0; n < items.length; n++) {
+		var row = [this._itemHeaderCell(level, items[n])];
+		for (var ci = 0; ci < tuples.length; ci++) {
+			var value = this.ResolveCell(tuples[ci], region, items[n]);
+			row.push(value);
+			// Se suma solo lo no nulo y se conserva null cuando ningún aporte tuvo
+			// valor: la suma de puros '-' debe quedar '-', no 0 (un 0 daría a
+			// entender que se midió y el resultado fue cero).
+			totals[ci].Value = _addKeepNull(totals[ci].Value, value.Value);
+			totals[ci].Total = _addKeepNull(totals[ci].Total, value.Total);
+			totals[ci].Area = _addKeepNull(totals[ci].Area, value.Area);
+			// Brecha: se agregan los dos universos para que el delta del encabezado
+			// se calcule sobre las sumas.
+			totals[ci].ValueGap = _addKeepNull(totals[ci].ValueGap, value.ValueGap);
+			totals[ci].TotalGap = _addKeepNull(totals[ci].TotalGap, value.TotalGap);
+		}
+		levelRows.push(row);
+	}
+	// Solo filas con al menos un valor. Sin indicadores no hay valores en ninguna
+	// fila: en ese caso se muestran todas, para que las delimitaciones sigan
+	// visibles al quitar el último indicador. Un elemento desplegado se conserva
+	// aunque no tenga datos, porque de él cuelgan sus niveles hijos.
+	if (tuples.length > 0) {
+		levelRows = levelRows.filter(function (r) {
+			return r[0].open || rowHasValue(r);
+		});
+	}
+
+	var columnTotals = this._applyColumnTotals(levelRows);
+	var groups = this._tupleGroups();
+	for (var g = 0; g < levelRows.length; g++) {
+		this._setRowGroupTotals(levelRows[g].slice(1), groups);
+	}
+	this._setRowGroupTotals(totals, groups);
+	this._applyComputedValues(levelRows);
+
+	// Ordena las filas al interior del nivel según el criterio activo (columna o
+	// label), sin mezclar entre niveles distintos.
+	this.SortBoundaryRows(levelRows);
+
+	for (var ti = 0; ti < totals.length; ti++) {
+		totals[ti].ColumnTotal = columnTotals.values[ti];
+		totals[ti].ColumnArea = columnTotals.areas[ti];
+		var tuple = tuples[ti];
+		// Columna placeholder (indicador sin versiones activas): el total es vacío, no 0.
+		if (tuple.isEmpty) {
+			totals[ti].Empty = true;
+			totals[ti].Value = null;
+			totals[ti].ComputedValue = null;
+		} else {
+			// ComputedValue del total para que pueda ordenarse / mostrarse coherente.
+			totals[ti].ComputedValue = this._computedValue(tuple, totals[ti]);
+		}
+	}
+	var header = [this._levelHeaderCell(level, levelRows.length)];
+	arr.AddRange(header, totals);
+	return { header: header, rows: levelRows };
+};
+
+ActivePivot.prototype._itemHeaderCell = function (level, item) {
+	return {
+		Label: item.Caption,
+		FID: item.FID,
+		Code: item.Code,
+		isHeader: true,
+		isItem: true,
+		boundaryId: level.boundary.Id,
+		level: level,
+		item: item,
+		open: level.IsItemOpen(item),
+		expandable: level.IsExpandable(item),
+		forced: level.IsItemForced(item)
+	};
+};
+
+// Encabezado de un nivel. El conteo entre paréntesis es cuántas filas quedan
+// LISTADAS debajo tras el filtro por datos (un indicador sin datos en la mayoría
+// de los hijos las oculta, y el número debe reflejar lo que se ve). Con el nivel
+// restringido se informa también el universo ("2 de 6"). Sin indicadores y sin
+// restricción no se muestra número: todas las filas están.
+ActivePivot.prototype._levelHeaderCell = function (level, listedCount) {
+	var caption = level.boundary.Name;
+	var countText = '';
+	if (!level.IsAll()) {
+		countText = '(' + listedCount + ' de ' + level.Items().length + ')';
+	} else if (this.MetricTuples.metricTuples.length > 0) {
+		countText = '(' + listedCount + ')';
+	}
+	var label = caption;
+	if (countText) {
+		label = caption + ' ' + countText;
+	}
+	return {
+		Label: label,
+		Caption: caption,
+		CountText: countText,
+		isHeader: true,
+		isLevelHeader: true,
+		isRoot: level.IsRoot(),
+		boundaryId: level.boundary.Id,
+		level: level,
+		collapsible: level.IsCollapsible(),
+		open: level.IsTypeOpen(),
+		restricted: !level.IsAll()
+	};
+};
+
+// Totales verticales por columna (Value y Area) de las filas de un nivel; se
+// copian a cada celda como ColumnTotal / ColumnArea (denominadores de col% y %
+// de área).
+ActivePivot.prototype._applyColumnTotals = function (rows) {
+	var tuples = this.MetricTuples.metricTuples;
+	var values = [];
+	var areas = [];
+	for (var ci = 0; ci < tuples.length; ci++) {
+		var sum = 0;
+		var sumArea = 0;
+		for (var ri = 0; ri < rows.length; ri++) {
+			var cell = rows[ri][ci + 1];
+			if (cell && cell.Value !== null && cell.Value !== undefined) sum += Number(cell.Value);
+			if (cell && cell.Area !== null && cell.Area !== undefined) sumArea += Number(cell.Area);
+		}
+		values.push(sum);
+		areas.push(sumArea);
+	}
+	for (var r = 0; r < rows.length; r++) {
+		for (var c = 0; c < tuples.length; c++) {
+			if (rows[r][c + 1]) {
+				rows[r][c + 1].ColumnTotal = values[c];
+				rows[r][c + 1].ColumnArea = areas[c];
+			}
+		}
+	}
+	return { values: values, areas: areas };
+};
+
+// Índices de columnas que comparten (metricId, versionId, levelId, variableId):
+// el grupo sobre el que se calcula el % horizontal (modo FIL).
+ActivePivot.prototype._tupleGroups = function () {
+	var tuples = this.MetricTuples.metricTuples;
+	var groups = {};
+	for (var i = 0; i < tuples.length; i++) {
+		var sp = tuples[i];
+		var key = sp.metricId + ':' + sp.versionId + ':' + sp.levelId + ':' + sp.variableId;
+		if (!groups[key]) groups[key] = [];
+		groups[key].push(i);
+	}
+	return groups;
+};
+
+// RowGroupTotal de una fila (cells alineadas con las tuplas): las categorías
+// reparten 100% entre las seleccionadas (suma de sus Value, sin la columna Total,
+// que sería doble conteo); la columna Total se normaliza contra sí misma, de modo
+// que su FIL dé 100 aun cuando no estén todas las categorías seleccionadas.
+ActivePivot.prototype._setRowGroupTotals = function (cells, groups) {
+	var tuples = this.MetricTuples.metricTuples;
+	var keys = Object.keys(groups);
+	for (var k = 0; k < keys.length; k++) {
+		var indexes = groups[keys[k]];
+		var sum = 0;
+		for (var n = 0; n < indexes.length; n++) {
+			var categoryCell = cells[indexes[n]];
+			if (!tuples[indexes[n]].isTotal && categoryCell && categoryCell.Value !== null && categoryCell.Value !== undefined) {
+				sum += Number(categoryCell.Value);
+			}
+		}
+		for (var m = 0; m < indexes.length; m++) {
+			var cell = cells[indexes[m]];
+			if (cell) {
+				if (tuples[indexes[m]].isTotal && cell.Value !== null && cell.Value !== undefined) {
+					cell.RowGroupTotal = Number(cell.Value);
+				} else {
+					cell.RowGroupTotal = sum;
+				}
+			}
+		}
+	}
+};
+
+// Valor calculado que se muestra en cada celda (según el modo y la variable). Lo
+// usan el orden y el render.
+ActivePivot.prototype._applyComputedValues = function (rows) {
+	var tuples = this.MetricTuples.metricTuples;
+	for (var r = 0; r < rows.length; r++) {
+		for (var ci = 0; ci < tuples.length; ci++) {
+			var cell = rows[r][ci + 1];
+			if (cell) {
+				cell.ComputedValue = this._computedValue(tuples[ci], cell);
+			}
+		}
+	}
+};
+
+ActivePivot.prototype._computedValue = function (tuple, cell) {
+	var cv = cellValue(tuple.metric, tuple.variable, cell);
+	if (cv === '-' || cv === null || cv === undefined) {
+		return null;
+	}
+	return Number(cv);
 };
 
 // Reconstruye pivot.Dataset (la vista plana de resultados) a partir del estado
@@ -307,160 +382,6 @@ ActivePivot.prototype.RebuildDataset = function (title) {
 	return this.Dataset;
 };
 
-// Si las filas tienen Parent (p. ej. municipios bajo su provincia), inserta un
-// corte de control por cada padre con su subtotal (suma de las filas del grupo),
-// respetando el orden ya aplicado a las filas. Si no hay Parent, devuelve las
-// filas tal cual.
-ActivePivot.prototype.GroupRowsByParent = function (boundaryRows) {
-	var loc = this;
-	var hasParent = boundaryRows.some(function (r) { return r[0] && r[0].Parent != null; });
-	if (!hasParent) return boundaryRows;
-
-	// Agrupa preservando el orden de aparición de cada padre.
-	var order = [];
-	var groups = {};
-	boundaryRows.forEach(function (r) {
-		var parent = (r[0] && r[0].Parent != null) ? r[0].Parent : '';
-		if (!groups[parent]) { groups[parent] = []; order.push(parent); }
-		groups[parent].push(r);
-	});
-
-	// Se acumulan los grupos (con su subtotal ya calculado) y luego se ordenan por el
-	// MISMO criterio activo, para que los grupos entre sí queden en el orden pedido
-	// (no solo las filas dentro de cada grupo). Sin esto, los grupos quedaban en orden
-	// de aparición del primer hijo, que no reflejaba el criterio.
-	var built = [];
-	order.forEach(function (parent) {
-		var rows = groups[parent];
-		// El Id y el Code del agrupador (formato actual de GetFabBoundaries) los
-		// comparten todas sus hojas; se toman de la primera para que la fila
-		// agrupadora se pueda referenciar por Id y exportar con su código.
-		var head0 = rows[0] && rows[0][0] ? rows[0][0] : null;
-		var groupId = head0 && head0.ParentId != null ? head0.ParentId : null;
-		var groupCode = head0 && head0.ParentCode != null ? head0.ParentCode : null;
-		var groupBoundaryId = head0 ? head0.boundaryId : null;
-		// FIDs de las hojas del grupo: permite quitar "el grupo y sus hijos" de una
-		// sola vez (la 'x' del encabezado de grupo), sin tener que recorrer las filas
-		// desde la UI.
-		var groupItemIds = rows.map(function (r) { return r[0] ? r[0].FID : null; }).filter(function (id) { return id != null; });
-		// El label del grupo lleva entre paréntesis cuántos hijos quedan listados
-		// debajo (rows ya viene filtrado por datos desde RefreshData): el mismo
-		// criterio que el encabezado de la delimitación, a nivel de este grupo.
-		var groupLabel = parent + ' (' + rows.length + ')';
-		// Subtotal del grupo por columna (suma de Value/Total/Area; ColumnTotal,
-		// ColumnArea y RowGroupTotal heredados de la primera fila del grupo).
-		// GroupKey (el nombre crudo, sin el conteo) es la CLAVE de identidad para
-		// colapsar/expandir y para saber qué filas pertenecen al grupo: debe coincidir
-		// con `row.Parent` de las hojas, que no lleva el conteo. Label (con el
-		// conteo) es solo para mostrar; usarlo como clave rompía el colapso, porque
-		// dejaba de coincidir con Parent.
-		var subtotal = [{ Label: groupLabel, GroupKey: parent, isHeader: true, isGroupHeader: true, GroupId: groupId, Code: groupCode, boundaryId: groupBoundaryId, ChildItemIds: groupItemIds }];
-		for (var ci = 0; ci < loc.MetricTuples.metricTuples.length; ci++) {
-			var sv = 0, st = 0, sa = 0, hasVal = false, hasArea = false;
-			var svg = 0, stg = 0, hasGap = false;
-			rows.forEach(function (r) {
-				var cell = r[ci + 1];
-				if (cell && cell.Value !== null && cell.Value !== undefined) { sv += Number(cell.Value); hasVal = true; }
-				if (cell && cell.Total !== null && cell.Total !== undefined) { st += Number(cell.Total); }
-				if (cell && cell.Area  !== null && cell.Area  !== undefined) { sa += Number(cell.Area);  hasArea = true; }
-				// Brecha: el subtotal agrega los dos universos de los hijos, para que
-				// el delta del corte de control se calcule sobre las sumas (no quede
-				// vacío como pasaba al no propagar el gap).
-				if (cell && cell.ValueGap !== null && cell.ValueGap !== undefined) { svg += Number(cell.ValueGap); hasGap = true; }
-				if (cell && cell.TotalGap !== null && cell.TotalGap !== undefined) { stg += Number(cell.TotalGap); hasGap = true; }
-			});
-			var first = rows[0] && rows[0][ci + 1] ? rows[0][ci + 1] : null;
-			var cellTotal = {
-				Value: hasVal ? sv : null,
-				Total: st,
-				Area:  hasArea ? sa : null,
-				ValueGap: hasGap ? svg : null,
-				TotalGap: hasGap ? stg : null,
-				ColumnTotal: first ? first.ColumnTotal : undefined,
-				ColumnArea:  first ? first.ColumnArea  : undefined
-			};
-			subtotal.push(cellTotal);
-		}
-		// RowGroupTotal del subtotal: suma de Value de las celdas del subtotal
-		// para columnas que comparten (metricId, versionId, levelId, variableId)
-		// y no son Total.
-		var groupIndices = {};
-		for (var gs = 0; gs < loc.MetricTuples.metricTuples.length; gs++) {
-			var sp = loc.MetricTuples.metricTuples[gs];
-			var gk = sp.metricId + ':' + sp.versionId + ':' + sp.levelId + ':' + sp.variableId;
-			if (!groupIndices[gk]) groupIndices[gk] = [];
-			groupIndices[gk].push(gs);
-		}
-		Object.keys(groupIndices).forEach(function (gk) {
-			var idxs = groupIndices[gk];
-			var sumRG = 0;
-			for (var n = 0; n < idxs.length; n++) {
-				var spn = loc.MetricTuples.metricTuples[idxs[n]];
-				if (spn.isTotal) continue;
-				var c = subtotal[idxs[n] + 1];
-				if (c && c.Value !== null && c.Value !== undefined) sumRG += Number(c.Value);
-			}
-			for (var m = 0; m < idxs.length; m++) {
-				var spm = loc.MetricTuples.metricTuples[idxs[m]];
-				var cSub = subtotal[idxs[m] + 1];
-				if (!cSub) continue;
-				if (spm.isTotal) {
-					cSub.RowGroupTotal = (cSub.Value !== null && cSub.Value !== undefined) ? Number(cSub.Value) : sumRG;
-				} else {
-					cSub.RowGroupTotal = sumRG;
-				}
-			}
-		});
-		// ComputedValue del subtotal después de tener todos los agregados.
-		for (var ci2 = 0; ci2 < loc.MetricTuples.metricTuples.length; ci2++) {
-			var sp2 = loc.MetricTuples.metricTuples[ci2];
-			var cellT = subtotal[ci2 + 1];
-			var cv = cellValue(sp2.metric, sp2.variable, cellT);
-			cellT.ComputedValue = (cv === '-' || cv === null || cv === undefined) ? null : Number(cv);
-		}
-		built.push({ parent: parent, subtotal: subtotal, rows: rows });
-	});
-
-	// Ordena los grupos entre sí según el criterio activo. Con orden por label, es
-	// alfabético por el nombre del grupo; con orden por columna, por el ComputedValue
-	// del subtotal en esa columna (nulos al final). Sin criterio activo, se conserva
-	// el orden de aparición.
-	var sortKey = this.MetricTuples.sortKey;
-	var dir = this.MetricTuples.sortDirection;
-	if (sortKey != null && dir !== 0) {
-		if (sortKey === ActivePivot.LABEL_SORT_KEY) {
-			built.sort(function (a, b) {
-				var cmp = String(a.parent).localeCompare(String(b.parent), 'es', { sensitivity: 'base' });
-				return dir === 1 ? cmp : -cmp;
-			});
-		} else {
-			var colIndex = -1;
-			for (var k = 0; k < this.MetricTuples.metricTuples.length; k++) {
-				if (this.MetricTuples.metricTuples[k].key === sortKey) { colIndex = k; break; }
-			}
-			if (colIndex !== -1) {
-				var col = colIndex + 1;
-				built.sort(function (a, b) {
-					var av = a.subtotal[col] ? a.subtotal[col].ComputedValue : null;
-					var bv = b.subtotal[col] ? b.subtotal[col].ComputedValue : null;
-					var aNull = (av === null || av === undefined);
-					var bNull = (bv === null || bv === undefined);
-					if (aNull && bNull) return 0;
-					if (aNull) return 1;
-					if (bNull) return -1;
-					return dir === 1 ? (av - bv) : (bv - av);
-				});
-			}
-		}
-	}
-
-	var out = [];
-	built.forEach(function (g) {
-		out.push(g.subtotal);
-		arr.AddRange(out, g.rows);
-	});
-	return out;
-};
 
 // Si la columna ordenadora ya no existe entre las columnas (porque se
 // deseleccionó la categoría o cambió la versión), limpia el estado de orden
@@ -532,38 +453,13 @@ ActivePivot.prototype.ResolveCell = function (tuple, region, regionItem) {
 		return { 'Value': null, 'Total': null, 'Area': null, 'Empty': true };
 	}
 
-	// Filtros: intersección con los geographyIds de cada filtro activo.
-	var filteredGeographyIds = geographyIds;
-	for (var i = 0; i < this.FilterSet.items.length; i++) {
-		var filter = this.FilterSet.items[i].SelectedVersion().Selection;
-		var filterGeographyIds = [];
-
-		for (var j = 0; j < filter.Items.length; j++) {
-			var filterItem = filter.Items[j];
-			var ids = filter.Region.GetGeographyIdsForItem(filterItem.FID, metricGeographyId);
-			if (ids && ids.length > 0) {
-				filterGeographyIds = filterGeographyIds.concat(ids);
-			}
-		}
-
-		if (filterGeographyIds.length > 0) {
-			filteredGeographyIds = filteredGeographyIds.filter(function (id) {
-				return filterGeographyIds.indexOf(id) !== -1;
-			});
-		}
-	}
-
-	if (filteredGeographyIds.length === 0) {
-		return { 'Value': null, 'Total': null, 'Area': null, 'Empty': true };
-	}
-
 	// Sumariza. Cuando tuple.labelId es null, suma todos los LID que matchean el VID
 	// (eso da el "Total" agregado por variable, o la única columna cuando la variable
 	// no tiene ValueLabels). Cuando tuple.labelId es un Id concreto, filtra por él.
 	//
-	// Se usa el índice por VID y geografía (pivot.Data.indexFor): se recorre solo
-	// la intersección de geografías filtradas con las que tienen datos, en vez de
-	// barrer todo el array de items por cada celda.
+	// Se usa el índice por VID y geografía (pivot.Data.indexFor): se recorren solo
+	// las geografías del elemento, en vez de barrer todo el array de items por
+	// cada celda.
 	var sum = 0, sumTotal = 0, sumArea = 0, count = 0;
 	var sumValueGap = 0, sumTotalGap = 0, hasGap = false;
 	var variableId = tuple.variableId;
@@ -572,8 +468,8 @@ ActivePivot.prototype.ResolveCell = function (tuple, region, regionItem) {
 	var byVid = index ? index[variableId] : null;
 
 	if (byVid) {
-		for (var g = 0; g < filteredGeographyIds.length; g++) {
-			var bucket = byVid.byGeo.get(filteredGeographyIds[g]);
+		for (var g = 0; g < geographyIds.length; g++) {
+			var bucket = byVid.byGeo.get(geographyIds[g]);
 			if (!bucket) continue;
 			// El área (AreaM2) es geográfica: la comparten todos los registros de la
 			// misma geografía (uno por categoría). Por eso se suma UNA sola vez por
@@ -616,9 +512,9 @@ ActivePivot.prototype.ResolveCell = function (tuple, region, regionItem) {
 	};
 };
 
-// Valor agregado de una categoría sobre todo el universo de regiones de la tabla,
-// reutilizando ResolveCell (la sumarización por celda, con filtros, vive en un
-// solo lugar). Recorre todas las regiones/items, acumula Value y Total, y aplica
+// Valor agregado de una categoría sobre el universo de análisis de la tabla,
+// reutilizando ResolveCell (la sumarización por celda vive en un solo lugar).
+// Recorre los elementos del nivel de análisis, acumula Value y Total, y aplica
 // la misma interpretación por modo de medición que usa el dataset (pivotValue):
 // suma de conteos, o media ponderada en porcentaje. Lo usa el widget de
 // distribución para mostrar categorías que no están seleccionadas como columnas
@@ -627,27 +523,25 @@ ActivePivot.prototype.ResolveCell = function (tuple, region, regionItem) {
 ActivePivot.prototype.ResolveCategoryAggregate = function (tuple, summaryMetric, variable, totalTuple) {
 	var sumValue = 0, sumTotal = 0, sumArea = 0, hasAny = false;
 	var sumValueGap = 0, sumTotalGap = 0, hasGap = false;
-	for (var bi = 0; bi < this.Regions.items.length; bi++) {
-		var version = this.Regions.items[bi].SelectedVersion();
-		var region = version.Selection;
-		for (var ii = 0; ii < region.Items.length; ii++) {
-			var item = region.Items[ii];
-			var cell = this.ResolveCell(tuple, region.Region, item);
-			if (cell.Empty) continue;
-			if (cell.Value != null) { sumValue += Number(cell.Value); hasAny = true; }
-			if (cell.Area != null)  { sumArea  += Number(cell.Area); }
-			if (cell.ValueGap != null) { sumValueGap += Number(cell.ValueGap); hasGap = true; }
-			if (cell.TotalGap != null) { sumTotalGap += Number(cell.TotalGap); hasGap = true; }
-			// En modos normalizados (incidencia, etc.) el denominador es el total del
-			// universo, no el de la categoría: los ítems de categoría pueden no traer
-			// su propio Total. Por eso se resuelve con el tuple de total (labelId null).
-			if (totalTuple) {
-				var tcell = this.ResolveCell(totalTuple, region.Region, item);
-				if (!tcell.Empty && tcell.Total != null) sumTotal += Number(tcell.Total);
-				if (!tcell.Empty && tcell.TotalGap != null) { sumTotalGap += Number(tcell.TotalGap); hasGap = true; }
-			} else if (cell.Total != null) {
-				sumTotal += Number(cell.Total);
-			}
+	var entries = this.RowTree.AnalysisEntries();
+	for (var ei = 0; ei < entries.length; ei++) {
+		var region = entries[ei].region;
+		var item = entries[ei].item;
+		var cell = this.ResolveCell(tuple, region, item);
+		if (cell.Empty) continue;
+		if (cell.Value != null) { sumValue += Number(cell.Value); hasAny = true; }
+		if (cell.Area != null)  { sumArea  += Number(cell.Area); }
+		if (cell.ValueGap != null) { sumValueGap += Number(cell.ValueGap); hasGap = true; }
+		if (cell.TotalGap != null) { sumTotalGap += Number(cell.TotalGap); hasGap = true; }
+		// En modos normalizados (incidencia, etc.) el denominador es el total del
+		// universo, no el de la categoría: los ítems de categoría pueden no traer
+		// su propio Total. Por eso se resuelve con el tuple de total (labelId null).
+		if (totalTuple) {
+			var tcell = this.ResolveCell(totalTuple, region, item);
+			if (!tcell.Empty && tcell.Total != null) sumTotal += Number(tcell.Total);
+			if (!tcell.Empty && tcell.TotalGap != null) { sumTotalGap += Number(tcell.TotalGap); hasGap = true; }
+		} else if (cell.Total != null) {
+			sumTotal += Number(cell.Total);
 		}
 	}
 	if (!hasAny && sumTotal === 0) return null;
@@ -718,32 +612,31 @@ ActivePivot.prototype.ResolveAllCategories = function (metricId, versionId) {
 		var c = info.tuples[ci];
 		var sumValue = 0, sumTotal = 0, sumArea = 0, hasAny = false;
 		var sumValueGap = 0, sumTotalGap = 0, hasGap = false;
-		for (var bi = 0; bi < this.Regions.items.length; bi++) {
-			var region = this.Regions.items[bi].SelectedVersion().Selection;
-			for (var ii = 0; ii < region.Items.length; ii++) {
-				var item = region.Items[ii];
-				var cell = this.ResolveCell(c.tuple, region.Region, item);
-				if (cell.Empty) continue;
-				// En incidencia, una celda sin valor (numerador) debe saltearse por
-				// completo: si se sumara solo su Total al denominador, la incidencia
-				// agregada quedaría hundida (p. ej. una región sin dato en la categoría
-				// arrastraba el promedio a casi cero). Con conteo no aplica: ahí el
-				// aporte es el propio Value, que si falta simplemente no suma.
-				var isIncidence = (sm === 'I' || sm === 'P' || sm === 'FIL');
-				if (isIncidence && cell.Value == null) continue;
-				if (cell.Value != null) { sumValue += Number(cell.Value); hasAny = true; }
-				if (cell.Area != null) sumArea += Number(cell.Area);
-				if (cell.ValueGap != null) { sumValueGap += Number(cell.ValueGap); hasGap = true; }
-				// Denominador de incidencia: el Total propio de la categoría (como en la
-				// pivot). Solo si la celda no lo trae se cae al total del universo.
-				if (cell.Total != null) {
-					sumTotal += Number(cell.Total);
-				} else {
-					var tcell = this.ResolveCell(info.totalTuple, region.Region, item);
-					if (!tcell.Empty && tcell.Total != null) sumTotal += Number(tcell.Total);
-				}
-				if (cell.TotalGap != null) { sumTotalGap += Number(cell.TotalGap); hasGap = true; }
+		var entries = this.RowTree.AnalysisEntries();
+		for (var ei = 0; ei < entries.length; ei++) {
+			var region = entries[ei].region;
+			var item = entries[ei].item;
+			var cell = this.ResolveCell(c.tuple, region, item);
+			if (cell.Empty) continue;
+			// En incidencia, una celda sin valor (numerador) debe saltearse por
+			// completo: si se sumara solo su Total al denominador, la incidencia
+			// agregada quedaría hundida (p. ej. una región sin dato en la categoría
+			// arrastraba el promedio a casi cero). Con conteo no aplica: ahí el
+			// aporte es el propio Value, que si falta simplemente no suma.
+			var isIncidence = (sm === 'I' || sm === 'P' || sm === 'FIL');
+			if (isIncidence && cell.Value == null) continue;
+			if (cell.Value != null) { sumValue += Number(cell.Value); hasAny = true; }
+			if (cell.Area != null) sumArea += Number(cell.Area);
+			if (cell.ValueGap != null) { sumValueGap += Number(cell.ValueGap); hasGap = true; }
+			// Denominador de incidencia: el Total propio de la categoría (como en la
+			// pivot). Solo si la celda no lo trae se cae al total del universo.
+			if (cell.Total != null) {
+				sumTotal += Number(cell.Total);
+			} else {
+				var tcell = this.ResolveCell(info.totalTuple, region, item);
+				if (!tcell.Empty && tcell.Total != null) sumTotal += Number(tcell.Total);
 			}
+			if (cell.TotalGap != null) { sumTotalGap += Number(cell.TotalGap); hasGap = true; }
 		}
 		aggs.push({ labelId: c.labelId, name: c.name, color: c.color,
 			sumValue: sumValue, sumTotal: sumTotal, sumArea: sumArea,
@@ -775,7 +668,7 @@ ActivePivot.prototype.ResolveAllCategories = function (metricId, versionId) {
 // Camino 1 en modo regiones: para un (metricId, versionId) con selección "solo
 // total", resuelve el valor de cada categoría POR REGIÓN. Devuelve una fila por
 // región { label, fid, parts: [{ labelId, name, color, value }] }, en el orden de
-// las regiones de la tabla. El widget arma con esto las barras horizontales.
+// los elementos del nivel de análisis. El widget arma con esto las barras horizontales.
 ActivePivot.prototype.ResolveAllCategoriesByRegion = function (metricId, versionId) {
 	var info = this._categoryTuples(metricId, versionId);
 	if (!info) return [];
@@ -794,23 +687,21 @@ ActivePivot.prototype.ResolveAllCategoriesByRegion = function (metricId, version
 	var colAreaSum = [];           // por categoría: suma de Area  (denominador col-área)
 	for (var ci0 = 0; ci0 < info.tuples.length; ci0++) { colValueSum[ci0] = 0; colAreaSum[ci0] = 0; }
 
-	for (var bi = 0; bi < this.Regions.items.length; bi++) {
-		var version = this.Regions.items[bi].SelectedVersion();
-		var region = version.Selection;
-		for (var ii = 0; ii < region.Items.length; ii++) {
-			var item = region.Items[ii];
-			var totalCell = this.ResolveCell(info.totalTuple, region.Region, item);
-			var cells = [];
-			for (var ci = 0; ci < info.tuples.length; ci++) {
-				var cell = this.ResolveCell(info.tuples[ci].tuple, region.Region, item);
-				cells.push(cell);
-				if (!cell.Empty) {
-					if (cell.Value != null) colValueSum[ci] += Number(cell.Value);
-					if (cell.Area != null) colAreaSum[ci] += Number(cell.Area);
-				}
+	var entries = this.RowTree.AnalysisEntries();
+	for (var ei = 0; ei < entries.length; ei++) {
+		var region = entries[ei].region;
+		var item = entries[ei].item;
+		var totalCell = this.ResolveCell(info.totalTuple, region, item);
+		var cells = [];
+		for (var ci = 0; ci < info.tuples.length; ci++) {
+			var cell = this.ResolveCell(info.tuples[ci].tuple, region, item);
+			cells.push(cell);
+			if (!cell.Empty) {
+				if (cell.Value != null) colValueSum[ci] += Number(cell.Value);
+				if (cell.Area != null) colAreaSum[ci] += Number(cell.Area);
 			}
-			grid.push({ item: item, totalCell: totalCell, cells: cells });
 		}
+		grid.push({ item: item, totalCell: totalCell, cells: cells });
 	}
 
 	// Gran total de Value (todas las categorías y regiones): es el denominador común
@@ -913,14 +804,14 @@ ActivePivot.prototype.ResolveAllCategoriesByRegion = function (metricId, version
 // nivel de alguna Selection (de algún censo), esa Selection baja un nivel. Cada
 // censo se evalúa contra SU propio GeographyId, porque sus geografías difieren.
 ActivePivot.prototype.NeedAutoDrillDown = function () {
-	var allBoundaries = this.AllBoundaries();
-	for (var bi = 0; bi < allBoundaries.length; bi++) {
-		var region = allBoundaries[bi].SelectedVersion().Selection;
+	var regions = this.RowTree.OpenRegions();
+	for (var bi = 0; bi < regions.length; bi++) {
+		var region = regions[bi];
 		for (var mi = 0; mi < this.Metrics.length; mi++) {
 			var selections = this.Metrics[mi].Selections;
 			for (var si = 0; si < selections.length; si++) {
 				var sel = selections[si];
-				var rel = region.Region.GeographyRelations[sel.geographyId()];
+				var rel = region.GeographyRelations[sel.geographyId()];
 				if (!rel || rel.length === 0) {
 					if (this._selectionLevelDown(sel)) return true;
 				}
@@ -934,7 +825,7 @@ ActivePivot.prototype.NeedAutoDrillDown = function () {
 // padre de una Selection, esa Selection sube un nivel. Por Selection y por su
 // propia geografía.
 ActivePivot.prototype.CanAutoDrillUp = function () {
-	var allBoundaries = this.AllBoundaries();
+	var regions = this.RowTree.OpenRegions();
 	var drilledUp = false;
 	for (var mi = 0; mi < this.Metrics.length; mi++) {
 		var selections = this.Metrics[mi].Selections;
@@ -943,9 +834,8 @@ ActivePivot.prototype.CanAutoDrillUp = function () {
 			var parent = this._selectionLevelParent(sel);
 			if (!parent) continue;
 			var canUp = true;
-			for (var bi = 0; bi < allBoundaries.length; bi++) {
-				var region = allBoundaries[bi].SelectedVersion().Selection;
-				var rel = region.Region.GeographyRelations[parent.GeographyId];
+			for (var bi = 0; bi < regions.length; bi++) {
+				var rel = regions[bi].GeographyRelations[parent.GeographyId];
 				if (!rel || rel.length === 0) { canUp = false; break; }
 			}
 			if (canUp && this._selectionLevelUp(sel)) drilledUp = true;
@@ -974,21 +864,14 @@ ActivePivot.prototype._selectionLevelDown = function (sel) {
 	return sel.moveToLevel(sel.version.Levels[idx + 1]);
 };
 
-ActivePivot.prototype.AllBoundaries = function () {
-	var allBoundaries = [];
-	arr.AddRange(allBoundaries, this.Regions.items);
-	arr.AddRange(allBoundaries, this.FilterSet.items);
-	return allBoundaries;
-};
-
 ActivePivot.prototype.RefreshRelations = function () {
-	// Verifica que la información de relaciones entre regiones/filtros y métricas
-	// esté completa. Itera por geographyIds únicos derivados de las ColumnTuples
+	// Verifica que la información de relaciones entre los niveles visibles y las
+	// métricas esté completa. Itera por geographyIds únicos derivados de las ColumnTuples
 	// (cubre multi-versión, donde cada versión activa puede usar un GeographyId distinto).
 	this.MetricTuples.rebuild();
 	var toRetrieve = [];
 	var seenGeoIds = {};
-	var allBoundaries = this.AllBoundaries();
+	var regions = this.RowTree.OpenRegions();
 
 	for (var s = 0; s < this.MetricTuples.metricTuples.length; s++) {
 		var tuple = this.MetricTuples.metricTuples[s];
@@ -1002,16 +885,14 @@ ActivePivot.prototype.RefreshRelations = function () {
 
 		if (!seenGeoIds[geographyId]) {
 			seenGeoIds[geographyId] = true;
-			for (var ab = 0; ab < allBoundaries.length; ab++) {
-				var region = allBoundaries[ab].SelectedVersion().Selection;
-				toRetrieve.push(region.Region.EnsureContainsGeographyRelations(geographyId));
+			for (var ab = 0; ab < regions.length; ab++) {
+				toRetrieve.push(regions[ab].EnsureContainsGeographyRelations(geographyId));
 			}
 		}
 		if (parentGeoId != null && !seenGeoIds[parentGeoId]) {
 			seenGeoIds[parentGeoId] = true;
-			for (var ab2 = 0; ab2 < allBoundaries.length; ab2++) {
-				var region2 = allBoundaries[ab2].SelectedVersion().Selection;
-				toRetrieve.push(region2.Region.EnsureContainsGeographyRelations(parentGeoId));
+			for (var ab2 = 0; ab2 < regions.length; ab2++) {
+				toRetrieve.push(regions[ab2].EnsureContainsGeographyRelations(parentGeoId));
 			}
 		}
 	}
@@ -1026,9 +907,8 @@ ActivePivot.prototype.GetTotalRows = function () {
 ActivePivot.prototype.Clear = function () {
 	arr.Clear(this.MetricTuples.headers);
 	arr.Clear(this.Rows);
-	arr.Clear(this.FilterSet.items);
-	arr.Clear(this.Regions.items);
 	arr.Clear(this.Metrics);
+	this.RowTree.Clear();
 };
 
 // Reordena una métrica de la posición `from` a la posición `to` (sobre el array
@@ -1043,70 +923,21 @@ ActivePivot.prototype.MoveMetric = function (from, to) {
 	return true;
 };
 
-ActivePivot.prototype.ClearBoundaries = function () {
-	this.Regions.clear();
-};
-
-ActivePivot.prototype.AddRegionById = function (boundaryId, caption) {
-	return this.Regions.addWholeById(boundaryId, caption);
-};
-
-// Quita una delimitación completa de las filas.
-ActivePivot.prototype.RemoveBoundaryById = function (boundaryId) {
-	this.Regions.removeById(boundaryId);
-};
-
-// Busca un boundary ya agregado a las filas por su id de origen.
-ActivePivot.prototype.FindBoundaryById = function (boundaryId) {
-	return this.Regions.findById(boundaryId);
-};
-
-// Agrega items concretos de una delimitación a las filas. Si la delimitación
-// ya está presente, fusiona los items (dedup); si no, la agrega con esos items.
-ActivePivot.prototype.AddRegionItemsById = function (boundaryId, itemIds) {
-	return this.Regions.addItemsById(boundaryId, itemIds, false);
-};
-
-// Quita items concretos de una delimitación de las filas. Si la delimitación
-// queda sin items seleccionados, se la remueve por completo.
-ActivePivot.prototype.RemoveRegionItemsById = function (boundaryId, itemIds) {
-	this.Regions.removeItemsById(boundaryId, itemIds);
-};
-
-ActivePivot.prototype.AddFilterById = function (boundaryId, itemIds) {
-	return this.FilterSet.addItemsById(boundaryId, itemIds);
-};
-
-ActivePivot.prototype.FindFilterById = function (boundaryId) {
-	return this.FilterSet.findById(boundaryId);
-};
-
-// Agrega items concretos como filtro; fusiona si la delimitación ya filtra.
-ActivePivot.prototype.AddFilterItemsById = function (boundaryId, itemIds) {
-	return this.FilterSet.addItemsById(boundaryId, itemIds);
-};
-
-ActivePivot.prototype.RemoveFilterItemsById = function (boundaryId, itemIds) {
-	this.FilterSet.removeItemsById(boundaryId, itemIds);
-};
-
-// Quita un filtro completo (todas sus selecciones) por delimitación.
-ActivePivot.prototype.RemoveFilterById = function (boundaryId) {
-	this.FilterSet.removeById(boundaryId);
-};
 ActivePivot.prototype.AddMetricById = function (metricId) {
 	var loc = this;
 	var ms = window.Context.MetricStore;
 	return ms.GetMetricOrRetrieve(metricId).then(function (metric) {
-			// La pivot habilita %FIL (distribución horizontal entre categorías),
-			// que en el mapa no aparece.
-			metric.properties.AllowRowPercent = true;
-			loc.Metrics.push(metric);
+		// La pivot habilita %FIL (distribución horizontal entre categorías),
+		// que en el mapa no aparece.
+		metric.properties.AllowRowPercent = true;
+		loc.Metrics.push(metric);
+		return metric;
 	});
 };
 
 ActivePivot.prototype.Render = function () {
 	var loc = this;
+	this.RowTree.EnsureRoot();
 	return loc.RefreshRelations().then(function () {
 		// Si TryAutoDrillDown devuelve true, repetimos todo
 		if (loc.NeedAutoDrillDown()) {
@@ -1120,9 +951,10 @@ ActivePivot.prototype.Render = function () {
 	});
 };
 
-// Reconstruye el pivot desde lo parseado de la ruta:
-// sections = { columns: [{id, versionId, levelId, variableId, summary}],
-//              rows: [{id, whole, items}], filters: [{id, whole, items}] }
+// Reconstruye el pivot desde lo parseado de la ruta (ver ActiveRoute):
+//   columns: indicadores; tree: árbol de filas; places: lugares que llegan del
+//   visor (cada uno, un id con sus ancestros como alternativas) y se muestran como
+//   selección; suggestion: lugar sugerido (vista actual del visor); order.
 // No llama a Render: el consumidor decide cuándo hacerlo.
 ActivePivot.prototype.RestoreFromSections = function (sections) {
 	var loc = this;
@@ -1130,20 +962,26 @@ ActivePivot.prototype.RestoreFromSections = function (sections) {
 	var tasks = [];
 
 	(sections.columns || []).forEach(function (col) {
-		tasks.push(loc.AddMetricById(col.id).then(function () {
-			var metric = loc.Metrics[loc.Metrics.length - 1];
+		tasks.push(loc.AddMetricById(col.id).then(function (metric) {
 			loc.applyColumnState(metric, col);
 		}));
 	});
 
-	(sections.rows || []).forEach(function (row) {
-		if (row.whole) tasks.push(loc.AddRegionById(row.id));
-		else if (row.items && row.items.length) tasks.push(loc.AddRegionItemsById(row.id, row.items));
-	});
-
-	(sections.filters || []).forEach(function (flt) {
-		if (flt.items && flt.items.length) tasks.push(loc.AddFilterItemsById(flt.id, flt.items));
-	});
+	if (sections.tree) {
+		this.RowTree.Restore(sections.tree);
+	}
+	var places = sections.places || [];
+	for (var p = 0; p < places.length; p++) {
+		var chain = this.RowTree.Hierarchy().ChainForCandidates(places[p]);
+		if (p === 0) {
+			this.RowTree.ReplaceSelection(chain);
+		} else {
+			this.RowTree.AddSelection(chain);
+		}
+	}
+	if (sections.suggestion && sections.suggestion.length) {
+		this.RowTree.SetSuggestion(sections.suggestion);
+	}
 
 	// Orden persistido (se aplica en el siguiente RefreshData/Render).
 	if (sections.order && sections.order.key != null) {
@@ -1151,36 +989,23 @@ ActivePivot.prototype.RestoreFromSections = function (sections) {
 		loc.MetricTuples.sortDirection = sections.order.dir;
 	}
 
-	// Las altas de arriba corren en paralelo (Promise.all) y cada una inserta al
-	// frente (Regions usa prepend), así que el orden final dependería de cuál
-	// promesa resuelve primero. Para que la tabla restaurada respete el orden
-	// serializado —el mismo en que se ven las filas al agregarlas— se reordenan
-	// las colecciones según el orden de las secciones, una vez cargadas.
+	// Las altas de indicadores corren en paralelo y cada una se agrega al final al
+	// resolverse: se reordenan según el orden serializado, una vez cargadas.
 	return Promise.all(tasks).then(function (result) {
-		loc._reorderBySections(loc.Regions, sections.rows);
-		loc._reorderBySections(loc.FilterSet, sections.filters);
+		loc._reorderMetricsBySections(sections.columns || []);
 		return result;
 	});
 };
 
-// Reordena los items de un ActiveBoundarySet para que sigan el orden de `sections`
-// (por boundaryId). Los que no aparezcan en sections quedan al final, en su orden
-// actual. No altera qué items hay, solo su orden.
-ActivePivot.prototype._reorderBySections = function (boundarySet, sections) {
-	if (!boundarySet || !sections || !sections.length) return;
-	// Posición de un boundaryId en el orden serializado; -1 (→ al final) si no está.
-	// Comparación laxa: los ids del parseo pueden venir como string y el interno
-	// como number.
-	function orderIndex(id) {
-		for (var i = 0; i < sections.length; i++) {
+ActivePivot.prototype._reorderMetricsBySections = function (columns) {
+	function orderIndex(metric) {
+		for (var i = 0; i < columns.length; i++) {
 			/* eslint-disable-next-line eqeqeq */
-			if (sections[i].id == id) return i;
+			if (columns[i].id == metric.properties.Metric.Id) return i;
 		}
-		return sections.length;
+		return columns.length;
 	}
-	boundarySet.items.sort(function (a, b) {
-		return orderIndex(a.__boundaryId) - orderIndex(b.__boundaryId);
-	});
+	this.Metrics.sort(function (a, b) { return orderIndex(a) - orderIndex(b); });
 };
 
 // Selecciona versión(es)/nivel/variable/summary/categorías de un indicador según

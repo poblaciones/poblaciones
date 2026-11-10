@@ -10,7 +10,18 @@
 			<p>{{ error }}</p>
 		</div>
 
-		<div v-else-if="pivot " class="pivot-table-wrapper">
+		<div v-else-if="pivot" class="pivot-table-wrapper" :class="{ 'is-embedded': embedded }">
+			<table-side-toolbar v-if="!embedded" :pivot="pivot" :tick="dataTick"
+													@add-metrics="onAddMetrics"
+													@remove-metrics="onRemoveMetrics"
+													@select-places="onSelectPlaces"
+													@remove-places="onRemovePlaces" />
+			<div v-if="suggestion" class="pivot-suggestion">
+				<span>Vista actual del mapa: <strong>{{ suggestionCaption }}</strong></span>
+				<button class="mp-btn mp-btn--solid mp-btn--sm" @click="acceptSuggestion">Usar como selección</button>
+				<button class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--dismiss mp-icon-btn--muted" @click="dismissSuggestion"
+								title="Descartar" aria-label="Descartar sugerencia">×</button>
+			</div>
 			<!-- Tabla pivot. El overlay de espera va en este contenedor relativo
 			     (no scrolleable), no dentro del scroll, para que cubra el área visible
 			     completa y no se desplace con el scroll horizontal. -->
@@ -23,55 +34,11 @@
 					<thead>
 						<tr>
 							<th class="pivot-header-corner" :rowspan="showLevelRow ? 4 : 3">
-								<!-- Filtros aplicados: viven en la celda esquina (no en una
-								     franja aparte). El panel del selector se ancla al + y no
-								     queda atrapado en el encabezado. -->
-								<div class="pivot-filters" :class="{ 'is-empty': !filterSelection.length }">
-									<span class="filters-label">Filtros</span>
-									<div class="filter-chips">
-										<span v-for="chip in filterSelection" :key="'fchip-' + chip.Id" class="filter-chip">
-											{{ chip.Caption }}
-											<button class="filter-chip-map" @click="openMapForFilter"
-													title="Abrir mapa con este filtro" aria-label="Abrir mapa con este filtro">
-												<i class="fas fa-globe-americas" aria-hidden="true"></i>
-											</button>
-											<button class="filter-chip-x" @click="removeFilterChip(chip)" title="Quitar filtro">×</button>
-										</span>
-									</div>
-									<button class="toolbar-button toolbar-button-sm"
-													@click="addFilters($event)"
-													title="Agregar filtro">
-										<i class="fas fa-plus"></i>
-									</button>
-									<IndicatorSelector :is-open="activePanel === 'filters'"
-														 :anchor="panelAnchor"
-														 :categories="boundaryCategories"
-														 :selection="filterSelection"
-														 :suggestions="[]"
-														 :selectable-branches="true"
-														 :filter-mode="true"
-														 :emit-container="true"
-														 :multi-select.sync="filterMulti"
-														 title="Agregar filtros"
-														 root-label="Categorías"
-														 search-placeholder="Buscar delimitación..."
-														 item-noun="delimitación"
-														 item-noun-plural="delimitaciones"
-														 :noun-from-node-name="true"
-														 @select="onFilterSelect"
-														 @deselect="onFilterDeselect"
-														 @close="closePanel" />
-								</div>
 								<span class="region-sort hand" @click="sortByLabel" title="Ordenar alfabéticamente">
 									Regiones
 									<span v-if="labelSortState === 'asc'" class="sort-arrow">▲</span>
 									<span v-else-if="labelSortState === 'desc'" class="sort-arrow">▼</span>
 								</span>
-								<button class="toolbar-button toolbar-button-inline"
-												@click="addRows($event)"
-												title="Agregar filas">
-									<i class="fas fa-plus"></i>
-								</button>
 							</th>
 							<th v-for="(group, gi) in headerGroups"
 									:key="'mgroup-' + group.metric.InstanceId"
@@ -96,18 +63,10 @@
 									</span>
 								</div>
 								<metric-header :metric="group.metric"
+															 :removable="pivot.Metrics.length > minMetrics"
 															 @selection-changed="handleChange"
 															 @metric-removed="handleRemove"
 															 @panel-open="onPanelOpen" />
-							</th>
-							<th class="pivot-header-metric pivot-header-add"
-									:rowspan="showLevelRow ? 4 : 3">
-								<span class="add-label">Indicadores</span>
-								<button class="toolbar-button"
-												@click="addMetrics($event)"
-												title="Agregar indicadores">
-									<i class="fas fa-plus"></i>
-								</button>
 							</th>
 						</tr>
 
@@ -191,34 +150,72 @@
 								</th>
 							</template>
 						</tr>
+						<!-- Filas fijadas: las mismas filas de la grilla, repetidas al pie del
+						     encabezado (que es sticky), así quedan arriba aunque se scrollee. -->
+						<tr v-for="(row, pinnedIndex) in pinnedRows" :key="'pinned-' + pinnedIndex" class="pivot-row-pinned">
+							<td v-for="(cell, cellIndex) in row" :key="'pinned-' + pinnedIndex + '-' + cellIndex" :class="getCellClass(cell)">
+								<span v-if="cell.isItem" class="cell-label">
+									<button class="row-pin-btn is-pinned" @click.stop="togglePin(cell)"
+													:title="'Desfijar ' + cell.Label" :aria-label="'Desfijar ' + cell.Label">
+										<i class="fas fa-thumbtack" aria-hidden="true"></i>
+									</button>
+									<span class="cell-label-text">{{ cell.Label }}</span>
+									<button class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--dismiss mp-icon-btn--muted row-unpin-btn"
+													@click.stop="togglePin(cell)"
+													:title="'Desfijar ' + cell.Label" :aria-label="'Desfijar ' + cell.Label">×</button>
+								</span>
+								<span v-else class="cell-value">
+									{{ resolveValue(pivot.MetricTuples.headers[cellIndex - 1], cell) }}
+								</span>
+							</td>
+						</tr>
 					</thead>
 					<tbody>
-						<tr v-for="(row, rowIndex) in visibleRows"
+						<tr v-for="(row, rowIndex) in rows"
 								:key="'row-' + rowIndex"
 								:class="getRowClass(row)">
 							<td v-for="(cell, cellIndex) in row"
 									:key="'cell-' + rowIndex + '-' + cellIndex"
-									:class="getCellClass(cell)"
-									@click="cell.isGroupHeader ? toggleGroup(cell.GroupKey) : null">
-								<span v-if="cell.isHeader" class="cell-label">
-									<span class="cell-label-text">{{ cell.Label }}</span>
-									<span class="cell-label-actions">
-										<button v-if="rowRemoveTarget(cell)"
-														class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--dismiss mp-icon-btn--muted region-remove-btn"
-														@click.stop="removeRow(cell)"
-														:title="rowRemoveTitle(cell)">×</button>
+									:class="getCellClass(cell)">
+								<span v-if="cell && cell.isLevelHeader" class="cell-label" :style="labelIndent(cell)">
+									<button v-if="cell.collapsible" class="row-chevron" @click.stop="toggleLevelRow(cell)"
+													:aria-expanded="ariaExpanded(cell)"
+													:aria-label="chevronLabel(cell, cell.Caption)">{{ chevronGlyph(cell) }}</button>
+									<span v-else class="row-chevron-spacer"></span>
+									<a v-if="hasLevelCaptionAction(cell)" class="cell-label-link" @click.stop="onLevelCaption(cell)"
+										 :title="levelCaptionTitle(cell)">{{ cell.Caption }}</a>
+									<span v-else class="cell-label-text">{{ cell.Caption }}</span>
+									<span v-if="cell.CountText" class="cell-label-count">{{ cell.CountText }}</span>
+									<button class="row-menu-btn" @click.stop="openLevelMenu(cell, $event)"
+													title="Elegir qué elementos se ven" aria-label="Elegir qué elementos se ven">▾</button>
+									<span v-if="!embedded" class="cell-label-actions">
 										<button class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--muted row-open-map" @click.stop="openMapForRow(cell)"
 														title="Abrir mapa" aria-label="Abrir mapa">
 											<i class="fas fa-globe-americas" aria-hidden="true"></i>
 										</button>
-										<button v-if="cell.isRegionHeader && groupKeys.length"
-														class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--muted"
-														@click.stop="toggleAllGroups"
-														:title="allGroupsCollapsed ? 'Expandir todos' : 'Colapsar todos'">{{ allGroupsCollapsed ? '▸' : '▾' }}</button>
-										<button v-if="cell.isGroupHeader"
-														class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--muted"
-														@click.stop="toggleGroup(cell.GroupKey)"
-														:title="collapse.isCollapsed(cell.GroupKey) ? 'Expandir' : 'Colapsar'">{{ collapse.isCollapsed(cell.GroupKey) ? '▸' : '▾' }}</button>
+									</span>
+								</span>
+								<span v-else-if="cell && cell.isItem" class="cell-label" :style="labelIndent(cell)">
+									<button v-if="isItemToggleable(cell)" class="row-chevron" @click.stop="toggleItemRow(cell)"
+													:aria-expanded="ariaExpanded(cell)"
+													:aria-label="chevronLabel(cell, cell.Label)">{{ chevronGlyph(cell) }}</button>
+									<span v-else class="row-chevron-spacer"></span>
+									<a v-if="isItemToggleable(cell)" class="cell-label-link" @click.stop="toggleItemRow(cell)">{{ cell.Label }}</a>
+									<span v-else class="cell-label-text">{{ cell.Label }}</span>
+									<button class="row-pin-btn" :class="{ 'is-pinned': isPinned(cell) }" @click.stop="togglePin(cell)"
+													:title="pinTitle(cell)" :aria-label="pinTitle(cell)">
+										<i class="fas fa-thumbtack" aria-hidden="true"></i>
+									</button>
+									<button class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--dismiss mp-icon-btn--muted row-remove-btn"
+													@click.stop="removeItemRow(cell)"
+													:title="'Quitar ' + cell.Label" :aria-label="'Quitar ' + cell.Label">×</button>
+									<button class="row-more-btn" @click.stop="openLevelMenu(cell, $event)"
+													title="Elegir qué elementos se ven" aria-label="Elegir qué elementos se ven">⋯</button>
+									<span v-if="!embedded" class="cell-label-actions">
+										<button class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--muted row-open-map" @click.stop="openMapForRow(cell)"
+														title="Abrir mapa" aria-label="Abrir mapa">
+											<i class="fas fa-globe-americas" aria-hidden="true"></i>
+										</button>
 									</span>
 								</span>
 								<span v-else class="cell-value">
@@ -235,43 +232,6 @@
 		<div v-else class="pivot-empty">
 			<p></p>
 		</div>
-
-		<IndicatorSelector :is-open="activePanel === 'metrics'"
-									 :anchor="panelAnchor"
-											 :categories="indicatorCategories"
-											 :selection="metricSelection"
-											 :suggestions="[]"
-											 :expand-leaves="true"
-											 :filter-mode="true"
-											 title="Agregar indicadores"
-											 root-label="Categorías"
-											 search-placeholder="Buscar indicador..."
-											 item-noun="indicador"
-											 item-noun-plural="indicadores"
-											 @select="onMetricSelect"
-											 @deselect="onMetricDeselect"
-											 @close="closePanel" />
-
-		<IndicatorSelector :is-open="activePanel === 'rows'"
-									 :anchor="panelAnchor"
-											 :categories="boundaryCategories"
-											 :selection="rowSelection"
-											 :suggestions="[]"
-											 :selectable-branches="true"
-											 :emit-container="true"
-											 :show-add-all="true"
-											 :multi-select.sync="rowMulti"
-											 add-all-label="Agregar todos/as"
-											 title="Agregar filas"
-											 root-label="Categorías"
-											 search-placeholder="Buscar delimitación..."
-											 item-noun="delimitación"
-											 item-noun-plural="delimitaciones"
-											 :noun-from-node-name="true"
-											 @select="onRowSelect"
-											 @deselect="onRowDeselect"
-											 @select-group="onRowGroup"
-											 @close="closePanel" />
 
 		<!-- Panel flotante único de versión/categorías. Vive en la raíz del
 		     componente (fuera del thead y su contexto de apilamiento sticky), y se
@@ -295,6 +255,10 @@
 				<category-picker :metric="floatPanel.metric" :version-id="floatPanel.versionId" :tick="dataTick"
 					@change="onFloatCategoryChange" />
 			</template>
+			<template v-else-if="floatPanel.kind === 'level'">
+				<level-menu :level="floatPanel.level" :tick="dataTick"
+					@change="onLevelMenuChange" @change-root="onChangeRoot" />
+			</template>
 		</div>
 
 	</div>
@@ -303,14 +267,13 @@
 <script>
 	import MetricHeader from '@/table/components/MetricHeader';
 	import arr from '@/common/framework/arr';
-	import IndicatorSelector from '@/map/components/widgets/sideToolbar/indicatorSelector.vue';
-	import RegionSelection from '@/table/classes/RegionSelection';
+	import TableSideToolbar from '@/table/components/TableSideToolbar.vue';
+	import LevelMenu from '@/table/components/pivot/LevelMenu.vue';
 	import ActivePivot from '@/table/classes/ActivePivot.js';
 	import { displayCell } from '@/table/classes/pivotValue.js';
 	import CsvWriter from '@/table/writers/CsvWriter.js';
 	import XlsxWriter from '@/table/writers/XlsxWriter.js';
 	import ColumnDragController, { initialDragState } from '@/table/components/pivot/ColumnDragController.js';
-	import CollapseState from '@/table/components/pivot/CollapseState.js';
 	import CategoryPicker from '@/table/components/CategoryPicker.vue';
 	import MapUrlBuilder from '@/table/classes/MapUrlBuilder.js';
 
@@ -318,7 +281,8 @@
 		name: 'PivotTable',
 		components: {
 			MetricHeader,
-			IndicatorSelector,
+			TableSideToolbar,
+			LevelMenu,
 			CategoryPicker
 		},
 		props: {
@@ -334,9 +298,15 @@
 				type: Number,
 				default: 2
 			},
-			initialCollapse: {
-				type: String,
-				default: ''
+			// Dentro del visor (popup "Ver como tabla"): sin barra lateral ni "Abrir mapa".
+			embedded: {
+				type: Boolean,
+				default: false
+			},
+			// Cantidad de indicadores que no se pueden quitar (el popup deja al menos uno).
+			minMetrics: {
+				type: Number,
+				default: 0
 			}
 		},
 
@@ -345,35 +315,28 @@
 				loading: false,
 				exloading: false,
 				error: null,
-				activePanel: '',
 				// Panel flotante único de versión/categorías (un solo lugar de estado,
 				// fuera del thead). metric: el indicador en edición; kind: 'version' o
 				// 'category'; style: posición calculada respecto del triángulo.
-				floatPanel: { open: false, kind: null, metric: null, versionId: null, style: {} },
+				floatPanel: { open: false, kind: null, metric: null, versionId: null, level: null, style: {} },
 				// Modo del combo de años: por defecto single-select (elegir un año lo
 				// reemplaza y cierra el panel); el check lo vuelve multiselect.
 				versionMulti: false,
-				// Filas y filtros: multiselección desactivada por defecto.
-				rowMulti: false,
-				filterMulti: false,
 				// Indicador de "preparando datos" mientras trae o recalcula.
 				busy: false,
 				// Cantidad de dropdowns de header abiertos (libera el overflow del scroll).
 				openPanels: 0,
-				// Posición desde la que se invocó el panel (para anclarlo al +).
-				panelAnchor: null,
 				// Estado del reordenamiento de columnas por arrastre (lo opera el
 				// ColumnDragController; lo lee el template para las clases y :draggable).
 				dragState: initialDragState(),
-				// Colapso de cortes de control (grupos). La clave es el nombre del grupo.
-				collapse: new CollapseState(),
-				collapseVersion: 0,  // fuerza recomputar al mutar collapse (no es reactivo)
 				dataTick: 0,         // fuerza recomputar lo que depende de metricTuples
 				                     // (array de clase, que Vue no observa) tras refrescar
 				// Cuando el alto visible de la tabla es apenas mayor (o menor) que el del
 				// encabezado, mantenerlo fijo dejaría sin espacio para ver los datos: en
 				// ese caso el encabezado deja de ser sticky y scrollea con el contenido.
-				headerScrolls: false
+				headerScrolls: false,
+				// Filas fijadas arriba (estado de la vista): { level, fid } de cada una.
+				pinned: []
 			};
 		},
 
@@ -424,42 +387,32 @@
 		},
 
 		computed: {
-			// Claves de los cortes de control (grupos), en orden de aparición. Sirven
-			// para el colapso y para codificar el estado de forma posicional.
-			groupKeys() {
-				this.collapseVersion;
-				var keys = [];
-				if (!this.pivot || !this.pivot.Rows) return keys;
-				this.pivot.Rows.forEach(function (row) {
-					if (row.length && row[0].isGroupHeader) keys.push(row[0].GroupKey);
-				});
-				return keys;
+			rows() {
+				this.dataTick;
+				return this.pivot ? this.pivot.Rows : [];
 			},
-			// Filas a mostrar: oculta las filas hijas de los grupos colapsados. La fila
-			// de grupo siempre se ve; sus hijos (item-header bajo ese padre) se ocultan.
-			visibleRows() {
-				this.collapseVersion;
-				if (!this.pivot || !this.pivot.Rows) return [];
-				var loc = this;
-				var hiddenParent = null;
+			// Las filas fijadas que siguen presentes en la grilla, en el orden en que se fijaron.
+			pinnedRows() {
+				this.dataTick;
 				var out = [];
-				this.pivot.Rows.forEach(function (row) {
-					var head = row[0];
-					if (head && head.isGroupHeader) {
-						hiddenParent = loc.collapse.isCollapsed(head.GroupKey) ? head.GroupKey : null;
-						out.push(row);
-						return;
+				var rows = this.pivot ? this.pivot.Rows : [];
+				for (var p = 0; p < this.pinned.length; p++) {
+					for (var r = 0; r < rows.length; r++) {
+						var head = rows[r][0];
+						if (head.isItem && head.level === this.pinned[p].level && head.FID === this.pinned[p].fid) {
+							out.push(rows[r]);
+						}
 					}
-					if (head && head.isRegionHeader) { hiddenParent = null; out.push(row); return; }
-					// Fila de item: se oculta si pertenece al grupo colapsado en curso.
-					if (hiddenParent != null && head && head.Parent === hiddenParent) return;
-					out.push(row);
-				});
+				}
 				return out;
 			},
-			allGroupsCollapsed() {
-				this.collapseVersion;
-				return this.collapse.allCollapsed(this.groupKeys);
+			suggestion() {
+				this.dataTick;
+				return this.pivot ? this.pivot.RowTree.suggestion : null;
+			},
+			suggestionCaption() {
+				var chain = this.suggestion.chain;
+				return chain[chain.length - 1].item.Caption;
 			},
 			// Estado del orden alfabético por label ('asc' | 'desc' | null).
 			labelSortState() {
@@ -611,60 +564,8 @@
 				}
 				return byMetric;
 			},
-			// Árboles de catálogo (poblados por App.vue desde GetFabIndicators / GetFabBoundaries).
-			indicatorCategories() {
-				return window.Context.Metrics;
-			},
-			boundaryCategories() {
-				return window.Context.Boundaries;
-			},
-			// Selección de columnas: indicadores activos en la pivot.
-			metricSelection() {
-				if (!this.pivot) return [];
-				return this.pivot.Metrics.map(this.metricToChip);
-			},
-			// Selección de filas: una delimitación agregada "completa" produce un único
-			// chip que la representa; agregada por items produce un chip por item.
-			rowSelection() {
-				if (!this.pivot) return [];
-				return this.boundariesToChips(this.pivot.Regions.items);
-			},
-			// Selección de filtros: siempre por items (un chip por item filtrado).
-			filterSelection() {
-				if (!this.pivot) return [];
-				return this.boundariesToChips(this.pivot.FilterSet.items);
-			}
 		},
 		methods: {
-			// Colapsa o expande un corte de control (grupo) por su clave.
-			toggleGroup(key) {
-				this.collapse.toggle(key);
-				this.collapseVersion++;
-				this.emitCollapse();
-			},
-			// Alterna entre colapsar todos los grupos y expandir todos.
-			toggleAllGroups() {
-				this.collapse.setAll(this.groupKeys, !this.allGroupsCollapsed);
-				this.collapseVersion++;
-				this.emitCollapse();
-			},
-			// Notifica el estado compacto para que el contenedor lo persista en la URL.
-			emitCollapse() {
-				this.$emit('collapse-changed', {
-					encoded: this.collapse.encode(this.groupKeys),
-					keys: this.collapse.collapsedKeys()
-				});
-			},
-			// Aplica un estado de colapso recibido (p. ej. restaurado desde la URL).
-			applyCollapse(encoded) {
-				this.collapse.decode(encoded || '', this.groupKeys);
-				this.collapseVersion++;
-				// Tras restaurar, notifica los nombres para que distribución los excluya.
-				this.$emit('collapse-changed', {
-					encoded: this.collapse.encode(this.groupKeys),
-					keys: this.collapse.collapsedKeys()
-				});
-			},
 			// Un header abrió o cerró un dropdown. Mantiene la cuenta para liberar
 			// el overflow del scroll mientras al menos uno esté abierto.
 			onPanelOpen(open) {
@@ -687,103 +588,18 @@
 					});
 				}
 			},
-			// Guarda el borde derecho y el centro vertical del botón invocador.
-			setAnchorFrom(event) {
-				if (event && event.currentTarget && event.currentTarget.getBoundingClientRect) {
-					var r = event.currentTarget.getBoundingClientRect();
-					this.panelAnchor = { left: r.right, centerY: r.top + r.height / 2 };
-				} else {
-					this.panelAnchor = null;
-				}
-			},
-			addFilters(event) {
-				this.setAnchorFrom(event);
-				this.activePanel = 'filters';
-			},
-			addMetrics(event) {
-				this.setAnchorFrom(event);
-				this.activePanel = 'metrics';
-			},
-			addRows(event) {
-				this.setAnchorFrom(event);
-				this.activePanel = 'rows';
-			},
-			closePanel() {
-				this.activePanel = '';
-			},
 
-			// ── Mapeo a chip (Id/Caption/Description para el panel) ──────────────────
-			// Supuesto a verificar: el id de cada item de región (hoja del árbol)
-			// coincide con item.Id; el nombre visible está en item.Caption.
-			metricToChip(metric) {
-				return {
-					Id: metric.properties.Metric.Id,
-					Key: 'm:' + metric.InstanceId,
-					Caption: metric.properties.Metric.Name,
-					Description: metric.properties.Metric.Name,
-					Item: metric
-				};
-			},
-			// Convierte delimitaciones activas en chips. Cada chip lleva en Item un
-			// Type ('B' delimitación completa, 'I' item) que el panel devuelve al
-			// removerlo, para que el consumidor sepa qué quitar (componente genérico).
-			boundariesToChips(boundaries) {
-				var chips = [];
-				for (var i = 0; i < boundaries.length; i++) {
-					var boundary = boundaries[i];
-					var boundaryId = boundary.__boundaryId;
-					if (boundary.__whole) {
-						// Delimitación completa: un único chip que la representa.
-						chips.push({
-							Id: 'B:' + boundaryId,
-							Caption: boundary.__caption || '(delimitación)',
-							Description: boundary.__caption || '',
-							Item: { Type: 'B', BoundaryId: boundaryId }
-						});
-						continue;
-					}
-					var selection = boundary.SelectedVersion ? boundary.SelectedVersion().Selection : null;
-					var items = selection && selection.Items ? selection.Items : [];
-					for (var j = 0; j < items.length; j++) {
-						var it = items[j];
-						chips.push({
-							Id: it.FID,
-							Caption: it.Caption,
-							Description: it.Caption,
-							Item: { Type: 'I', BoundaryId: boundaryId, Id: it.FID }
-						});
-					}
-				}
-				return chips;
-			},
-			// Agrupa por boundary los items a quitar, distinguiendo si la quita es de
-			// una delimitación completa (Type 'B') o de items concretos.
-			collectRemovals(items, container) {
-				var byBoundary = {};
-				var wholeBoundaries = [];
-				items.forEach(function (it) {
-					if (it && it.Type === 'B') {
-						wholeBoundaries.push(it.BoundaryId);
-						return;
-					}
-					// Desde un chip: it.BoundaryId + it.Id. Desde el árbol: it.Id + container.
-					var boundaryId = (it && it.BoundaryId != null) ? it.BoundaryId : (container ? container.Id : null);
-					var itemId = (it && it.Id != null) ? it.Id : null;
-					if (boundaryId == null || itemId == null) return;
-					(byBoundary[boundaryId] = byBoundary[boundaryId] || []).push(itemId);
-				});
-				return { byBoundary: byBoundary, wholeBoundaries: wholeBoundaries };
-			},
 
 			// ── Columnas (indicadores) ───────────────────────────────────────────────
-			onMetricSelect(items) {
+			onAddMetrics(metricIds) {
 				var loc = this;
-				var ps = items.map(function (it) {
-					return loc.pivot.AddMetricById(it.Id);
-				});
-				Promise.all(ps).then(function () { loc.applyAndNotify(true); });
+				var tasks = [];
+				for (var i = 0; i < metricIds.length; i++) {
+					tasks.push(loc.pivot.AddMetricById(metricIds[i]));
+				}
+				Promise.all(tasks).then(function () { loc.applyAndNotify(true); });
 			},
-			onMetricDeselect(items) {
+			onRemoveMetrics(items) {
 				var loc = this;
 				items.forEach(function (it) {
 					// Desde un chip llega la instancia concreta: se quita esa.
@@ -805,54 +621,7 @@
 				this.$emit('data-refreshed', this.pivot, true);
 			},
 
-			// ── Filas (delimitaciones) ───────────────────────────────────────────────
-			// "Agregar todos/as": la delimitación entera (un solo chip).
-			onRowGroup(node) {
-				var loc = this;
-				loc.pivot.AddRegionById(node.Id, node.Name).then(function () { loc.applyAndNotify(true); });
-			},
-			// Selección por items (hojas individuales o check de corte de control).
-			// container es la delimitación a la que pertenecen las hojas.
-			onRowSelect(items, container) {
-				if (!container) return;
-				var loc = this;
-				var itemIds = items.map(function (it) { return it.Id; });
-				loc.pivot.AddRegionItemsById(container.Id, itemIds).then(function () { loc.applyAndNotify(true); });
-			},
-			onRowDeselect(items, container) {
-				var loc = this;
-				var removals = this.collectRemovals(items, container);
-				removals.wholeBoundaries.forEach(function (boundaryId) {
-					loc.pivot.RemoveBoundaryById(boundaryId);
-				});
-				Object.keys(removals.byBoundary).forEach(function (boundaryId) {
-					loc.pivot.RemoveRegionItemsById(boundaryId, removals.byBoundary[boundaryId]);
-				});
-				this.applyAndNotify(true);
-			},
 
-			// ── Filtros (delimitaciones) ─────────────────────────────────────────────
-			onFilterSelect(items, container) {
-				if (!container) return;
-				var loc = this;
-				var itemIds = items.map(function (it) { return it.Id; });
-				loc.pivot.AddFilterItemsById(container.Id, itemIds).then(function () { loc.applyAndNotify(true); });
-			},
-			onFilterDeselect(items, container) {
-				var loc = this;
-				var removals = this.collectRemovals(items, container);
-				removals.wholeBoundaries.forEach(function (boundaryId) {
-					loc.pivot.RemoveFilterById(boundaryId);
-				});
-				Object.keys(removals.byBoundary).forEach(function (boundaryId) {
-					loc.pivot.RemoveFilterItemsById(boundaryId, removals.byBoundary[boundaryId]);
-				});
-				this.applyAndNotify();
-			},
-			// Quita un filtro desde su chip en el área de filtros.
-			removeFilterChip(chip) {
-				this.onFilterDeselect([chip.Item], null);
-			},
 
 			// Muestra el indicador mientras corre fn (sync o async). Cede un frame
 			// para que el overlay se pinte antes de un cálculo bloqueante.
@@ -905,28 +674,22 @@
 				var headH = thead.offsetHeight;
 				this.headerScrolls = headH > 0 && visible < headH * 1.2;
 			},
-			// Abre el visor de mapa en otra pestaña para el encabezado de fila dado.
-			// Según qué se haya clickeado arma el destino: un tipo de delimitación se
-			// agrega como capa; un elemento o corte de control se recorta (sin filtros)
-			// o se hace zoom (con filtros). El builder resuelve el formato de la URL.
+			// Abre el visor de mapa en otra pestaña para la fila dada: un elemento se
+			// recorta en sí mismo; un nivel se agrega como capa, recortado en el
+			// elemento del que cuelga.
 			openMapForRow(cell) {
-				if (!cell) return;
 				var target;
-				if (cell.isRegionHeader && cell.boundaryId != null) {
-					target = { kind: 'boundaryType', boundaryId: cell.boundaryId };
-				} else if (cell.isGroupHeader) {
-					target = { kind: 'group', regionId: cell.GroupId };
+				if (cell.isLevelHeader) {
+					var parentItem = cell.level.parentItem;
+					var parentFid = null;
+					if (parentItem) {
+						parentFid = parentItem.FID;
+					}
+					target = { kind: 'level', boundaryId: cell.boundaryId, parentFid: parentFid };
 				} else {
 					target = { kind: 'item', regionId: cell.FID };
 				}
 				var url = new MapUrlBuilder(this.pivot).build(target);
-				window.open(url, '_blank');
-			},
-			openMapForFilter() {
-				// El mundo del chip de filtro abre el mapa usando los filtros vigentes
-				// como recorte (a diferencia del mundo de una fila, que recorta en su
-				// propio elemento e ignora los filtros).
-				var url = new MapUrlBuilder(this.pivot).build({ kind: 'filter' });
 				window.open(url, '_blank');
 			},
 			handleChange(data) {
@@ -970,12 +733,12 @@
 				this._positionFloatPanel(ev.currentTarget);
 			},
 			closeFloatPanel() {
-				this.floatPanel = { open: false, kind: null, metric: null, versionId: null, style: {} };
+				this.floatPanel = { open: false, kind: null, metric: null, versionId: null, level: null, style: {} };
 			},
 			// Posiciona el panel (position:fixed) debajo del triángulo, ajustando si se
 			// sale del viewport. Se recalcula en el nextTick (cuando el panel ya tiene
 			// tamaño) para poder corregir hacia arriba/izquierda.
-			_positionFloatPanel(triggerEl) {
+			_positionFloatPanel(triggerEl, scrollable) {
 				if (!triggerEl || !triggerEl.getBoundingClientRect) return;
 				var r = triggerEl.getBoundingClientRect();
 				var loc = this;
@@ -988,8 +751,12 @@
 					var left = r.left, top = r.bottom + 4;
 					if (left + pr.width > vw - 8) left = Math.max(8, vw - pr.width - 8);
 					if (top + pr.height > vh - 8) top = Math.max(8, r.top - pr.height - 4);
-					loc.floatPanel.style = { position: 'fixed', top: top + 'px', left: left + 'px', zIndex: 3000,
-						maxHeight: (vh - top - 12) + 'px', overflowY: 'auto' };
+					var style = { position: 'fixed', top: top + 'px', left: left + 'px', zIndex: 3000 };
+					if (scrollable !== false) {
+						style.maxHeight = (vh - top - 12) + 'px';
+						style.overflowY = 'auto';
+					}
+					loc.floatPanel.style = style;
 				});
 			},
 			// Alterna el modo de selección de versiones. Al pasar de múltiple a simple
@@ -1134,50 +901,137 @@
 					loc.$emit('data-refreshed', loc.pivot, true);
 				});
 			},
-			// La 'x' del encabezado de fila quita, según el tipo de celda: toda la
-			// delimitación (boundary), un grupo completo con sus hijos, o un elemento
-			// suelto. Un único punto de entrada para el template.
-			rowRemoveTarget(cell) {
-				if (cell.isRegionHeader) return cell.boundaryId != null ? 'boundary' : null;
-				if (cell.isGroupHeader) return (cell.boundaryId != null && cell.ChildItemIds && cell.ChildItemIds.length) ? 'group' : null;
-				return (cell.boundaryId != null && cell.FID != null) ? 'item' : null;
-			},
-			rowRemoveTitle(cell) {
-				var t = this.rowRemoveTarget(cell);
-				if (t === 'boundary') return 'Quitar de las filas';
-				if (t === 'group') return 'Quitar este grupo de las filas';
-				return 'Quitar de las filas';
-			},
-			removeRow(cell) {
-				var target = this.rowRemoveTarget(cell);
-				if (target === 'boundary') {
-					this.pivot.RemoveBoundaryById(cell.boundaryId);
-					this.applyAndNotify();
-				} else if (target === 'group') {
-					// El grupo y todos sus hijos: mismo circuito que un chip (convierte un
-					// boundary agregado entero en "todos menos los quitados" si hiciera falta).
-					var items = cell.ChildItemIds.map(function (id) { return { Id: id, BoundaryId: cell.boundaryId }; });
-					this.onRowDeselect(items, null);
-				} else if (target === 'item') {
-					this.onRowDeselect([{ Id: cell.FID, BoundaryId: cell.boundaryId }], null);
-				}
-			},
 			resolveValue(tuple, cell) {
 				if (!tuple || !tuple.metric || cell === null || cell === undefined) return '';
 				return displayCell(tuple.metric, tuple.variable, cell);
 			},
 			getRowClass(row) {
-				if (row.length > 0 && row[0].isRegionHeader) {
-					return 'pivot-row-region-header';
+				var head = row[0];
+				if (head.isLevelHeader) {
+					return 'pivot-row-level-header';
 				}
-				if (row.length > 0 && row[0].isGroupHeader) {
-					return 'pivot-row-group-header';
+				if (head.open) {
+					return 'pivot-row-item-header pivot-row-item-open';
 				}
-				// Indentado doble solo cuando hay cortes de control (jerarquía de
-				// árbol); sin ellos, indentado simple.
-				return this.groupKeys.length
-					? 'pivot-row-item-header pivot-row-item-nested'
-					: 'pivot-row-item-header';
+				return 'pivot-row-item-header';
+			},
+			labelIndent(cell) {
+				return { paddingLeft: (cell.depth * 14) + 'px' };
+			},
+			chevronGlyph(cell) {
+				if (cell.open) return '▾';
+				return '▸';
+			},
+			ariaExpanded(cell) {
+				if (cell.open) return 'true';
+				return 'false';
+			},
+			chevronLabel(cell, caption) {
+				if (cell.open) return 'Replegar ' + caption;
+				return 'Desplegar ' + caption;
+			},
+			isItemToggleable(cell) {
+				return cell.expandable && !cell.forced;
+			},
+			// Un encabezado colapsable se despliega con su nombre; uno que no lo es (la
+			// raíz o un tipo de hijo único) vuelve a mostrar todos si estaba restringido.
+			hasLevelCaptionAction(cell) {
+				return cell.collapsible || cell.restricted;
+			},
+			levelCaptionTitle(cell) {
+				if (cell.collapsible) return 'Desplegar o replegar';
+				return 'Volver a ver todos los elementos';
+			},
+			onLevelCaption(cell) {
+				if (cell.collapsible) {
+					this.toggleLevelRow(cell);
+				} else {
+					cell.level.ShowAll();
+					this.applyAndNotify(true);
+				}
+			},
+			toggleLevelRow(cell) {
+				cell.level.ToggleOpen();
+				this.applyAndNotify(true);
+			},
+			toggleItemRow(cell) {
+				cell.level.ToggleItem(cell.item);
+				this.applyAndNotify(true);
+			},
+			removeItemRow(cell) {
+				cell.level.RemoveItem(cell.item);
+				this.applyAndNotify(true);
+			},
+			openLevelMenu(cell, ev) {
+				if (this.floatPanel.open && this.floatPanel.kind === 'level' && this.floatPanel.level === cell.level) {
+					this.closeFloatPanel();
+					return;
+				}
+				this.floatPanel = { open: true, kind: 'level', metric: null, versionId: null, level: cell.level, style: {} };
+				this._positionFloatPanel(ev.currentTarget, false);
+			},
+			// Las casillas del menú ya cambiaron el nivel: se rehace la tabla sin el
+			// overlay de espera, que cerraría el menú (debe quedar abierto para seguir
+			// marcando).
+			onLevelMenuChange() {
+				var loc = this;
+				this.pivot.Render().then(function () {
+					loc.dataTick++;
+					loc.$emit('data-refreshed', loc.pivot, true);
+				});
+			},
+			pinIndex(cell) {
+				for (var i = 0; i < this.pinned.length; i++) {
+					if (this.pinned[i].level === cell.level && this.pinned[i].fid === cell.FID) return i;
+				}
+				return -1;
+			},
+			isPinned(cell) {
+				return this.pinIndex(cell) !== -1;
+			},
+			pinTitle(cell) {
+				if (this.isPinned(cell)) return 'Desfijar ' + cell.Label;
+				return 'Fijar ' + cell.Label + ' arriba';
+			},
+			togglePin(cell) {
+				var index = this.pinIndex(cell);
+				if (index === -1) {
+					this.pinned.push({ level: cell.level, fid: cell.FID });
+				} else {
+					this.pinned.splice(index, 1);
+				}
+			},
+			onChangeRoot(boundaryId) {
+				this.pivot.RowTree.SetRoot(boundaryId);
+				this.closeFloatPanel();
+				this.applyAndNotify(true);
+			},
+			// Regiones elegidas en Filtrar: sin selección múltiple, la primera reemplaza
+			// la selección de filas; el resto (y todas, con selección múltiple) se suman.
+			onSelectPlaces(chains, additive) {
+				for (var i = 0; i < chains.length; i++) {
+					if (additive || i > 0) {
+						this.pivot.RowTree.AddSelection(chains[i]);
+					} else {
+						this.pivot.RowTree.ReplaceSelection(chains[i]);
+					}
+				}
+				this.applyAndNotify(true);
+			},
+			onRemovePlaces(fids) {
+				for (var i = 0; i < fids.length; i++) {
+					this.pivot.RowTree.RemoveSelectedItem(fids[i]);
+				}
+				this.applyAndNotify(true);
+			},
+			acceptSuggestion() {
+				this.pivot.RowTree.AcceptSuggestion();
+				this.applyAndNotify(true);
+			},
+			dismissSuggestion() {
+				this.pivot.RowTree.DismissSuggestion();
+				this.dataTick++;
+				this.$emit('data-refreshed', this.pivot);
 			},
 
 			getCellClass(cell) {
@@ -1209,13 +1063,6 @@
 					}
 				},
 				deep: false
-			},
-			// Aplica el colapso restaurado de la URL una sola vez, cuando ya hay
-			// grupos sobre los que mapearlo (tras el primer render con datos).
-			groupKeys(keys) {
-				if (this._collapseApplied || !keys.length) return;
-				this._collapseApplied = true;
-				if (this.initialCollapse) this.applyCollapse(this.initialCollapse);
 			}
 		}
 	};
@@ -1271,69 +1118,31 @@
 		color: #757575;
 	}
 
-	.pivot-filters {
-		display: inline-flex;
-		align-items: center;
-		gap: 8px;
-		padding: 4px 6px;
-		background-color: #fff;
-		border-radius: 4px;
-		border-left: 4px solid #2196f3;
-	}
-
-		.filters-label {
-			font-size: 13px;
-			font-weight: 600;
-			color: #607d8b;
-			white-space: nowrap;
-		}
-
-	.filter-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-	.filter-chip {
-		display: inline-flex;
-		align-items: center;
-		gap: 6px;
-		background: #e9f2fd;
-		color: #1565c0;
-		border-radius: 14px;
-		padding: 3px 6px 3px 12px;
-		font-size: 12px;
-	}
-	.filter-chip-x {
-		border: none;
-		background: rgba(0,0,0,0.08);
-		color: #1565c0;
-		border-radius: 50%;
-		width: 18px;
-		height: 18px;
-		line-height: 1;
-		cursor: pointer;
-		font-size: 13px;
-	}
-	.filter-chip-map {
-		border: none;
-		background: transparent;
-		color: #607d8b;
-		cursor: pointer;
-		padding: 0 2px;
-		font-size: 11px;
-		display: inline-flex;
-		align-items: center;
-	}
-		.filter-chip-map:hover { color: #1565c0; }
-		.filter-chip-x:hover { background: rgba(0,0,0,0.18); }
-
 	.pivot-table-wrapper {
+		position: relative;
 		display: flex;
 		flex-direction: column;
 		height: 100%;
 		min-height: 0;
-		padding: 12px;
+		padding: 12px 12px 12px 58px;
 		box-sizing: border-box;
 	}
+	.pivot-table-wrapper.is-embedded {
+		padding: 0;
+	}
 
-	.pivot-filters {
+	.pivot-suggestion {
 		flex: 0 0 auto;
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		margin-bottom: 8px;
+		padding: 6px 10px;
+		background: #fff;
+		border: 1px dashed #90a4ae;
+		border-radius: 6px;
+		font-size: 13px;
+		color: #455a64;
 	}
 
 	.pivot-scroll-area {
@@ -1388,8 +1197,6 @@
 			text-decoration: underline;
 		}
 
-	.pivot-header-add { text-align: center; white-space: nowrap; width: 90px; }
-	.add-label { display: block; font-size: 11px; opacity: 0.9; margin-bottom: 4px; }
 
 	.pivot-table {
 		width: auto;
@@ -1434,15 +1241,6 @@
 		z-index: 12;
 	}
 
-	.toolbar-button-inline {
-		width: 26px;
-		height: 26px;
-		font-size: 13px;
-		margin-left: 10px;
-		vertical-align: middle;
-		display: inline-flex;
-	}
-
 	.pivot-header-metric {
 		text-align: right;
 		position: relative;
@@ -1452,7 +1250,7 @@
 	.metric-drag-handle {
 		visibility: hidden;
 		position: absolute;
-		top: 13px;
+		top: 0;
 		left: 0;
 		width: 100%;
 		height: 16px;
@@ -1472,7 +1270,7 @@
 		visibility: visible;
 	}
 	.metric-drag-handle:hover {
-		color: #1976d2;
+		color: #fff;
 	}
 	.pivot-header-metric.dragging {
 		opacity: 0.5;
@@ -1674,18 +1472,15 @@
 			background-color: #f5f5f5;
 		}
 
-	.pivot-row-region-header {
+	.pivot-row-level-header {
 		background-color: #e9f2fd;
 		font-weight: 600;
 	}
-		.pivot-row-region-header .pivot-cell-header {
+		.pivot-row-level-header .pivot-cell-header {
 			background-color: #e9f2fd;
 		}
-
-		.pivot-row-region-header:hover {
-			background-color: #bbdefb !important;
-		}
-		.pivot-row-region-header:hover .pivot-cell-header {
+		.pivot-row-level-header:hover,
+		.pivot-row-level-header:hover .pivot-cell-header {
 			background-color: #bbdefb;
 		}
 
@@ -1695,30 +1490,96 @@
 		.pivot-row-item-header .pivot-cell-header {
 			background-color: #fafafa;
 		}
-		/* Indentado simple por defecto; doble cuando hay cortes de control. */
-		.pivot-row-item-header .cell-label {
-			padding-left: 6px;
-		}
-		.pivot-row-item-nested .cell-label {
-			padding-left: 13px;
+	.pivot-row-item-open {
+		font-weight: 600;
+	}
+
+	.row-chevron,
+	.row-chevron-spacer {
+		flex: 0 0 auto;
+		width: 16px;
+		margin-right: 2px;
+	}
+	.row-chevron {
+		border: 0;
+		background: none;
+		padding: 0;
+		color: #78909c;
+		font-size: 11px;
+		cursor: pointer;
+	}
+		.row-chevron:hover {
+			color: #263238;
 		}
 
-	.pivot-row-group-header {
-		background-color: #f0f4f8;
-		font-weight: 600;
-		color: #37474f;
+	.cell-label-link {
+		flex: 0 1 auto;
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		color: #1565c0;
+		cursor: pointer;
 	}
-		.pivot-row-group-header .pivot-cell-header {
-			background-color: #f0f4f8;
+		.cell-label-link:hover {
+			text-decoration: underline;
 		}
-		/* El corte de control se indenta levemente; su fondo ya lo distingue, sin
-		   necesidad de un borde izquierdo (que rompía la jerarquía del árbol). */
-		.pivot-row-group-header .cell-label {
-			padding-left: 6px;
+	.cell-label-count {
+		flex: 0 0 auto;
+		margin-left: 4px;
+		font-weight: 400;
+		color: #78909c;
+	}
+
+	.row-pin-btn {
+		flex: 0 0 auto;
+		border: 0;
+		background: none;
+		margin-left: 4px;
+		padding: 0 3px;
+		border-radius: 3px;
+		color: #90a4ae;
+		font-size: 10px;
+		cursor: pointer;
+		transform: rotate(45deg);
+	}
+		.row-pin-btn:hover {
+			color: #1565c0;
 		}
-		/* El agrupador entero es clickeable para expandir/colapsar. */
-		.pivot-row-group-header { cursor: pointer; }
-		.pivot-row-group-header:hover { background-color: #e8eef4; }
+		.row-pin-btn.is-pinned {
+			color: #1565c0;
+			transform: none;
+		}
+	.pivot-table thead tr.pivot-row-pinned td {
+		background-color: #fffde7;
+		color: #37474f;
+		font-weight: 600;
+		border-bottom: 1px solid #e0e0e0;
+	}
+		.pivot-table thead tr.pivot-row-pinned td.pivot-cell-header {
+			background-color: #fffde7;
+		}
+	.row-unpin-btn {
+		margin-left: auto;
+	}
+
+	.row-menu-btn,
+	.row-more-btn {
+		flex: 0 0 auto;
+		border: 0;
+		background: none;
+		margin-left: 2px;
+		padding: 0 4px;
+		border-radius: 3px;
+		color: #78909c;
+		font-size: 11px;
+		cursor: pointer;
+	}
+		.row-menu-btn:hover,
+		.row-more-btn:hover {
+			background: rgba(0, 0, 0, 0.08);
+			color: #263238;
+		}
 
 	.pivot-cell-header { position: relative; }
 	.pivot-table td {
@@ -1768,7 +1629,7 @@
 		overflow: hidden;
 	}
 	.cell-label-text {
-		flex: 1 1 auto;
+		flex: 0 1 auto;
 		min-width: 0;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -1782,12 +1643,17 @@
 		margin-left: auto;
 	}
 
-	/* "Quitar fila" y "Abrir mapa" quedan ocultos hasta pasar por la fila, solo en
-	   dispositivos con hover real. En touch, donde no hay manera de "pasar el mouse",
-	   quedan siempre visibles. */
+	/* "Quitar" y "Abrir mapa" quedan ocultos hasta pasar por la fila, solo en
+	   dispositivos con hover real. En touch no se puede "pasar el mouse": la "×" se
+	   reemplaza por "⋯", que abre el menú del nivel para elegir qué se ve. */
+	.row-more-btn { display: none; }
 	@media (hover: hover) and (pointer: fine) {
-		.region-remove-btn, .row-open-map { opacity: 0; }
-		tr:hover .region-remove-btn, tr:hover .row-open-map { opacity: 1; }
+		.row-remove-btn, .row-open-map, .row-pin-btn:not(.is-pinned) { opacity: 0; }
+		tr:hover .row-remove-btn, tr:hover .row-open-map, tr:hover .row-pin-btn { opacity: 1; }
+	}
+	@media (hover: none) {
+		.row-remove-btn { display: none; }
+		.row-more-btn { display: inline-block; }
 	}
 
 	.cell-value {
@@ -1818,72 +1684,4 @@
 		}
 	}
 
-
-	.toolbar-button {
-		width: 40px;
-		height: 40px;
-		border-radius: 50%;
-		border: none;
-		background: white;
-		color: #666;
-		font-size: 18px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		cursor: pointer;
-		transition: all 0.2s ease;
-		outline: none;
-	}
-
-		.toolbar-button.toolbar-button-sm {
-			width: 26px;
-			height: 26px;
-			font-size: 13px;
-			border: 1px solid #d0d7de;
-			color: #607d8b;
-			flex: 0 0 auto;
-		}
-
-		.toolbar-button:hover {
-			background: #f0f0f0;
-			color: #333;
-			transform: scale(1.05);
-		}
-
-		.toolbar-button.active {
-			background: #0fa7d8;
-			color: white;
-		}
-
-		.toolbar-button:active {
-			transform: scale(0.95);
-		}
-
-		/* Primer botón con color azul por defecto */
-		.toolbar-button:first-child {
-			background: #0fa7d8;
-			color: white;
-		}
-
-			.toolbar-button:first-child:hover {
-				background: #0fa7d8;
-			}
-
-			.toolbar-button:first-child.active {
-				background: #0fa7d8;
-			}
-
-	@media (max-width: 768px) {
-		.map-toolbar {
-			left: 10px;
-			padding: 8px;
-			gap: 8px;
-		}
-
-		.toolbar-button {
-			width: 40px;
-			height: 40px;
-			font-size: 16px;
-		}
-	}
 </style>

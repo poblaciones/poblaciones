@@ -184,6 +184,7 @@ class ConfigurationService extends BaseService
 
 		$this->FilterUserSettings($ret['User']['Settings']);
 		Callbacks::$MapsOpened++;
+		Session::RegisterUniqueUser();
 
 		return $ret;
 	}

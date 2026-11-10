@@ -11,6 +11,7 @@ class Callbacks extends FrameworkCallbacks
 {
 	public static $AddressQueried = 0;
 	public static $MapsOpened = 0;
+	public static $UniqueUsers = 0;
 
 	public function RenderTemplate(string $template, $vals = []) : void
 	{
@@ -28,29 +29,28 @@ class Callbacks extends FrameworkCallbacks
 	{
 		return App::Db();
 	}
+	// Las posiciones se conservan para no alterar el histórico: 'Sesiones sin cookie'
+	// (posición 2) ya no se registra y 'Usuarios únicos' se agrega al final.
 	public function ExtraHitsLabels() : array
 	{
 		if (App::Settings()->Keys()->GetGoogleMapsCount() == 1)
-			return ['MapsOpened', 'AddressQuery', 'Usuarios únicos', '', '', 'Errores'];
+			return ['MapsOpened', 'AddressQuery', 'Sesiones sin cookie (histórico)', '', '', 'Errores', 'Usuarios únicos'];
 		else
-			return ['MapsOpened', 'AddressQuery', 'Usuarios únicos', 'Secondary', 'Terciary', 'Errores'];
+			return ['MapsOpened', 'AddressQuery', 'Sesiones sin cookie (histórico)', 'Secondary', 'Terciary', 'Errores', 'Usuarios únicos'];
 	}
 	public function ExtraHits() : array
 	{
 		$errorCount = Performance::GetCurrentErrorCount();
+		$secondary = 0;
+		$tertiary = 0;
 
-		if (App::Settings()->Keys()->GetGoogleMapsCount() == 1)
-			return [ self::$MapsOpened, self::$AddressQueried, Session::$NewSession, 0, 0, $errorCount ];
-		// Tiene varias
-		$useSecondary = (App::Settings()->Keys()->GetGoogleMapsIndex() == 1);
-		$useTertiary = (App::Settings()->Keys()->GetGoogleMapsIndex() == 2);
-
-		if ($useSecondary)
-			return [ self::$MapsOpened, self::$AddressQueried, Session::$NewSession, self::$MapsOpened, 0, $errorCount ];
-		else if ($useTertiary)
-			return [ self::$MapsOpened, self::$AddressQueried, Session::$NewSession, 0, self::$MapsOpened, $errorCount ];
-		else
-			return [ self::$MapsOpened, self::$AddressQueried, Session::$NewSession, 0, 0, $errorCount ];
-
+		if (App::Settings()->Keys()->GetGoogleMapsCount() > 1)
+		{
+			if (App::Settings()->Keys()->GetGoogleMapsIndex() == 1)
+				$secondary = self::$MapsOpened;
+			else if (App::Settings()->Keys()->GetGoogleMapsIndex() == 2)
+				$tertiary = self::$MapsOpened;
+		}
+		return [ self::$MapsOpened, self::$AddressQueried, 0, $secondary, $tertiary, $errorCount, self::$UniqueUsers ];
 	}
 }

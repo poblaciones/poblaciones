@@ -15,10 +15,15 @@ import App from './App';
 
 import CommonBootstrap from '@/common/classes/CommonBootstrap';
 import AriaPlugin from '@/common/framework/ariaPlugin';
+import VueMobileDetection from 'vue-mobile-detection';
+import Vue2TouchEvents from 'vue2-touch-events';
 
 CommonBootstrap.Init(Vue, { router: false, extended: false });
 Vue.use(Vuelidate);
 Vue.use(AriaPlugin);
+// El selector del visor que reutiliza la barra lateral usa $isMobile y v-touch.
+Vue.use(VueMobileDetection);
+Vue.use(Vue2TouchEvents);
 
 window.Db = new Db();
 

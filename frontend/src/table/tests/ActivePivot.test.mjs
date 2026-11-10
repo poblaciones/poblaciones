@@ -11,6 +11,7 @@
 
 import { describe, it, expect, report } from './_harness.mjs';
 import ActivePivot from '@/table/classes/ActivePivot.js';
+import { makeTreePivot, withCountColumn, rowLabels } from './fixtures-hierarchy.mjs';
 
 // Métrica simulada: id + tuples declaradas.
 function fakeMetric(metricId, tuples) {
@@ -116,7 +117,7 @@ describe('caché de datos (manager Data)', function () {
 	});
 	it('load resuelve y cachea los datos de cada (versión, nivel) único', async function () {
 		var p = new ActivePivot();
-		var store = { GetMetricData: function (m, v, l) { return Promise.resolve([{ tag: v + ':' + l.Id }]); } };
+		var store = { GetMetricData: function (m, v, l) { return Promise.resolve({ Items: [{ tag: v + ':' + l.Id }] }); } };
 		var lvl5 = { Id: 5 };
 		p.MetricTuples.metricTuples = [
 			{ isEmpty: false, level: lvl5, versionId: 2010, levelId: 5, metric: { Store: store }, version: 2010 },
@@ -131,14 +132,14 @@ describe('caché de datos (manager Data)', function () {
 });
 
 describe('Clear', function () {
-	it('vacía tuples, filas, filtros, regiones y métricas', function () {
-		var p = new ActivePivot();
-		p.MetricTuples.headers = [1]; p.Rows = [1]; p.FilterSet.items = [1]; p.Regions.items = [1]; p.Metrics = [1];
+	it('vacía tuples, filas, árbol de filas y métricas', function () {
+		var p = makeTreePivot(1);
+		p.RowTree.EnsureRoot();
+		p.MetricTuples.headers = [1]; p.Rows = [1]; p.Metrics = [1];
 		p.Clear();
 		expect(p.MetricTuples.headers).toHaveLength(0);
 		expect(p.Rows).toHaveLength(0);
-		expect(p.FilterSet.items).toHaveLength(0);
-		expect(p.Regions.items).toHaveLength(0);
+		expect(p.RowTree.root).toBeNull();
 		expect(p.Metrics).toHaveLength(0);
 	});
 });
@@ -194,89 +195,75 @@ describe('manager Columns (API por objeto)', function () {
 	});
 });
 
-describe('GroupRowsByParent — subtotal con brecha (gap)', function () {
-	it('el subtotal del corte de control suma el gap de los hijos y calcula el delta', function () {
-		var p = new ActivePivot();
-		var variable = { IsGap: true, NormalizationScale: 1 };
-		// Una columna en modo incidencia con variable de brecha.
-		p.MetricTuples.metricTuples = [{
-			metricId: 1, key: 'k1', versionId: 10, levelId: 5, isEmpty: false,
-			metric: { properties: { SummaryMetric: 'I' } }, variable: variable
-		}];
-		// Dos filas hijas del mismo padre, con datos de brecha.
-		var rows = [
-			[{ Label: 'A', FID: 1, Parent: 'P' }, { Value: 7090, Total: 17379, ValueGap: 6193, TotalGap: 18536 }],
-			[{ Label: 'B', FID: 2, Parent: 'P' }, { Value: 3200, Total: 9000, ValueGap: 2800, TotalGap: 9500 }]
-		];
-		var grouped = p.GroupRowsByParent(rows);
-		// La primera fila del resultado es el subtotal del grupo (isGroupHeader).
-		var subtotal = grouped[0];
-		expect(subtotal[0].isGroupHeader).toBe(true);
-		var subCell = subtotal[1];
-		// Sumó los dos universos de los hijos.
-		expect(subCell.ValueGap).toBe(8993);
-		expect(subCell.TotalGap).toBe(28036);
-		// Y calculó el delta (no quedó en null/'-').
-		expect(subCell.ComputedValue).toBeCloseTo(-17.7698, 3);
-	});
-});
-
-describe('GroupRowsByParent — conteo de hijos listados en el label', function () {
-	it('el label del subtotal lleva entre paréntesis la cantidad de hijos que llegan (ya filtrados por datos)', function () {
-		var p = new ActivePivot();
-		p.MetricTuples.metricTuples = [{
-			metricId: 1, key: 'k1', versionId: 10, levelId: 5, isEmpty: false,
-			metric: { properties: { SummaryMetric: 'N' } }, variable: {}
-		}];
-		// Tres hijos del mismo padre. RefreshData ya habría descartado, antes de
-		// llegar acá, los hijos sin datos en ningún indicador: GroupRowsByParent
-		// solo ve los que sobrevivieron, y por eso cuenta 3, no el universo del padre.
-		var rows = [
-			[{ Label: 'A', FID: 1, Parent: 'Catamarca' }, { Value: 10, Total: 20 }],
-			[{ Label: 'B', FID: 2, Parent: 'Catamarca' }, { Value: 5,  Total: 15 }],
-			[{ Label: 'C', FID: 3, Parent: 'Catamarca' }, { Value: 8,  Total: 12 }]
-		];
-		var grouped = p.GroupRowsByParent(rows);
-		expect(grouped[0][0].Label).toBe('Catamarca (3)');
+describe('RefreshData — filas por niveles', function () {
+	it('arma el encabezado de la raíz y sus elementos', async function () {
+		var p = makeTreePivot(1);
+		p.RowTree.EnsureRoot();
+		withCountColumn(p, { 10: { Value: 30, Total: 60 }, 11: { Value: 20, Total: 40 } });
+		await p.RefreshData();
+		expect(rowLabels(p)).toEqual(['Provincias (2)', 'Catamarca', 'Tucumán']);
+		expect(p.Rows[0][0].isLevelHeader).toBe(true);
+		expect(p.Rows[0][1].Value).toBe(50);
+		expect(p.Rows[1][0].depth).toBe(1);
+		expect(p.Rows[1][0].inAnalysis).toBe(true);
 	});
 
-	it('el subtotal hereda el boundaryId de sus hojas y junta sus FID en ChildItemIds (para la \'x\' de quitar el grupo)', function () {
-		var p = new ActivePivot();
-		p.MetricTuples.metricTuples = [{
-			metricId: 1, key: 'k1', versionId: 10, levelId: 5, isEmpty: false,
-			metric: { properties: { SummaryMetric: 'N' } }, variable: {}
-		}];
-		var rows = [
-			[{ Label: 'A', FID: 11, Parent: 'Catamarca', boundaryId: 900 }, { Value: 10, Total: 20 }],
-			[{ Label: 'B', FID: 22, Parent: 'Catamarca', boundaryId: 900 }, { Value: 5,  Total: 15 }]
-		];
-		var grouped = p.GroupRowsByParent(rows);
-		var subtotal = grouped[0][0];
-		expect(subtotal.boundaryId).toBe(900);
-		expect(subtotal.ChildItemIds).toEqual([11, 22]);
+	it('debajo de un elemento desplegado van sus tipos de hijo; uno colapsado muestra solo su encabezado, sin valores', async function () {
+		var p = makeTreePivot(1);
+		p.RowTree.EnsureRoot();
+		var catamarca = p.RowTree.root.FindItem(10);
+		p.RowTree.root.RestrictTo(catamarca);
+		p.RowTree.root.Types(catamarca)[0].ToggleOpen();   // Municipios abierto
+		withCountColumn(p, { 10: { Value: 30, Total: 60 }, 20: { Value: 12, Total: 20 }, 21: { Value: 8, Total: 15 }, 30: { Value: 29, Total: 58 } });
+		await p.RefreshData();
+		// Los tipos colapsados se listan con su cantidad de elementos, aunque no
+		// tengan datos: sus valores se calculan recién al abrirlos.
+		expect(rowLabels(p)).toEqual(['Provincias (1 de 2)', 'Catamarca', 'Municipios (2)', 'Belén', 'Andalgalá',
+			'Departamentos (1)', 'Aglomerados (1)']);
+		expect(p.Rows[5][1]).toBeNull();
+		// El total de Municipios es la suma de los municipios, que puede no
+		// coincidir con la provincia (cobertura parcial).
+		expect(p.Rows[2][1].Value).toBe(20);
+		expect(p.Rows[1][0].forced).toBe(true);
+		// El nivel de análisis es el único tipo abierto.
+		expect(p.Rows[3][0].inAnalysis).toBe(true);
+		expect(p.Rows[1][0].inAnalysis).toBe(false);
 	});
 
-	it('GroupKey es el nombre crudo (coincide con el Parent de las hojas), distinto del Label con el conteo', function () {
-		// Regresión real: la UI usaba Label para identificar el grupo (colapsar/
-		// expandir y decidir qué filas ocultar), comparándolo contra el Parent de
-		// las hojas. Al agregar el conteo "(N)" al Label, dejó de coincidir con
-		// Parent y las filas ya no se ocultaban (el ícono cambiaba, pero nada pasaba).
-		// GroupKey existe para eso: la clave de identidad, sin el conteo.
-		var p = new ActivePivot();
-		p.MetricTuples.metricTuples = [{
-			metricId: 1, key: 'k1', versionId: 10, levelId: 5, isEmpty: false,
-			metric: { properties: { SummaryMetric: 'N' } }, variable: {}
-		}];
-		var rows = [
-			[{ Label: 'A', FID: 1, Parent: 'Catamarca' }, { Value: 10, Total: 20 }],
-			[{ Label: 'B', FID: 2, Parent: 'Catamarca' }, { Value: 5,  Total: 15 }]
-		];
-		var grouped = p.GroupRowsByParent(rows);
-		var subtotal = grouped[0][0];
-		expect(subtotal.Label).toBe('Catamarca (2)');
-		expect(subtotal.GroupKey).toBe('Catamarca');
-		// La propiedad que importa: GroupKey coincide EXACTO con Parent de las hojas.
-		expect(subtotal.GroupKey).toBe(rows[0][0].Parent);
+	it('oculta los elementos sin datos, salvo los desplegados con filas debajo', async function () {
+		var p = makeTreePivot(1);
+		p.RowTree.EnsureRoot();
+		var tucuman = p.RowTree.root.FindItem(11);
+		p.RowTree.root.ToggleItem(tucuman);
+		p.RowTree.root.Types(tucuman)[0].ToggleOpen();   // Municipios de Tucumán
+		withCountColumn(p, { 10: { Value: 30, Total: 60 }, 22: { Value: 4, Total: 9 } });
+		await p.RefreshData();
+		expect(rowLabels(p)).toEqual(['Provincias (2)', 'Catamarca', 'Tucumán', 'Municipios (1)', 'Tafí Viejo',
+			'Departamentos (1)', 'Aglomerados (1)']);
+		expect(p.Rows[2][0].open).toBe(true);
+	});
+
+	it('un elemento desplegado sin datos, y sin elementos con datos debajo, no se lista', async function () {
+		var p = makeTreePivot(1);
+		p.RowTree.EnsureRoot();
+		p.RowTree.root.ToggleItem(p.RowTree.root.FindItem(11));
+		withCountColumn(p, { 10: { Value: 30, Total: 60 } });
+		await p.RefreshData();
+		expect(rowLabels(p)).toEqual(['Provincias (1)', 'Catamarca']);
+	});
+
+	it('el total del encabezado suma la brecha de sus elementos y calcula el delta', async function () {
+		var p = makeTreePivot(1);
+		p.RowTree.EnsureRoot();
+		withCountColumn(p, {
+			10: { Value: 7090, Total: 17379, ValueGap: 6193, TotalGap: 18536 },
+			11: { Value: 3200, Total: 9000, ValueGap: 2800, TotalGap: 9500 }
+		}, { summary: 'I', variable: { IsGap: true, NormalizationScale: 1 } });
+		await p.RefreshData();
+		var total = p.Rows[0][1];
+		expect(total.ValueGap).toBe(8993);
+		expect(total.TotalGap).toBe(28036);
+		expect(total.ComputedValue).toBeCloseTo(-17.7698, 3);
 	});
 });
 
@@ -285,9 +272,7 @@ describe('ResolveAllCategories — incidencia sobre el total propio', function (
 		// "65% y más": Value 6880 sobre su Total propio 10000 = 68.8%. El total del
 		// universo es 96900: si se usara como denominador, daría 7.1% (el bug).
 		var p = Object.create(ActivePivot.prototype);
-		p.Regions = { items: [ { SelectedVersion: function () { return { Selection: {
-			Region: {}, Items: [ { Caption: 'Depto X', FID: 1 } ]
-		} }; } } ] };
+		p.RowTree = { AnalysisEntries: function () { return [{ region: {}, item: { Caption: 'Depto X', FID: 1 } }]; } };
 		p._categoryTuples = function () {
 			return {
 				base: { summary: 'I', variable: { NormalizationScale: 100 }, level: 0, levelId: 0, versionId: 11, variableId: 1 },
@@ -314,9 +299,9 @@ describe('ResolveAllCategories — incidencia con celdas sin valor', function ()
 		// dar 84%.
 		var p = Object.create(ActivePivot.prototype);
 		var items = [{ Caption: 'Santiago', FID: 1 }, { Caption: 'Catamarca', FID: 2 }];
-		p.Regions = { items: [ { SelectedVersion: function () { return { Selection: {
-			Region: {}, Items: items
-		} }; } } ] };
+		p.RowTree = { AnalysisEntries: function () {
+			return items.map(function (item) { return { region: {}, item: item }; });
+		} };
 		p._categoryTuples = function () {
 			return {
 				base: { summary: 'I', variable: { NormalizationScale: 100 }, level: 0, levelId: 0, versionId: 11, variableId: 1 },
@@ -347,9 +332,9 @@ describe('ResolveAllCategoriesByRegion — % de área (modo A) compone bien por 
 		// Gran total de área (todas las categorías, todas las regiones) = 100.
 		var p = Object.create(ActivePivot.prototype);
 		var items = [{ Caption: 'Región 1', FID: 1 }, { Caption: 'Región 2', FID: 2 }];
-		p.Regions = { items: [ { SelectedVersion: function () { return { Selection: {
-			Region: {}, Items: items
-		} }; } } ] };
+		p.RowTree = { AnalysisEntries: function () {
+			return items.map(function (item) { return { region: {}, item: item }; });
+		} };
 		p._categoryTuples = function () {
 			return {
 				base: { summary: 'A', variable: {}, level: 0, levelId: 0, versionId: 11, variableId: 1 },
@@ -376,31 +361,13 @@ describe('ResolveAllCategoriesByRegion — % de área (modo A) compone bien por 
 });
 
 
-describe('_reorderBySections — orden de filas simétrico a la URL', function () {
-	it('reordena los items para seguir el orden de las secciones (por boundaryId)', function () {
-		// Tras cargar en paralelo con prepend, items puede quedar en cualquier orden;
-		// el reorden lo fija según lo serializado.
+describe('_reorderMetricsBySections — orden de columnas simétrico a la URL', function () {
+	it('reordena los indicadores según el orden serializado, con ids laxos', function () {
+		// Las altas corren en paralelo y cada una se agrega al resolverse.
 		var p = Object.create(ActivePivot.prototype);
-		var set = { items: [ { __boundaryId: 20 }, { __boundaryId: 10 }, { __boundaryId: 30 } ] };
-		// La URL guardó provincias(10) primero, luego regiones(30), luego 20.
-		p._reorderBySections(set, [ { id: 10 }, { id: 30 }, { id: 20 } ]);
-		expect(set.items.map(function (x) { return x.__boundaryId; })).toEqual([10, 30, 20]);
-	});
-
-	it('compara ids de forma laxa (string vs number) y deja los ausentes al final', function () {
-		var p = Object.create(ActivePivot.prototype);
-		var set = { items: [ { __boundaryId: 30 }, { __boundaryId: 10 }, { __boundaryId: 99 } ] };
-		// ids del parseo como string; 99 no está en la URL → va al final.
-		p._reorderBySections(set, [ { id: '10' }, { id: '30' } ]);
-		expect(set.items.map(function (x) { return x.__boundaryId; })).toEqual([10, 30, 99]);
-	});
-
-	it('no falla si no hay secciones', function () {
-		var p = Object.create(ActivePivot.prototype);
-		var set = { items: [ { __boundaryId: 1 } ] };
-		p._reorderBySections(set, null);
-		p._reorderBySections(set, []);
-		expect(set.items).toHaveLength(1);
+		p.Metrics = [fakeMetric(20, []), fakeMetric(10, []), fakeMetric(30, [])];
+		p._reorderMetricsBySections([{ id: '10' }, { id: 30 }, { id: 20 }]);
+		expect(p.Metrics.map(function (m) { return m.properties.Metric.Id; })).toEqual([10, 30, 20]);
 	});
 });
 

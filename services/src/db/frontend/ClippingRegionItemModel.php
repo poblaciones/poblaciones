@@ -59,6 +59,27 @@ class ClippingRegionItemModel extends BaseModel
 		return $ret;
 	}
 
+	// Ids de los ancestros de un item, del padre inmediato hacia arriba.
+	public function GetAncestorIds($clippingRegionItemId)
+	{
+		Profiling::BeginTimer();
+		$sql = "SELECT CONCAT_WS(',', cli.cli_parent_id, anc1.cli_parent_id, anc2.cli_parent_id, anc3.cli_parent_id)
+						FROM clipping_region_item cli
+						LEFT JOIN clipping_region_item anc1 ON anc1.cli_id = cli.cli_parent_id
+						LEFT JOIN clipping_region_item anc2 ON anc2.cli_id = anc1.cli_parent_id
+						LEFT JOIN clipping_region_item anc3 ON anc3.cli_id = anc2.cli_parent_id
+						WHERE cli.cli_id = ?";
+		$text = App::Db()->fetchScalarNullable($sql, array($clippingRegionItemId));
+		Profiling::EndTimer();
+		$ret = [];
+		if ($text !== null && $text !== '')
+		{
+			foreach(explode(',', $text) as $id)
+				$ret[] = intval($id);
+		}
+		return $ret;
+	}
+
 	public function GetClippingRegionItems($clrId, $parentId = 0)
 	{
 		Profiling::BeginTimer();

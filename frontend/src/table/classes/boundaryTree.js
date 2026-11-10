@@ -23,28 +23,6 @@
  * seleccionable) es el que tiene VersionId.
  */
 
-// Busca recursivamente el nodo "tipo" cuyo Id coincide (comparación laxa).
-export function findBoundaryNode(boundaryId, nodes) {
-	nodes = nodes || (window.Context ? window.Context.Boundaries : []);
-	for (var i = 0; i < nodes.length; i++) {
-		var node = nodes[i];
-		/* eslint-disable-next-line eqeqeq */
-		if (node.VersionId != null && node.Id == boundaryId) {
-			return node;
-		}
-		// Sub-categorías navegables: nodos SIN VersionId cuyos Items son a su vez
-		// nodos navegables. Se distinguen de los agrupadores de hojas (que cuelgan
-		// de un nodo tipo, el cual sí tiene VersionId) porque acá el nodo padre no
-		// tiene VersionId.
-		if (node.VersionId == null && Array.isArray(node.Items) && node.Items.length &&
-				node.Items[0] && node.Items[0].Items !== undefined) {
-			var found = findBoundaryNode(boundaryId, node.Items);
-			if (found) return found;
-		}
-	}
-	return null;
-}
-
 // ¿El array de Items son agrupadores (formato actual)? Un agrupador tiene Items
 // propios (sus hojas). Una hoja, no.
 function isGroupedList(items) {
@@ -92,20 +70,41 @@ function toLeaf(item, groupParent, groupId, groupCode) {
 		ParentId: (item.ParentId != null ? item.ParentId : (groupId != null ? groupId : null)),
 		ParentCode: (groupCode != null ? groupCode : null),
 		Population: item.Population,
-		Code: (item.Code != null ? item.Code : null)
+		Code: (item.Code != null ? item.Code : null),
+		Ancestors: parseAncestors(item.Ancestors)
 	};
 }
 
-// Devuelve { node, versionId, name, items } para un boundaryId, o null si no existe.
-export function resolveBoundary(boundaryId) {
-	var node = findBoundaryNode(boundaryId);
-	if (!node) return null;
-	return {
-		node: node,
-		versionId: node.VersionId,
-		name: node.Name,
-		items: flattenLeaves(node)
-	};
+// Ancestros del item (del padre inmediato hacia arriba), que el servidor manda
+// como texto separado por comas.
+export function parseAncestors(text) {
+	var ids = [];
+	if (text == null || text === '') {
+		return ids;
+	}
+	var parts = String(text).split(',');
+	for (var i = 0; i < parts.length; i++) {
+		ids.push(parseInt(parts[i], 10));
+	}
+	return ids;
 }
 
-export default { findBoundaryNode, flattenLeaves, resolveBoundary };
+// Nodos "tipo" (delimitaciones seleccionables) del árbol, en el orden del
+// catálogo, con el nombre del grupo al que pertenecen.
+export function listBoundaryNodes(nodes, groupName) {
+	var out = [];
+	for (var i = 0; i < nodes.length; i++) {
+		var node = nodes[i];
+		if (node.VersionId != null) {
+			out.push({ node: node, group: groupName || null });
+		} else if (Array.isArray(node.Items) && node.Items.length && node.Items[0] && node.Items[0].Items !== undefined) {
+			var nested = listBoundaryNodes(node.Items, node.Name);
+			for (var n = 0; n < nested.length; n++) {
+				out.push(nested[n]);
+			}
+		}
+	}
+	return out;
+}
+
+export default { flattenLeaves, listBoundaryNodes, parseAncestors };

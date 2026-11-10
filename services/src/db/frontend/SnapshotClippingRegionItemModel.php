@@ -75,6 +75,28 @@ class SnapshotClippingRegionItemModel extends BaseModel
 		return $ret;
 	}
 
+	// Item de recorte de mayor prioridad que contiene el punto. STRAIGHT_JOIN
+	// obliga a partir de los ítems geográficos que contienen el punto (índice
+	// espacial de snapshot_geography_item) y cruzar después con los ítems de
+	// recorte, en lugar de recorrer la tabla de cruce completa buscando la mayor
+	// prioridad.
+	public function GetTopClippingRegionItemAt($coordinate)
+	{
+		Profiling::BeginTimer();
+		$params = array();
+		$coordinate->ToParams($params);
+		$sql = "SELECT STRAIGHT_JOIN cgv_clipping_region_item_id Id, cli_caption Name
+						FROM snapshot_geography_item
+						JOIN snapshot_clipping_region_item_geography_item ON cgv_geography_item_id = giw_geography_item_id
+						JOIN clipping_region_item ON cli_id = cgv_clipping_region_item_id
+						WHERE ST_CONTAINS(giw_geometry_r3, POINT(?, ?)) AND giw_geography_is_tracking_level = 1
+						ORDER BY cgv_clipping_region_priority DESC
+						LIMIT 1";
+		$ret = App::Db()->fetchAssoc($sql, $params);
+		Profiling::EndTimer();
+		return $ret;
+	}
+
 	public function GetClippingRegionItemEnvelope($clippingRegionId)
 	{
 		Profiling::BeginTimer();

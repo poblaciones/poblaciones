@@ -82,9 +82,9 @@ una parte:
   (indicador × versión × variable × categoría|total) que define una medición a
   pedir. Es el equivalente *no visual* de las columnas. Mantiene también el orden
   y los encabezados visibles derivados. (`ActiveMetricTuples`)
-- `pivot.Regions` — las delimitaciones de **filas** (semántica OR). (`ActiveBoundarySet`)
-- `pivot.FilterSet` — las delimitaciones de **filtro** (semántica AND). Misma
-  clase que Regions, distinta instancia. (`ActiveBoundarySet`)
+- `pivot.RowTree` — el **árbol de filas** (`ActiveRowTree`, ver más abajo). Reemplaza
+  a las antiguas colecciones de filas y filtros: la selección se expresa con las
+  casillas de cada nivel y el despliegue de sus elementos.
 - `pivot.Data` — caché de filas de datos traídas del backend, indexada por
   `(versionId, levelId)` y, dentro, por geografía. (`ActiveData`)
 - `pivot.Dataset` — la **vista plana y reactiva de resultados** sobre la que se
@@ -93,7 +93,7 @@ una parte:
 - `pivot.Router` — serialización del estado a la query de la ruta (deep-link) y
   su restitución. (`ActiveRoute`)
 
-El par de colecciones del pivot es **`MetricTuples` / `Regions`** (ambas no
+El par de colecciones del pivot es **`MetricTuples` / `RowTree`** (ambas no
 visuales). No se llaman `Columns`/`Rows` justamente porque la pivot no es un
 objeto visual; las columnas visuales aparecen recién en el dataset.
 
@@ -121,10 +121,43 @@ su `Total` al denominador hunde el promedio a casi cero. (Una región con dato
 faltante en una categoría, si no se saltea, tira toda la categoría a ~0.)
 
 Otros métodos que conviene conocer: `ResolveAllCategories` (agregado para los
-charts de distribución), `GroupRowsByParent` (corte de control / agrupadores; los
-grupos entre sí se ordenan por el mismo criterio activo, no por orden de
-aparición), `applyColumnState` (restaurar una columna desde la ruta),
+charts de distribución), `_buildLevelBlock` (las filas de un nivel con el
+encabezado y sus totales), `applyColumnState` (restaurar una columna desde la ruta),
 `RefreshData` (traer del backend y cachear en `pivot.Data`).
+
+### El árbol de filas: `ActiveRowTree` y `BoundaryHierarchy`
+
+- `BoundaryHierarchy` (en `window.Context.BoundaryHierarchy`, catálogo) deriva la
+  jerarquía de delimitaciones de `GetFabBoundaries`, con este orden de prevalencia:
+  1) la **agrupación por padre declarada** (`bou_gropup_by_parent`, que llega como
+  `UseParent`): la delimitación se ofrece solo debajo de la delimitación cuyos
+  items coinciden con sus agrupadores (por id, código o nombre, porque el padre
+  puede ser de otra versión; p. ej. Barrios bajo Aglomerados); 2) los **ancestros
+  de cada item**: una delimitación sin agrupación se ofrece además bajo las que
+  contienen a sus ancestros (p. ej. Aglomerados dentro de Provincias). Son raíces
+  las que no declaran agrupación.
+- `ActiveRowTree` tiene una **raíz única** (un `RowLevel`); cada elemento visible se
+  despliega y, debajo, cada delimitación hija es un `RowLevel` propio (Municipios,
+  Departamentos…), con sus casillas. Reglas: ninguna casilla marcada equivale a
+  todas; el único elemento visible de un nivel queda siempre desplegado; un tipo
+  de hijo único queda siempre abierto; un tipo de hijo sin elementos (o, abierto
+  y con indicadores, sin filas con datos) no se ofrece; los tipos arrancan
+  colapsados salvo el último que el usuario abrió para ese padre (preferencia de
+  sesión).
+- **Tipos colapsados sin datos**: un tipo de hijo colapsado muestra solo su
+  encabezado con la cantidad de elementos; sus celdas son `null`. No integra
+  `OpenRegions()`, así que no pide relaciones geográficas ni provoca el
+  auto-drill: abrir un nivel (p. ej. Municipios, que solo se relaciona con
+  radios) es lo único que puede obligar a cargar un nivel geográfico fino.
+- **Filas fijadas** (pin): son estado de la vista (`PivotTable.pinned`), no de la
+  pivot. Las mismas filas se repiten al pie del encabezado, que ya es sticky, así
+  que quedan arriba aunque se scrollee; la estructura de filas no cambia.
+- **Nivel de análisis** (`AnalysisLevel`): se baja desde la raíz mientras haya un
+  único elemento visible con un único tipo abierto. Sus filas son las `data` del
+  dataset (las que analizan los widgets); las de otros niveles son `item`.
+- El clic en un nombre solo despliega o repliega; "quedarse con uno" se hace con las
+  casillas del menú del nivel. La "×" de una fila la quita (si era la última, el
+  nivel vuelve a mostrar todos).
 
 ### La vista plana: `ActiveDataset`
 
@@ -238,6 +271,7 @@ no escribir historial durante el arranque o la restauración.
     table/
       views/
         Dashboard.vue            Tablero (dueño del pivot, layout, splitters, persistencia, URL/historial)
+        EmbeddedTable.vue        La tabla dentro del visor (popup "Ver como tabla"): solo la pivot
       widgets/                   Composiciones con orientación de negocio
         widgetMixin.js           Contrato común (prop dataset, config, estados de disponibilidad)
         widgetKinds.js           Catálogo de tipos de análisis
@@ -246,11 +280,13 @@ no escribir historial durante el arranque o la restauración.
         relations/RelationsWidget.vue
         distributions/DistributionWidget.vue  (ver detalle abajo)
       components/                Controles reutilizables (sin lógica de negocio del pivot)
-        MetricHeader.vue         Orquesta los sub-controles de una métrica
-        VariableSelector.vue, VersionSelector.vue, CategoriesSelector.vue, CategoryPicker.vue
+        MetricHeader.vue         Nombre del indicador; variable y medida, cada una con su desplegable si hay alternativas
+        VersionSelector.vue, CategoriesSelector.vue, CategoryPicker.vue
+        TableSideToolbar.vue     Barra lateral flotante: agregar indicadores y filtrar (el selector del visor;
+                                 Filtrar elige regiones concretas, no delimitaciones enteras)
         floatingDropdown.js      Mixin de panel flotante (fixed + click-outside)
-        indicatorSelector.vue    Selector/buscador de indicadores y delimitaciones (compartido con el visor)
-        pivot/PivotTable.vue     Render de la tabla (sticky, sort por header, agrupadores, ícono de mapa)
+        pivot/PivotTable.vue     Render de la tabla (sticky, sort por header, árbol de filas, ícono de mapa)
+        pivot/LevelMenu.vue      Menú de un nivel de filas: casillas con buscador y, en la raíz, "Mostrar ›"
         pivot/ColumnDragController.js  Reordenamiento de columnas por arrastre (objeto, no mixin)
         charts/ScatterPlot.vue, ScatterMulti.vue, DualHistogram.vue
         popups/AddMetricPopup.vue, WorkMetadataPopup.vue  Popups (modal propio) invocables vía window.Popups
@@ -271,9 +307,10 @@ no escribir historial durante el arranque o la restauración.
         ActivePivot.js           Agregado raíz; compone los colaboradores (clase central)
         ActiveMultiselectedMetric.js  Un indicador con sus censos; produce las tuplas (GetTuples)
         Selection.js             Un censo: versión + nivel + variable
-        RegionSelection.js       Qué regiones van en las filas
         ActiveMetricTuples.js    Tuplas de métrica, orden, encabezados
-        ActiveBoundarySet.js     Colección de delimitaciones (Regions y FilterSet)
+        ActiveRowTree.js         Árbol de filas (RowLevel: casillas, despliegue, tipos de hijo; serialización)
+        BoundaryHierarchy.js     Jerarquía de delimitaciones del catálogo (raíces, hijas, cadena de un item)
+        EmbeddedContextLoader.js Prepara window.Context dentro del visor la primera vez que se pide la tabla
         ActiveData.js            Caché/índice de datos por (versión, nivel) y geografía
         ActiveDataset.js         Vista plana de resultados (.Columns = AnalysisColumns)
         ActiveRoute.js           Serialización a la ruta (columnas/filas por índice; ver sección sobre URL)
@@ -322,9 +359,22 @@ Dos serializadores, con un criterio unificado tomado del visor de mapa:
   indexada por índice de versión. **Sin compatibilidad con rutas viejas**: los
   datos publicados no cambian, así que los índices son estables y no hace falta
   arrastrar el esquema anterior.
-- **`MapUrlBuilder`** arma la URL del visor de mapa desde una fila de la pivot.
-  Emite el indicador **una vez por cada versión seleccionada** (no descarta las
-  otras). Misma convención de índices y omisión de defaults.
+  Las filas van como árbol: `r=<raíz>[!i<fids>]` y `x=<entradas>`, una por
+  elemento desplegado o nivel abierto/restringido; cada entrada es un camino de
+  ids alternados (elemento.delimitación.elemento…). Los elementos se identifican
+  por su id (FID), que es estable.
+- **Desde el visor** (`map/classes/TableLink.js`): arma las secciones con que se
+  abre la tabla (en el popup, y de ahí al tablero con `ActiveRoute.tableUrl`). Los
+  indicadores van con la versión, nivel, variable y medida activos; la selección,
+  como lugares `p=<fid>[,<ancestro>...]` (regiones de
+  recorte, o el lugar del centro de un círculo, resuelto por
+  `GetRegionItemByLocation`), y sin selección y con zoom alto, el lugar del centro
+  de la vista como sugerencia `s=` (un chip que el usuario acepta o descarta). Los
+  ancestros son alternativas por si el item no está en ninguna delimitación.
+- **`MapUrlBuilder`** arma la URL del visor de mapa desde una fila de la pivot: un
+  elemento se recorta en sí mismo; un nivel se agrega como capa, recortado en el
+  elemento del que cuelga. Refleja la versión seleccionada más reciente de cada
+  indicador, con la misma convención de índices y omisión de defaults.
 
 El **estado del tablero** (`dash`) omite todos los defaults: una tabla vacía no
 genera parámetro. Los análisis visibles van por letra (`s`/`d`/`r`), los
@@ -336,6 +386,28 @@ corrige; el índice, sobre datos publicados, es estable y produce rutas más
 cortas. Es una decisión heredada del visor.
 
 ---
+
+### La tabla dentro del visor
+
+Los botones del visor ("Ver como tabla" en el toolbar y en cada indicador) abren
+un popup modal (`map/components/popups/tableView.vue`) con `EmbeddedTable`: la
+pivot con los indicadores y la selección del mapa (las secciones las arma
+`map/classes/TableLink.js`), sin barra lateral ni paneles de análisis.
+
+- **Título y edición.** El título es el indicador, o la lista de los visibles; se
+  pueden quitar indicadores mientras quede uno (`minMetrics`). "Exportar" ofrece
+  Excel y CSV; las filas no ofrecen "Abrir mapa".
+- **Carga bajo demanda.** El visor importa `EmbeddedTable` con `import()`
+  dinámico: el módulo de la tabla queda en un fragmento aparte y no pesa en el
+  arranque del mapa. Al abrirse por primera vez, `EmbeddedContextLoader` crea
+  `window.Context` y trae el catálogo de delimitaciones (con sus ancestros); las
+  definiciones y datos de los indicadores los trae la pivot al restaurarse. Las
+  aperturas siguientes reutilizan el contexto.
+- **No toca la ruta del visor.** La embebida no escribe historial; la URL que
+  tendría en el tablero se calcula al pedir "Abrir como tablero"
+  (`EmbeddedTable.dashboardUrl`, con el estado vigente de la pivot).
+- No se usa un iframe, para que la tabla del popup pueda interactuar con el mapa
+  más adelante.
 
 ## 7. Convenciones de arquitectura (cómo escribir código acá)
 
@@ -427,8 +499,7 @@ Batería propia, sin framework externo. Se corre con:
   `expect(x === undefined).toBeTruthy()`) ni otros; antes de usar un matcher,
   verificar que esté en esa lista.
 - `tests/_register-alias.mjs` + `_alias-hooks.mjs`: loader que mapea los alias
-  `@/...` del proyecto a stubs mínimos en `tests/_stubs/` (arr, promises,
-  RegionSelection, ActiveBoundary, pivotValue, boundaryTree), para cargar las
+  `@/...` del proyecto a stubs mínimos en `tests/_stubs/` (arr, pivotValue, helper), para cargar las
   clases sin el framework completo. Al agregar una clase nueva que importe por
   alias algo aún no stubeado, se agrega el stub y su registro en `_alias-hooks`.
 - `tests/run-all.mjs`: registra cada suite con `await import('./X.test.mjs')`. Al
@@ -480,7 +551,7 @@ Antes de dar por buena una edición:
   directamente. `App.vue` resuelve el "work" inicial con `StartTable` y, sobre una
   ruta "limpia", espera el evento `pivot-ready` (emitido por el Dashboard vía
   `window.Messages`) para aplicar `RestoreWork`. El estado de la pivot se
-  serializa en el **hash** (`#/view?c=...&r=...&dash=...`): el Dashboard lo lee con
+  serializa en el **hash** (`#/view?c=...&r=...&x=...&dash=...`): el Dashboard lo lee con
   un parser propio y lo escribe con `window.history`, sin depender de
   `$route`/`$router`. `pivot.Router` compone el objeto de query (agnóstico del
   transporte); el Dashboard lo serializa al hash.

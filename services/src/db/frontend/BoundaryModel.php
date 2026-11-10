@@ -12,6 +12,14 @@ use helena\db\frontend\SnapshotClippingRegionItemModel;
 
 class BoundaryModel extends BaseModel
 {
+	// Ancestros de cada item (del padre inmediato hacia arriba) separados por coma.
+	// La tabla los usa para ubicar cada delimitación dentro de la jerarquía y para
+	// filtrar los hijos de un elemento en cualquier nivel inferior.
+	const ANCESTORS_SELECT = "CONCAT_WS(',', cli.cli_parent_id, anc1.cli_parent_id, anc2.cli_parent_id, anc3.cli_parent_id)";
+	const ANCESTORS_JOINS = " LEFT JOIN clipping_region_item anc1 ON anc1.cli_id = cli.cli_parent_id
+                    LEFT JOIN clipping_region_item anc2 ON anc2.cli_id = anc1.cli_parent_id
+                    LEFT JOIN clipping_region_item anc3 ON anc3.cli_id = anc2.cli_parent_id ";
+
 	public function __construct()
 	{
 		$this->tableName = '';
@@ -102,11 +110,12 @@ class BoundaryModel extends BaseModel
 			if ($boundary['OrderBy'] == 'P') {
 				// por tamaï¿½o
 				$orderBy .= "clc_population DESC, cli.cli_code";
-				$sql = "SELECT min(cli.cli_id) Id, cli.cli_caption `Name`, " . $useParentSelect . " clc_population Population
+				$sql = "SELECT min(cli.cli_id) Id, cli.cli_caption `Name`, " . $useParentSelect . " clc_population Population,
+                    MIN(" . self::ANCESTORS_SELECT . ") Ancestors
                     FROM boundary_version_clipping_region c
                     JOIN clipping_region_item cli ON cli.cli_clipping_region_id = bcr_clipping_region_id
                     JOIN snapshot_lookup_clipping_region_item ON cli.cli_id = clc_clipping_region_item_id
-					" . $useParentFrom . "
+					" . $useParentFrom . self::ANCESTORS_JOINS . "
                     WHERE bcr_boundary_version_id = ? " . $exclusions . "
                     GROUP BY cli.cli_caption, cli.cli_code, clc_population
                     ORDER BY " . $orderBy;
@@ -117,11 +126,12 @@ class BoundaryModel extends BaseModel
 				else
 					$orderBy .= 'cli.cli_caption, cli.cli_code';
 
-				$sql = "SELECT cli.cli_id Id, cli.cli_caption `Name` , cli.cli_code Code," . $useParentSelect . " IFNULL(clc_population, 0) Population
+				$sql = "SELECT cli.cli_id Id, cli.cli_caption `Name` , cli.cli_code Code," . $useParentSelect . " IFNULL(clc_population, 0) Population,
+                    " . self::ANCESTORS_SELECT . " Ancestors
                     FROM boundary_version_clipping_region c
                     JOIN clipping_region_item cli ON cli.cli_clipping_region_id = bcr_clipping_region_id
                     LEFT JOIN snapshot_lookup_clipping_region_item ON cli.cli_id = clc_clipping_region_item_id
-                    " . $useParentFrom . "
+                    " . $useParentFrom . self::ANCESTORS_JOINS . "
                     WHERE bcr_boundary_version_id = ? " . $exclusions . "
                     ORDER BY " . $orderBy;
 			}

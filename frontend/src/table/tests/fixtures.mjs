@@ -56,7 +56,7 @@ export function makeDataset() {
 
 	// values[] alineado por orden de columnas (0-based denso).
 	var rows = [
-		{ type: 'region-header', label: 'Provincias', parentLabel: null, values: [], weights: [] },
+		{ type: 'level-header', label: 'Provincias', parentLabel: null, values: [], weights: [] },
 		dataRow('Buenos Aires', null, [15000000, 80, 12, 8, 100], [1, 1000, 1000, 1000, 1000]),
 		dataRow('Córdoba', null, [3500000, 60, 25, 15, 100], [1, 2000, 2000, 2000, 2000]),
 		dataRow('Santa Fe', null, [3200000, 70, 20, 10, 100], [1, 1500, 1500, 1500, 1500]),
@@ -122,7 +122,7 @@ export function makeDatasetTwoVersions() {
 		col('nbi_t_2022', '%', { metricId: 5, metricName: 'NBI', variableName: 'Hogares con NBI', labelId: null, labelName: 'Total', fillColor: null, isTotal: true, isSimpleCount: false, versionName: '2022', versionId: 52 })
 	];
 	var rows = [
-		{ type: 'region-header', label: 'Provincias', parentLabel: null, values: [], weights: [] },
+		{ type: 'level-header', label: 'Provincias', parentLabel: null, values: [], weights: [] },
 		dataRow('Buenos Aires', null, [18, 14], [1000, 1000]),
 		dataRow('Córdoba', null, [15, 11], [800, 800])
 	];

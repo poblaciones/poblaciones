@@ -10,10 +10,9 @@ importan por `@/table/...`):
 
     node --import ./tests/_register-alias.mjs tests/run-all.mjs
 
-Un archivo puntual sin alias (pivotStats, pivotRoute):
+Un archivo puntual sin alias (pivotStats):
 
     node tests/pivotStats.test.mjs
-    node tests/pivotRoute.test.mjs
 
 Un archivo que usa alias (AnalysisColumns):
 
@@ -26,8 +25,12 @@ Requiere Node con ESM (14+). El `package.json` de esta carpeta declara
 
 - **pivotStats**: media/describe ponderados, Pearson y Spearman, matriz de
   correlaciones (asimetría por pesos), regresión lineal y simple, cuantiles.
-- **pivotRoute**: round-trip de serialización/parseo (versiones múltiples,
-  selección de categorías, regiones).
+- **ActiveRoute**: round-trip de serialización/parseo (columnas por índice,
+  selección de categorías, árbol de filas, lugares del visor).
+- **BoundaryHierarchy / ActiveRowTree**: jerarquía de delimitaciones a partir de
+  los ancestros de cada item, y las reglas del árbol de filas (casillas,
+  despliegue, tipos de hijo, preferencia, selección desde el visor, serialización),
+  sobre el catálogo de `fixtures-hierarchy.mjs`.
 - **AnalysisColumns**: el modelo de columnas del analizador de relaciones
   (construcción desde el dataset, nombres por columna, subconjunto de
   regresión, escala compartida, matriz/1×N/regresión/par). Reemplaza al viejo

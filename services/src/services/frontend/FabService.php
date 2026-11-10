@@ -23,7 +23,9 @@ class FabService extends BaseService
 	{
 		$shard = App::Settings()->Shard()->CurrentShard;
 		$data = null;
-		$key = 'B' . $shard;
+		// La clave cambia cuando cambia el formato de los items (p. ej. al sumar
+		// Ancestors), para no servir datos cacheados con el formato anterior.
+		$key = 'BA' . $shard;
 
 		if (FabListsCache::Cache()->HasData($key, $data))
 			return self::RemovePrivateFabBoundaries($data);
@@ -376,11 +378,10 @@ class FabService extends BaseService
 	private function GetRecommended($providers)
 	{
 		$stats = new StatisticsService();
-		$rows = $stats->GetLastMonthTopMetrics(9);
+		$rows = $stats->GetLastMonthTopMetrics(10);
 		if (sizeof($rows) === 0)
 			return null;
 
-		Arr::SortByNamedValue($rows, "myv_metric_caption");
 		$metrics = $this->createMetricInfos($rows, $providers);
 		// Listo
 		return [

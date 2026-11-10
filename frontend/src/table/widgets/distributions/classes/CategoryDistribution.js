@@ -17,24 +17,20 @@
 
 export default CategoryDistribution;
 
-function CategoryDistribution(panel, dataset, pivot, excludedGroups) {
+function CategoryDistribution(panel, dataset, pivot) {
 	this.panel = panel;
 	this.dataset = dataset;
 	this.pivot = pivot || null;
-	this.excludedGroups = excludedGroups || [];
 	this._bars = null;
 	this._total = null;
 	this._build();
 }
 
-// Filas de datos, excluyendo las que pertenecen a un corte de control colapsado
-// (su grupo padre está en excludedGroups). El colapso es una ocultación visual de
-// la tabla; distribución la respeta, pero los demás widgets no.
 CategoryDistribution.prototype._rows = function () {
-	var all = (this.dataset && typeof this.dataset.dataRows === 'function') ? this.dataset.dataRows() : [];
-	if (!this.excludedGroups.length) return all;
-	var ex = this.excludedGroups;
-	return all.filter(function (r) { return ex.indexOf(r.parentLabel) === -1; });
+	if (this.dataset && typeof this.dataset.dataRows === 'function') {
+		return this.dataset.dataRows();
+	}
+	return [];
 };
 
 CategoryDistribution.prototype._indexOf = function (column) {

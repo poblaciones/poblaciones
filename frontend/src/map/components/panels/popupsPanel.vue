@@ -10,6 +10,7 @@
 		<BoundaryCustomize ref="showBoundaryCustomize" :backgroundColor="backgroundColor" />
 		<MetricCustomize ref="showCustomize" :backgroundColor="backgroundColor" />
 		<AddMetric ref="addMetric" :backgroundColor="backgroundColor" />
+		<TableView ref="showTableView" />
 
 		<Tour ref="showTour"></Tour>
 
@@ -30,6 +31,7 @@ import MetricDownload from '@/map/components/popups/metricDownload';
 import BoundaryDownload from '@/map/components/popups/boundaryDownload';
 import Embedding from '@/map/components/popups/embedding';
 import Tour from '@/map/components/popups/tour';
+import TableView from '@/map/components/popups/tableView';
 
 export default {
 	name: 'popupsPanel',
@@ -46,6 +48,7 @@ export default {
 		BoundaryCustomize,
 		MetricCustomize,
 		MetricDownload,
+		TableView,
 	},
 	props: [
 		'backgroundColor',
@@ -62,6 +65,7 @@ export default {
 		window.Popups.MetricCustomize = this.$refs.showCustomize;
 		window.Popups.AnnotationItem = this.$refs.showAnnotationItem;
 		window.Popups.AddMetric = this.$refs.addMetric;
+		window.Popups.TableView = this.$refs.showTableView;
 	},
 	methods: {
 

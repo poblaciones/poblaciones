@@ -20,6 +20,7 @@
 	import { addIndicatorSubtitles, addBoundarySubtitles } from '@/map/components/widgets/sideToolbar/selectorSubtitles';
 	import { attachInfo, buildIndicatorInfo, buildBoundaryInfo } from '@/map/components/widgets/sideToolbar/selectorTooltips';
 	import StartTable from '@/table/classes/StartTable';
+	import BoundaryHierarchy from '@/table/classes/BoundaryHierarchy.js';
 	import WorkPanel from '@/map/components/panels/workPanel';
 	import Dashboard from '@/table/views/Dashboard';
 	import AddMetricPopup from '@/table/components/popups/AddMetricPopup.vue';
@@ -138,6 +139,7 @@
 					addBoundarySubtitles(data);
 					attachInfo(data, buildBoundaryInfo);
 					arr.AddRange(window.Context.Boundaries, data);
+					window.Context.BoundaryHierarchy = new BoundaryHierarchy(data, loc.config.DefaultPivotBoundaryId);
 				}).catch(function (error) {
 					err.errDialog('LoadFabBoundaries', 'obtener las delimitaciones', error);
 				});
@@ -161,7 +163,11 @@
 
 				var run = function (pivot) {
 					var starter = new StartTable(loc.work, loc.config, pivot);
-					starter.RestoreWork(args.workId, args.link, routeIsClean);
+					starter.RestoreWork(args.workId, args.link, routeIsClean).then(function (applied) {
+						if (applied) {
+							loc.$refs.dashboard.refreshPivot();
+						}
+					});
 				};
 
 				// Si el Dashboard ya terminó de construir su pivot, se actúa directo

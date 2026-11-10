@@ -3,6 +3,7 @@
 namespace helena\classes;
 
 use minga\framework\Context;
+use minga\framework\Cookies;
 use minga\framework\MessageBox;
 use minga\framework\PhpSession;
 use minga\framework\Request;
@@ -21,7 +22,8 @@ use helena\caches\BoundaryVisiblityCache;
 class Session
 {
 	public static $AccessLink = null;
-	public static $NewSession = 0;
+	const UniqueUserCookieName = 'uu';
+	const UniqueUserCookieDays = 32;
 
 	public static function GetCurrentUser()
 	{
@@ -36,11 +38,19 @@ class Session
 	}
 	public static function StartSession()
 	{
-		$isStarting = PhpSession::CheckPhpSessionStarted();
-
-		if ($isStarting && !Request::IsGoogle())
-			self::$NewSession = 1;
+		PhpSession::CheckPhpSessionStarted();
 	}
+	public static function RegisterUniqueUser()
+	{
+		if (Request::IsCrawler() || Request::IsGoogle())
+			return;
+		$currentMonth = date('Y-m');
+		if (Cookies::GetCookie(self::UniqueUserCookieName) === $currentMonth)
+			return;
+		Cookies::SetCookie(self::UniqueUserCookieName, $currentMonth, self::UniqueUserCookieDays);
+		Callbacks::$UniqueUsers++;
+	}
+
 	public static function IsMegaUser()
 	{
 		$account = Account::Current();

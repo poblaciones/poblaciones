@@ -60,6 +60,25 @@ describe('ActiveMultiselectedMetric — selección', function () {
 	});
 });
 
+describe('ActiveMultiselectedMetric — cambio de variable', function () {
+	it('ChangeVariable conserva los censos vigentes (no suma años) y el nivel', function () {
+		var m = makeMetric();
+		m.SelectByCaption('Población con discapacidad');   // 2010, Departamentos
+		m.ChangeVariable('Hogares con NBI');                // también existe en 2022
+		expect(m.Selections.length).toBe(1);
+		expect(m.Selections[0].versionId()).toBe('2010');
+		expect(m.Selections[0].levelName()).toBe('Departamentos');
+	});
+
+	it('si ningún censo vigente mide la variable nueva, queda el más reciente que la mida', function () {
+		var m = makeMetric();
+		m.SelectByCaption('Hogares con NBI', ['2022']);
+		m.ChangeVariable('Población con discapacidad');
+		expect(m.Selections.length).toBe(1);
+		expect(m.Selections[0].versionId()).toBe('2010');
+	});
+});
+
 describe('ActiveMultiselectedMetric — niveles por censo', function () {
 	it('cada Selection mueve su nivel por su propia jerarquía', function () {
 		var m = makeMetric();

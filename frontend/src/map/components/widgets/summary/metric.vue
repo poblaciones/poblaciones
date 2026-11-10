@@ -65,7 +65,9 @@
 			</div>
 			<Source :sourceTitle="metric.properties.Metric.Name" v-if="!Embedded.Readonly && !$isMobile()" :useCompare="allowCompare"
 														:valueCompare="compare" :compareTitle="compareContent" :useRanking="metric.useRankings()" :valueRanking="metric.ShowRanking"
-							@clickRanking="rankingShown" @clickDownload="clickDescargar" @clickSource="clickFuente" @clickCompare="toggleCompare"  />
+														:useTable="Use.UsePivot"
+							@clickRanking="rankingShown" @clickDownload="clickDescargar" @clickSource="clickFuente" @clickCompare="toggleCompare"
+							@clickTable="openTable" />
 			<div style="clear: both; height: 0px"></div>
 		</div>
 			<mp-collapse>
@@ -161,6 +163,10 @@ export default {
 		clickLabel(label) {
 			label.Visible = !label.Visible;
 			this.metric.RefreshMap();
+		},
+		// Muestra como tabla solo este indicador, con la selección del mapa.
+		openTable() {
+			window.Popups.TableView.show([this.metric]);
 		},
 		clickDescargar() {
 			window.Popups.MetricDownload.show(this.metric);

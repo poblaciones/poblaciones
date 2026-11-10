@@ -15,6 +15,8 @@ function Context() {
 
 	this.Metrics = [];
 	this.Boundaries = [];
+	// Jerarquía derivada de Boundaries (BoundaryHierarchy); se arma al cargarlas.
+	this.BoundaryHierarchy = null;
 
 	this.MetricStore = new MetricStore();
 	this.RegionStore = new RegionStore();

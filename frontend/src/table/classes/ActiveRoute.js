@@ -7,16 +7,25 @@
  * tener estado (en el arranque del tablero), por eso es estática:
  * `ActiveRoute.parseQuery(query)`.
  *
- * Esquema en la query: #/view?c=<col>;<col>&r=<row>;<row>&f=<flt>;<flt>&o=<key>!a|d
+ * Esquema en la query: #/view?c=<col>*<col>&r=<raíz>&x=<entrada>*<entrada>&p=<lugar>*<lugar>&s=<lugar>&o=<key>!a|d
  *
  *   Columna (indicador):
- *     <metricId>!v<vId>[,<vId2>...]!l<levelId>!a<variableId>!s<summary>[!c<sel>]
- *     <sel>: bloques '<versionId>=<labelId>,...,t' separados por '~' ('t' = Total).
+ *     <metricId>!v<vIdx>[,<vIdx2>...]!l<levelIdx>!a<variableIdx>!s<summary>[!c<sel>]
+ *     <sel>: bloques '<versionIdx>=<labelId>,...,t' separados por '~' ('t' = Total).
  *     Si se omite '!c', el default es solo Total por cada versión activa.
  *
- *   Fila / filtro (delimitación):
- *     <boundaryId>!w                      (delimitación completa)
- *     <boundaryId>!i<itemId>,<itemId>,... (por items, FID)
+ *   Árbol de filas (ver ActiveRowTree.ToSection):
+ *     r=<boundaryId>[!i<fid>,<fid>...]     raíz y, si está restringida, sus elementos
+ *     x=<path>[!o][!i<fid>,...]            una entrada por elemento desplegado o tipo
+ *                                          de hijo abierto/restringido. El path une
+ *                                          con '.' ids de elemento y de delimitación
+ *                                          alternados: impar = elemento, par = nivel.
+ *
+ *   Lugares (los arma el visor al saltar a la tabla; no se vuelven a escribir):
+ *     p=<fid>[,<fidAncestro>...]*...       cada lugar se muestra como selección; los
+ *                                          ancestros son alternativas si el elemento
+ *                                          no está en ninguna delimitación.
+ *     s=<fid>[,<fidAncestro>...]           lugar sugerido (vista actual del visor).
  *
  *   Orden:
  *     o=<columnKey>!a (asc) | o=<columnKey>!d (desc)
@@ -65,14 +74,32 @@ function composeColumn(col) {
 	return parts.join('!');
 }
 
-function composeBoundary(entry) {
-	var parts = [String(entry.id)];
-	if (entry.whole) {
-		parts.push('w');
-	} else if (entry.items && entry.items.length) {
-		parts.push('i' + entry.items.join(','));
+function composeRoot(tree) {
+	var text = String(tree.root);
+	if (tree.checked && tree.checked.length) {
+		text += '!i' + tree.checked.join(',');
 	}
-	return parts.join('!');
+	return text;
+}
+
+function composeEntry(entry) {
+	var text = entry.path.join('.');
+	var isLevel = entry.path.length % 2 === 0;
+	if (isLevel && entry.open) {
+		text += '!o';
+	}
+	if (isLevel && entry.checked && entry.checked.length) {
+		text += '!i' + entry.checked.join(',');
+	}
+	return text;
+}
+
+function composeEntries(entries) {
+	var tokens = [];
+	for (var i = 0; i < entries.length; i++) {
+		tokens.push(composeEntry(entries[i]));
+	}
+	return tokens.join('*');
 }
 
 function joinSection(list, composer) {
@@ -127,13 +154,37 @@ function parseColumn(token) {
 	return col;
 }
 
-function parseBoundary(token) {
-	var parts = token.split('!');
-	var entry = { id: toIntOrRaw(parts[0]), whole: false, items: [] };
+function parseIdList(text) {
+	var ids = [];
+	var parts = String(text).split(',');
+	for (var i = 0; i < parts.length; i++) {
+		if (parts[i] !== '') {
+			ids.push(toIntOrRaw(parts[i]));
+		}
+	}
+	return ids;
+}
+
+function parseRoot(token) {
+	var parts = String(token).split('!');
+	var tree = { root: toIntOrRaw(parts[0]), checked: null, entries: [] };
 	for (var i = 1; i < parts.length; i++) {
-		var p = parts[i];
-		if (p === 'w') entry.whole = true;
-		else if (p[0] === 'i') entry.items = p.slice(1).split(',').filter(Boolean).map(toIntOrRaw);
+		if (parts[i][0] === 'i') {
+			tree.checked = parseIdList(parts[i].slice(1));
+		}
+	}
+	return tree;
+}
+
+function parseEntry(token) {
+	var parts = token.split('!');
+	var entry = { path: parseIdList(parts[0].split('.').join(',')), open: false, checked: null };
+	for (var i = 1; i < parts.length; i++) {
+		if (parts[i] === 'o') {
+			entry.open = true;
+		} else if (parts[i][0] === 'i') {
+			entry.checked = parseIdList(parts[i].slice(1));
+		}
 	}
 	return entry;
 }
@@ -153,17 +204,15 @@ function ActiveRoute(pivot) {
 
 ActiveRoute.prototype.sections = function () {
 	var pivot = this.pivot;
-	var sections = { columns: [], rows: [], filters: [] };
+	var sections = { columns: [], tree: null, places: [], suggestion: null };
 	if (!pivot) return sections;
 
 	for (var m = 0; m < pivot.Metrics.length; m++) {
 		sections.columns.push(this._columnSection(pivot.Metrics[m]));
 	}
-	for (var b = 0; b < pivot.Regions.items.length; b++) {
-		sections.rows.push(this._boundarySection(pivot.Regions.items[b]));
-	}
-	for (var f = 0; f < pivot.FilterSet.items.length; f++) {
-		sections.filters.push(this._boundarySection(pivot.FilterSet.items[f]));
+	sections.tree = pivot.RowTree.ToSection();
+	if (pivot.RowTree.suggestion) {
+		sections.suggestion = pivot.RowTree.suggestion.fids;
 	}
 
 	if (pivot.MetricTuples.sortKey != null && pivot.MetricTuples.sortDirection !== 0) {
@@ -218,16 +267,6 @@ ActiveRoute.prototype._columnSection = function (metric) {
 	};
 };
 
-ActiveRoute.prototype._boundarySection = function (boundary) {
-	if (boundary.__whole) return { id: boundary.__boundaryId, whole: true };
-	var sel = boundary.SelectedVersion ? boundary.SelectedVersion().Selection : null;
-	var items = [];
-	if (sel && sel.Items) {
-		for (var i = 0; i < sel.Items.length; i++) items.push(sel.Items[i].FID);
-	}
-	return { id: boundary.__boundaryId, whole: false, items: items };
-};
-
 ActiveRoute.prototype.query = function () {
 	return ActiveRoute.composeQuery(this.sections());
 };
@@ -247,8 +286,16 @@ ActiveRoute.composeQuery = function (sections) {
 	sections = sections || {};
 	var query = {};
 	if (sections.columns && sections.columns.length) query.c = joinSection(sections.columns, composeColumn);
-	if (sections.rows && sections.rows.length)       query.r = joinSection(sections.rows, composeBoundary);
-	if (sections.filters && sections.filters.length) query.f = joinSection(sections.filters, composeBoundary);
+	if (sections.tree) {
+		query.r = composeRoot(sections.tree);
+		if (sections.tree.entries && sections.tree.entries.length) query.x = composeEntries(sections.tree.entries);
+	}
+	if (sections.places && sections.places.length) {
+		var places = [];
+		for (var p = 0; p < sections.places.length; p++) places.push(sections.places[p].join(','));
+		query.p = places.join('*');
+	}
+	if (sections.suggestion && sections.suggestion.length) query.s = sections.suggestion.join(',');
 	if (sections.order) query.o = sections.order;
 	return query;
 };
@@ -268,11 +315,15 @@ ActiveRoute.tableUrl = function (sections, basePath) {
 };
 
 ActiveRoute.parseQuery = function (query) {
-	var result = { columns: [], rows: [], filters: [] };
+	var result = { columns: [], tree: null, places: [], suggestion: null };
 	if (!query) return result;
 	if (query.c) result.columns = parseList(query.c, parseColumn);
-	if (query.r) result.rows    = parseList(query.r, parseBoundary);
-	if (query.f) result.filters = parseList(query.f, parseBoundary);
+	if (query.r) {
+		result.tree = parseRoot(query.r);
+		if (query.x) result.tree.entries = parseList(query.x, parseEntry);
+	}
+	if (query.p) result.places = parseList(query.p, parseIdList);
+	if (query.s) result.suggestion = parseIdList(query.s);
 	if (query.o) {
 		// La columnKey puede contener '!', así que se separa por el último.
 		var raw = String(query.o);
@@ -282,6 +333,12 @@ ActiveRoute.parseQuery = function (query) {
 		}
 	}
 	return result;
+};
+
+// ¿La ruta trae estado de la pivot (indicadores, filas o lugares)?
+ActiveRoute.hasContent = function (sections) {
+	return !!((sections.columns && sections.columns.length) || sections.tree ||
+		(sections.places && sections.places.length) || (sections.suggestion && sections.suggestion.length));
 };
 
 export default ActiveRoute;

@@ -3,10 +3,9 @@
  *
  * Mapea:
  *   - "@/table/..."  → la ruta real bajo table/
- *   - dependencias del proyecto (arr, promises, RegionSelection, ActiveBoundary,
- *     pivotValue, boundaryTree) → stubs mínimos en tests/_stubs, para poder
- *     cargar clases (p. ej. ActivePivot) que las importan sin arrastrar todo el
- *     framework del proyecto.
+ *   - dependencias del proyecto (arr, pivotValue, helper) → stubs
+ *     mínimos en tests/_stubs, para poder cargar clases (p. ej. ActivePivot) que
+ *     las importan sin arrastrar todo el framework del proyecto.
  */
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, resolve as pathResolve } from 'node:path';
@@ -16,13 +15,7 @@ function here() { return dirname(fileURLToPath(import.meta.url)); } // .../table
 // Especificadores del proyecto → archivo de stub.
 var STUBS = {
 	'@/common/framework/arr': '_stubs/arr.mjs',
-	'@/common/framework/promises': '_stubs/promises.mjs',
-	'@/table/classes/RegionSelection': '_stubs/RegionSelection.mjs',
-	'@/table/classes/RegionSelection.js': '_stubs/RegionSelection.mjs',
-	'@/map/classes/ActiveBoundary': '_stubs/ActiveBoundary.mjs',
 	'@/table/classes/pivotValue.js': '_stubs/pivotValue.mjs',
-	'@/table/classes/boundaryTree': '_stubs/boundaryTree.mjs',
-	'@/table/classes/boundaryTree.js': '_stubs/boundaryTree.mjs',
 	'@/map/js/helper': '_stubs/helper.mjs'
 };
 

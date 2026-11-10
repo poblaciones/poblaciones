@@ -14,7 +14,7 @@
 		<line :x1="zeroX" :y1="pad.t" :x2="zeroX" :y2="H - pad.b" class="zero-line" />
 
 		<g v-for="(row, ri) in layout" :key="'r-' + ri">
-			<text :x="pad.l - 6" :y="row.labelY" class="region-label" :class="{ 'region-label-group': row.isGroup }" text-anchor="end">
+			<text :x="pad.l - 6" :y="row.labelY" class="region-label" text-anchor="end">
 				<tspan v-for="(ln, li) in row.lines" :key="'ln-' + li" :x="pad.l - 6" :dy="li === 0 ? 0 : lineH">{{ ln }}</tspan>
 			</text>
 			<rect v-for="(seg, si) in row.segments" :key="'s-' + ri + '-' + si"
@@ -22,7 +22,7 @@
 					:style="{ fill: seg.color }" class="seg">
 				<title>{{ seg.title }}</title>
 			</rect>
-			<text v-if="!stacked && !allHundred" :x="row.totalX + 4" :y="row.cy + 3" class="region-total" :class="{ 'region-total-group': row.isGroup }">{{ fmtVal(row.total) }}</text>
+			<text v-if="!stacked && !allHundred" :x="row.totalX + 4" :y="row.cy + 3" class="region-total">{{ fmtVal(row.total) }}</text>
 		</g>
 	</svg>
 </template>
@@ -170,7 +170,7 @@
 						var cyG = barTop + loc.barH / 2;
 						var labelYG = cyG - (lines.length - 1) * loc.lineH / 2 + 3;
 						var itemG = { lines: lines, labelY: labelYG, y: barTop, cy: cyG, segments: gapSegments,
-							total: delta, totalX: xEnd, isGroup: !!r.isGroup };
+							total: delta, totalX: xEnd };
 						y += rowH + loc.rowGap;
 						return itemG;
 					}
@@ -202,7 +202,7 @@
 						: loc.pad.l + ((loc.stacked ? 100 : Math.min(sum, loc.axisMax)) / loc.axisMax) * loc.trackW;
 					var cy = barTop + loc.barH / 2;
 					var labelY = cy - (lines.length - 1) * loc.lineH / 2 + 3;
-					var item = { lines: lines, labelY: labelY, y: barTop, cy: cy, segments: segments, total: r.total, totalX: totalX, isGroup: !!r.isGroup };
+					var item = { lines: lines, labelY: labelY, y: barTop, cy: cy, segments: segments, total: r.total, totalX: totalX };
 					y += rowH + loc.rowGap;
 					return item;
 				});
@@ -287,8 +287,6 @@
 	.zero-line { stroke: #5e5e5e; stroke-width: 1.2; }
 	.tick-label { font-size: 10px; fill: #90a4ae; }
 	.region-label { font-size: 15px; fill: #546e7a; }
-	.region-label-group { font-weight: 700; fill: #37474f; }
 	.region-total { font-size: 11px; fill: #78909c; }
-	.region-total-group { font-weight: 700; fill: #546e7a; }
 	.seg { stroke: #5e5e5e; stroke-width: 0.1; vector-effect: non-scaling-stroke; }
 </style>

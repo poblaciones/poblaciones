@@ -26,7 +26,6 @@ function RegionDistribution(panel, dataset, options) {
 	this.panel = panel;
 	this.dataset = dataset;
 	this.pivot = options.pivot || null;
-	this.excludedGroups = options.excludedGroups || [];
 	this._rows = null;
 	this._totalCount = 0;
 	this._build();
@@ -82,7 +81,7 @@ RegionDistribution.prototype._build = function () {
 					rr.push({
 						label: src.label, fid: src.fid,
 						total: (src.delta != null ? src.delta : 0),
-						parts: parts, isGroup: false, isGap: true
+						parts: parts, isGap: true
 					});
 				} else if (usePercentAgg) {
 					// Incidencia del conjunto: suma de los valores sobre el universo
@@ -93,11 +92,11 @@ RegionDistribution.prototype._build = function () {
 					});
 					var su = 0;
 					for (var ui = 0; ui < aggParts.length; ui++) su += aggParts[ui].value;
-					rr.push({ label: src.label, fid: src.fid, total: su, parts: aggParts, isGroup: false });
+					rr.push({ label: src.label, fid: src.fid, total: su, parts: aggParts });
 				} else {
 					var s = 0;
 					for (var pi = 0; pi < parts.length; pi++) s += (parts[pi].value || 0);
-					rr.push({ label: src.label, fid: src.fid, total: s, parts: parts, isGroup: false });
+					rr.push({ label: src.label, fid: src.fid, total: s, parts: parts });
 				}
 			}
 			this._rows = this._filterAndOrder(rr);
@@ -116,16 +115,10 @@ RegionDistribution.prototype._build = function () {
 		? this.dataset.dataRows()
 		: [];
 
-	// El chart refleja las filas visibles de la pivot: regiones (data) y sus
-	// agrupadores (group-header, en negrita). Los encabezados de delimitación
-	// (region-header) no son barras. Un grupo colapsado oculta sus hijos
-	// (excludedGroups), pero el agrupador permanece con su subtotal.
-	var ex = this.excludedGroups;
+	// El chart refleja las filas del nivel de análisis de la pivot (dataRows).
 	var rows = [];
 	for (var r = 0; r < dataRows.length; r++) {
 		var dr = dataRows[r];
-		if (dr.type === 'region-header') continue;
-		if (dr.type === 'data' && ex.length && ex.indexOf(dr.parentLabel) !== -1) continue;
 
 		var parts = [];
 		var sum = 0;
@@ -145,8 +138,7 @@ RegionDistribution.prototype._build = function () {
 			label: dr.label,
 			fid: dr.fid,
 			total: sum,
-			parts: parts,
-			isGroup: dr.type === 'group-header'
+			parts: parts
 		});
 	}
 	this._rows = rows;
@@ -169,29 +161,21 @@ RegionDistribution.prototype.isComposed = function () {
 	return false;
 };
 
-// El Camino 1 resuelve directo desde el universo de la delimitación
-// (pivot.Regions.items, vía ResolveAllCategoriesByRegion), sin pasar por el
-// filtro de "sin datos en ningún indicador" que ya aplicó RefreshData al armar
-// pivot.Rows, ni por los grupos colapsados (excludedGroups, que es una
-// ocultación puramente de presentación). Sin este filtro, el Camino 1 graficaba
-// regiones sin dato y también los hijos de grupos colapsados, aunque la tabla no
-// los mostrara.
+// El Camino 1 resuelve directo desde los elementos del nivel de análisis (vía
+// ResolveAllCategoriesByRegion), sin pasar por el filtro de "sin datos en ningún
+// indicador" que ya aplicó RefreshData al armar pivot.Rows. Sin este filtro, el
+// Camino 1 graficaba regiones sin dato, aunque la tabla no las mostrara.
 //
 // dataset.dataRows() es la fuente de verdad de qué está VISIBLE con datos (ya
-// excluye lo sin dato); se cruza además con excludedGroups (que dataset.dataRows
-// no conoce, porque el colapso es un estado de la UI, no de la pivot) para
-// construir el orden y la visibilidad reales. Los fids que no aparecen en ese
-// conjunto se descartan; el resto se ordena igual que la tabla (el sort activo).
+// excluye lo sin dato): los fids que no aparecen en ese conjunto se descartan y
+// el resto se ordena igual que la tabla (el sort activo).
 RegionDistribution.prototype._visibleOrder = function () {
 	var dataRows = (this.dataset && typeof this.dataset.dataRows === 'function')
 		? this.dataset.dataRows() : [];
-	var ex = this.excludedGroups;
 	var rank = {};
 	var next = 0;
 	for (var i = 0; i < dataRows.length; i++) {
 		var dr = dataRows[i];
-		if (dr.type === 'region-header') continue;
-		if (dr.type === 'data' && ex.length && ex.indexOf(dr.parentLabel) !== -1) continue;
 		if (dr.fid != null && rank[dr.fid] === undefined) rank[dr.fid] = next++;
 	}
 	return rank;

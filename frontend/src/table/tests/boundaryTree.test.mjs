@@ -8,7 +8,7 @@
  */
 
 import { describe, it, expect, report } from './_harness.mjs';
-import { flattenLeaves, findBoundaryNode } from '../classes/boundaryTree.js';
+import { flattenLeaves, listBoundaryNodes, parseAncestors } from '../classes/boundaryTree.js';
 
 describe('boundaryTree — hojas planas', function () {
 	it('aplana un array de hojas sin agrupador', function () {
@@ -71,7 +71,7 @@ describe('boundaryTree — diccionario (formato anterior)', function () {
 	});
 });
 
-describe('boundaryTree — findBoundaryNode', function () {
+describe('boundaryTree — listBoundaryNodes', function () {
 	var tree = [
 		{ Id: null, Name: 'Límites políticos', Items: [
 			{ Id: 1, Name: 'Provincias', VersionId: 26, Items: [ { Id: 6, Name: 'BA' } ] },
@@ -80,14 +80,23 @@ describe('boundaryTree — findBoundaryNode', function () {
 			] }
 		] }
 	];
-	it('encuentra un nodo tipo por Id, sin confundir agrupadores con navegables', function () {
-		var node = findBoundaryNode(2, tree);
-		expect(node).toBeTruthy();
-		expect(node.Name).toBe('Departamentos');
-		expect(node.VersionId).toBe(25);
+	it('lista los nodos tipo en orden, sin confundir agrupadores con navegables', function () {
+		var nodes = listBoundaryNodes(tree);
+		expect(nodes).toHaveLength(2);
+		expect(nodes[1].node.Name).toBe('Departamentos');
+		expect(nodes[1].group).toBe('Límites políticos');
 	});
-	it('devuelve null si el Id no existe', function () {
-		expect(findBoundaryNode(999, tree)).toBeNull();
+});
+
+describe('boundaryTree — ancestros', function () {
+	it('parsea la lista de ancestros que manda el servidor', function () {
+		expect(parseAncestors('30,10')).toEqual([30, 10]);
+		expect(parseAncestors('')).toEqual([]);
+		expect(parseAncestors(null)).toEqual([]);
+	});
+	it('cada hoja lleva sus ancestros', function () {
+		var leaves = flattenLeaves({ VersionId: 1, Name: 'Localidades', Items: [ { Id: 50, Name: 'X', Ancestors: '30,10' } ] });
+		expect(leaves[0].Ancestors).toEqual([30, 10]);
 	});
 });
 

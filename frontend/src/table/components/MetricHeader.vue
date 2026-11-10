@@ -1,57 +1,80 @@
 <template>
-	<div class="metric-header">
-		<!-- Fila superior: Título y botón remover (el título ya no es trigger de sort) -->
+	<div class="metric-header measure-selector">
 		<div class="metric-header-top">
-			<div class="metric-title">
-				<span class="metric-name">{{ metric.properties.Metric.Name }}</span>
-			</div>
-			<button class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--dismiss mp-icon-btn--muted" @click="handleRemove" title="Remover métrica" aria-label="Remover métrica">×</button>
+			<span class="metric-name" :title="metricName">{{ metricName }}</span>
+			<button v-if="removable" class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--dismiss metric-remove" @click="handleRemove" title="Quitar indicador" aria-label="Quitar indicador">×</button>
 		</div>
 
-		<!-- Fila media: Variable lógica y modo de medición, juntos -->
-		<div class="metric-variable-section">
-			<variable-selector
-				:metric="metric"
-				:normalization-caption="normalizationCaption"
-				@select="selectVariable"
-				@open-change="onChildPanelOpen" />
-			<metric-mode-selector
-				:metric="metric"
-				:variable="getCurrentVariable()"
-				:level="getCurrentLevel()"
-				@change="onModeChange"
-				@cycle="cycleSummaryMetric"
-				@open-change="onChildPanelOpen" />
+		<div class="metric-measure">
+			<span ref="variableAnchor" class="metric-measure-text" :class="{ 'is-choice': hasVariableChoices }" :title="measureTooltip"
+						@click.stop="openMenu('variable', 'variableAnchor', hasVariableChoices)">{{ currentVariableName }}<span v-if="normalizationCaption" class="metric-measure-norm"> {{ normalizationCaption }}</span><span v-if="hasVariableChoices" class="metric-measure-arrow">▾</span></span>
+			<span ref="modeAnchor" class="metric-measure-mode" :class="{ 'is-choice': hasModeChoices }" :title="currentModeCaption"
+						@click.stop="openMenu('mode', 'modeAnchor', hasModeChoices)"><span v-html="modeBadgeHtml"></span><span v-if="hasModeChoices" class="metric-measure-arrow">▾</span></span>
 		</div>
+
+		<div v-if="open" class="measure-panel floating" :style="floatStyle">
+			<div v-if="menuKind === 'variable'" class="measure-section">
+				<div v-for="(name, index) in variableNames"
+						 :key="'variable-' + index"
+						 class="measure-option"
+						 :class="{ 'active': name === currentVariableName }"
+						 @click="selectVariable(name)">{{ name }}</div>
+			</div>
+			<div v-else class="measure-section">
+				<div v-for="opt in modeOptions"
+						 :key="'mode-' + opt.key"
+						 class="measure-option measure-mode-option"
+						 :class="{ 'active': opt.key === currentModeKey }"
+						 @click="selectMode(opt.key)">
+					<span class="measure-option-symbol" v-html="opt.symbol"></span>
+					<span class="measure-option-caption">{{ opt.caption }}</span>
+				</div>
+			</div>
 		</div>
+	</div>
 </template>
 
 <script>
 	import h from '@/map/js/helper';
-	import VariableSelector from '@/table/components/VariableSelector.vue';
-	import MetricModeSelector from '@/table/components/MetricModeSelector.vue';
+	import { valueHeader, valueHeaderForKey } from '@/table/classes/pivotValue.js';
+	import floatingDropdown from '@/table/components/floatingDropdown.js';
 
+	/*
+	 * MetricHeader — encabezado de un indicador: nombre en la primera línea; variable
+	 * y medida (tipo de métrica) en la segunda. Cada una, si tiene alternativas,
+	 * lleva su desplegable, que se abre con clic en el propio texto. No muta la
+	 * pivot: emite 'selection-changed' y 'metric-removed'.
+	 */
 	export default {
 		name: 'MetricHeader',
-		components: { VariableSelector, MetricModeSelector },
+		mixins: [floatingDropdown],
 
 		props: {
 			metric: { type: Object, required: true },
 			// Una variable normalizable nueva arranca en 'I' (incidencia) aunque el
 			// backend traiga 'N'. Se aplica una sola vez por métrica.
-			preferIncidenceMode: { type: Boolean, default: true }
+			preferIncidenceMode: { type: Boolean, default: true },
+			removable: { type: Boolean, default: true }
 		},
 
 		data() {
-			return { childPanelsOpen: 0 };
+			return { menuKind: 'variable' };
 		},
 
 		watch: {
-			anyPanelOpen(open) { this.$emit('panel-open', open); }
+			open(isOpen) { this.$emit('panel-open', isOpen); }
 		},
 
 		computed: {
-			anyPanelOpen() { return this.childPanelsOpen > 0; },
+			metricName() {
+				return this.metric.properties.Metric.Name;
+			},
+			variableNames() {
+				return this.metric.AvailableVariables();
+			},
+			currentVariableName() {
+				return this.metric.variableName() || '';
+			},
 			// Modos de resumen válidos para la variable/nivel de referencia (todas las
 			// selecciones comparten la variable lógica, así que el modo es común).
 			availableSummaryMetrics() {
@@ -59,12 +82,53 @@
 				var level = this.getCurrentLevel();
 				return this.metric.getValidMetrics ? this.metric.getValidMetrics(variable, level) : [];
 			},
+			modeOptions() {
+				var variable = this.getCurrentVariable();
+				var options = [];
+				for (var i = 0; i < this.availableSummaryMetrics.length; i++) {
+					var mode = this.availableSummaryMetrics[i];
+					options.push({ key: mode.Key, symbol: valueHeaderForKey(mode.Key, variable), caption: mode.Caption });
+				}
+				return options;
+			},
+			currentModeKey() {
+				return this.metric.properties.SummaryMetric;
+			},
+			currentModeCaption() {
+				for (var i = 0; i < this.availableSummaryMetrics.length; i++) {
+					if (this.availableSummaryMetrics[i].Key === this.currentModeKey) {
+						return this.availableSummaryMetrics[i].Caption;
+					}
+				}
+				return '';
+			},
+			modeBadgeHtml() {
+				return valueHeader(this.metric, this.getCurrentVariable());
+			},
+			hasVariableChoices() {
+				return this.variableNames.length > 1;
+			},
+			hasModeChoices() {
+				return this.modeOptions.length > 1;
+			},
 			normalizationCaption() {
 				if (this.metric.properties.SummaryMetric !== 'I') return '';
-				var cap = h.ResolveNormalizationCaption(this.getCurrentVariable(), false);
-				return (cap && cap !== '%') ? cap : '';
+				var caption = h.ResolveNormalizationCaption(this.getCurrentVariable(), false);
+				if (caption && caption !== '%') {
+					return caption;
+				}
+				return '';
 			},
-			isMultiVersion() { return this.metric.isMultiVersion(); }
+			measureTooltip() {
+				var text = this.currentVariableName;
+				if (this.normalizationCaption) {
+					text += ' ' + this.normalizationCaption;
+				}
+				if (this.currentModeCaption) {
+					text += ' — ' + this.currentModeCaption;
+				}
+				return text;
+			}
 		},
 
 		mounted() {
@@ -74,9 +138,8 @@
 				var variable = this.getCurrentVariable();
 				if (variable && (variable.IsSimpleCount || variable.IsCategorical)) {
 					this.metric.properties.SummaryMetric = 'N';
-				} else if (this.preferIncidenceMode) {
-					var hasIncidence = this.availableSummaryMetrics.some(function (m) { return m.Key === 'I'; });
-					if (hasIncidence) this.metric.properties.SummaryMetric = 'I';
+				} else if (this.preferIncidenceMode && this.hasAvailableMode('I')) {
+					this.metric.properties.SummaryMetric = 'I';
 				}
 				this.metric.properties._summaryInitialized = true;
 			}
@@ -84,47 +147,56 @@
 		},
 
 		beforeDestroy() {
-			if (this.anyPanelOpen) this.$emit('panel-open', false);
+			if (this.open) this.$emit('panel-open', false);
 		},
 
 		methods: {
-			onChildPanelOpen(open) {
-				this.childPanelsOpen += open ? 1 : -1;
-				if (this.childPanelsOpen < 0) this.childPanelsOpen = 0;
+			rootClass() { return 'measure-selector'; },
+			panelWidth() {
+				if (this.menuKind === 'mode') return 240;
+				return 300;
 			},
 
-			// ── Variable lógica (gobierna las selecciones) ────────────────────────
+			// Abre el desplegable de la variable o de la medida desde su texto; un
+			// segundo clic sobre el mismo lo cierra.
+			openMenu(kind, anchorRef, available) {
+				if (!available) return;
+				var sameMenu = this.open && this.menuKind === kind;
+				if (this.open) this.closePanel();
+				if (!sameMenu) {
+					this.menuKind = kind;
+					this.openPanel(this.$refs[anchorRef]);
+				}
+			},
+
 			selectVariable(variableName) {
-				this.metric.SelectByCaption(variableName);
+				this.closePanel();
+				this.metric.ChangeVariable(variableName);
 				this.ensureAvailableSummaryMetric();
 				this.emitSelectionChanged('Variable');
 			},
 
-			onModeChange(key) {
+			selectMode(key) {
+				this.closePanel();
 				this.metric.properties.SummaryMetric = key;
 				this.emitSelectionChanged('Value');
 			},
 
-			cycleSummaryMetric() {
-				var list = this.availableSummaryMetrics;
-				if (!list.length) return;
-				var idx = 0;
-				for (var n = 0; n < list.length; n++) {
-					if (list[n].Key === this.metric.properties.SummaryMetric) { idx = n; break; }
-				}
-				this.metric.properties.SummaryMetric = list[(idx + 1) % list.length].Key;
-				this.emitSelectionChanged('Value');
-			},
-
-			// ── Referencia para la UI (primera selección) ─────────────────────────
+			// Referencia para la UI (primera selección).
 			getCurrentLevel() { return this.metric.referenceLevel(); },
 			getCurrentVariable() { return this.metric.referenceVariable(); },
+
+			hasAvailableMode(key) {
+				for (var i = 0; i < this.availableSummaryMetrics.length; i++) {
+					if (this.availableSummaryMetrics[i].Key === key) return true;
+				}
+				return false;
+			},
 
 			ensureAvailableSummaryMetric() {
 				var list = this.availableSummaryMetrics;
 				if (!list.length) return;
-				var current = this.metric.properties.SummaryMetric;
-				if (!list.some(function (m) { return m.Key === current; })) {
+				if (!this.hasAvailableMode(this.metric.properties.SummaryMetric)) {
 					this.metric.properties.SummaryMetric = list[0].Key;
 				}
 			},
@@ -144,60 +216,112 @@
 
 <style scoped>
 	.metric-header {
-		background-color: #fff;
-		border: 1px solid #e0e0e0;
-		border-radius: 6px;
 		width: 100%;
-		min-width: 300px;
+		min-width: 220px;
 		position: relative;
-		padding: 10px 14px 0;
-		margin-bottom: 12px;
-		box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-		transition: box-shadow 0.2s ease;
+		padding: 8px 6px 6px 8px;
+		text-align: left;
+		color: #fff;
 	}
-
-		.metric-header:hover {
-			box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-		}
 
 	.metric-header-top {
 		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 8px;
-	}
-
-	.metric-title {
-		flex: 1;
+		align-items: flex-start;
+		gap: 6px;
 	}
 
 	.metric-name {
-		font-size: 15px;
+		flex: 1;
+		font-size: 14px;
 		font-weight: 600;
+		line-height: 1.25;
+	}
+
+	.metric-remove {
+		color: rgba(255, 255, 255, 0.75);
+		visibility: hidden;
+		margin-right: -5px;
+	}
+	.metric-header:hover .metric-remove {
+		visibility: visible;
+	}
+	.metric-remove:hover {
 		color: #1976d2;
 	}
 
-	.metric-variable-section {
-		position: relative;
-		margin-bottom: 8px;
+	.metric-measure {
 		display: flex;
-		align-items: center;
-		gap: 8px;
-		flex-wrap: nowrap;
+		align-items: flex-start;
+		gap: 6px;
+		margin-top: 3px;
+		font-size: 12px;
+		font-weight: 400;
+		line-height: 1.3;
+		color: rgba(255, 255, 255, 0.85);
+	}
+	.metric-measure-text {
+		flex: 1;
+		white-space: normal;
+		word-wrap: break-word;
+	}
+	.metric-measure-norm {
+		color: rgba(255, 255, 255, 0.65);
+	}
+	.metric-measure-mode {
+		font-weight: 600;
+		white-space: nowrap;
+	}
+	.is-choice {
+		cursor: pointer;
+		border-radius: 3px;
+	}
+	.is-choice:hover {
+		background-color: rgba(0, 0, 0, 0.15);
+		color: #fff;
+	}
+	.metric-measure-arrow {
+		margin-left: 4px;
+		font-size: 10px;
 	}
 
-	.sort-arrow {
-		font-size: 11px;
+	.measure-panel {
+		background-color: #fff;
+		border: 1px solid #e0e0e0;
+		border-radius: 4px;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+		overflow-y: auto;
+		text-align: left;
+	}
+	.measure-option {
+		padding: 7px 12px;
+		font-size: 13px;
+		font-weight: 400;
+		color: #424242;
+		line-height: 1.35;
+		cursor: pointer;
+		white-space: normal;
+		word-wrap: break-word;
+	}
+	.measure-option:hover {
+		background-color: #f5f5f5;
+	}
+	.measure-option.active {
+		background-color: #e9f2fd;
 		color: #1976d2;
 	}
-
-	@media (max-width: 768px) {
-		.metric-header {
-			padding: 8px 10px;
-		}
-
-		.metric-name {
-			font-size: 14px;
-		}
+	.measure-mode-option {
+		display: flex;
+		align-items: baseline;
+		gap: 8px;
+		white-space: nowrap;
+	}
+	.measure-option-symbol {
+		display: inline-block;
+		min-width: 38px;
+		font-weight: 700;
+		color: #1565c0;
+	}
+	.measure-option-caption {
+		color: #455a64;
 	}
 </style>

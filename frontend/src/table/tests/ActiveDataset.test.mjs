@@ -27,19 +27,20 @@ function cell(value, total) {
 }
 
 // Pivot mínimo: dos columnas (un total de población, una categoría educativa) y
-// dos filas de datos bajo un region-header.
+// dos filas del nivel de análisis bajo el encabezado de nivel.
 function fakePivot() {
 	var tuples = [
 		tuple({ key: 'pob', metricName: 'Población', summary: 'N', isTotal: true }),
 		tuple({ key: 'edu', metricName: 'Nivel educativo', variableName: 'Nivel', labelName: '0 a 5%', summary: 'P' })
 	];
-	var header = [{ Label: 'Provincias', isHeader: true, isRegionHeader: true, boundaryId: 7 }, cell(100), cell(40)];
-	var rowA = [{ Label: 'Buenos Aires', FID: 1, isHeader: true }, cell(60), cell(25)];
-	var rowB = [{ Label: 'Córdoba', FID: 2, isHeader: true }, cell(40), cell(15)];
+	var level = { boundary: { Id: 7, Name: 'Provincias' }, parentItem: null };
+	var header = [{ Label: 'Provincias (2)', isHeader: true, isLevelHeader: true, boundaryId: 7, level: level, depth: 0 }, cell(100), cell(40)];
+	var rowA = [{ Label: 'Buenos Aires', FID: 1, isHeader: true, isItem: true, inAnalysis: true, boundaryId: 7, level: level, depth: 1 }, cell(60), cell(25)];
+	var rowB = [{ Label: 'Córdoba', FID: 2, isHeader: true, isItem: true, inAnalysis: true, boundaryId: 7, level: level, depth: 1 }, cell(40), cell(15)];
 	return {
 		MetricTuples: { metricTuples: tuples },
 		Rows: [header, rowA, rowB],
-		FilterSet: { items: [] }
+		RowTree: { SelectionLeaves: function () { return []; } }
 	};
 }
 
@@ -52,7 +53,7 @@ describe('ActiveDataset — estructura', function () {
 	});
 	it('clasifica filas por tipo', function () {
 		var ds = new ActiveDataset(fakePivot());
-		expect(ds.regionHeaders()).toHaveLength(1);
+		expect(ds.levelHeaders()).toHaveLength(1);
 		expect(ds.dataRows()).toHaveLength(2);
 	});
 	it('alinea values[] por índice de columna', function () {
@@ -62,10 +63,28 @@ describe('ActiveDataset — estructura', function () {
 		expect(rows[0].values[0]).toBe(60); // pob
 		expect(rows[0].values[1]).toBe(25); // edu
 	});
-	it('regionTypes lista los encabezados de región', function () {
+	it('regionTypes lista la delimitación de las filas analizadas', function () {
 		var ds = new ActiveDataset(fakePivot());
 		expect(ds.regionTypes).toHaveLength(1);
 		expect(ds.regionTypes[0]).toBe('Provincias');
+	});
+});
+
+describe('ActiveDataset — filas fuera del nivel de análisis', function () {
+	it('un elemento de otro nivel se lista como item y no entra en dataRows', function () {
+		var pivot = fakePivot();
+		pivot.Rows[2][0].inAnalysis = false;
+		var ds = new ActiveDataset(pivot);
+		expect(ds.dataRows()).toHaveLength(1);
+		expect(ds.rows[2].type).toBe('item');
+	});
+	it('el parentLabel es el elemento del que cuelga el nivel', function () {
+		var pivot = fakePivot();
+		var child = { boundary: { Id: 9, Name: 'Municipios' }, parentItem: { FID: 1, Caption: 'Buenos Aires' } };
+		pivot.Rows.push([{ Label: 'Tandil', FID: 50, isHeader: true, isItem: true, inAnalysis: false, boundaryId: 9, level: child, depth: 3 }, cell(5), cell(1)]);
+		var ds = new ActiveDataset(pivot);
+		expect(ds.rows[3].parentLabel).toBe('Buenos Aires');
+		expect(ds.rows[3].levelCaption).toBe('Municipios');
 	});
 });
 

@@ -12,10 +12,8 @@
 						ref="table"
 						:pivot="pivot"
 						:active-analyses="activeAnalyses"
-						:initial-collapse="rowCollapse"
 						@toggle-analysis="onToggleAnalysis"
 						@data-refreshed="onDataRefreshed"
-						@collapse-changed="onCollapseChanged"
 						@error="onWidgetError" />
 				</div>
 
@@ -29,7 +27,6 @@
 						ref="distribution"
 						:dataset="dataset"
 						:pivot="pivot"
-						:excluded-groups="collapsedGroups"
 						:config="configFor('distribution')"
 						@config-changed="onConfigChanged('distribution', $event)"
 						@close="hideAnalysis('distribution')"
@@ -150,8 +147,6 @@ export default {
 			showDistribution: false,
 			showRelations: false,
 			analysisConfig: { summary: {}, distribution: {}, relations: {} },
-			rowCollapse: '',   // estado compacto de colapso de cortes de control (pivot)
-			collapsedGroups: [],   // nombres de grupos colapsados (para excluir en distribución)
 			colSplit: 0.5,
 			leftSplit: 0.5,
 			rightSplit: 0.5,
@@ -267,10 +262,13 @@ export default {
 			this._pendingStructural = false;
 			this.syncRoute(isStructural);
 		},
-		onCollapseChanged(payload) {
-			this.rowCollapse = (payload && payload.encoded) || '';
-			this.collapsedGroups = (payload && payload.keys) || [];
-			this.syncRoute();
+		// Rehace la pivot tras un cambio aplicado desde afuera (el arranque del work,
+		// que App.vue resuelve después de construida la pivot).
+		refreshPivot() {
+			var loc = this;
+			return this.pivot.Render().then(function () {
+				loc.syncRoute(false);
+			});
 		},
 		// Agrega un indicador a la pivot del tablero. Lo invoca App.vue cuando el
 		// popup de la barra superior emite su intención; la mutación vive acá
@@ -358,10 +356,10 @@ export default {
 			var query = _parseHashQuery(window.location.hash);
 			var sections = ActiveRoute.parseQuery(query);
 			this.pivot.Clear();
-			var hasContent = (sections.columns && sections.columns.length) ||
-							 (sections.rows && sections.rows.length) ||
-							 (sections.filters && sections.filters.length);
-			var start = hasContent ? this.pivot.Router.restore(sections) : Promise.resolve();
+			var start = Promise.resolve();
+			if (ActiveRoute.hasContent(sections)) {
+				start = this.pivot.Router.restore(sections);
+			}
 			Promise.resolve(start).then(function () {
 				return loc.pivot.Render();
 			}).then(function () {
@@ -375,13 +373,10 @@ export default {
 			var loc = this;
 			var query = _parseHashQuery(window.location.hash);
 			var sections = ActiveRoute.parseQuery(query);
-			var hasContent = (sections.columns && sections.columns.length) ||
-							 (sections.rows && sections.rows.length) ||
-							 (sections.filters && sections.filters.length);
-
-			var start = hasContent
-				? this.pivot.Router.restore(sections)
-				: Promise.resolve();
+			var start = Promise.resolve();
+			if (ActiveRoute.hasContent(sections)) {
+				start = this.pivot.Router.restore(sections);
+			}
 			Promise.resolve(start).then(function () {
 				return loc.pivot.Render();
 			}).then(function () {
@@ -395,10 +390,10 @@ export default {
 			});
 		},
 
-		// Restaura splitters, análisis visibles, config de relaciones y de
-		// distribución y colapso de cortes de la pivot, desde el parámetro 'dash'.
-		// Formato (5 segmentos separados por ';'):
-		//   "col,left,right;kind1,kind2;<relaciones>;<distribución>;<colapso-pivot>"
+		// Restaura splitters, análisis visibles y config de relaciones y de
+		// distribución, desde el parámetro 'dash'.
+		// Formato (4 segmentos separados por ';'):
+		//   "col,left,right;kind1,kind2;<relaciones>;<distribución>"
 		restoreDashState(query) {
 			if (!query || !query.dash) return;
 			try {
@@ -407,7 +402,6 @@ export default {
 				this.restoreVisible(parts[1]);
 				this.restoreRelationsConfig(parts[2]);
 				this.restoreDistributionConfig(parts[3]);
-				if (parts[4] != null) this.rowCollapse = parts[4];
 			} catch (e) { /* estado inválido: se ignora */ }
 		},
 		restoreSplits(segment) {
@@ -502,7 +496,7 @@ export default {
 
 			// Recorta segmentos finales vacíos: una tabla en su estado base queda con
 			// el dash mínimo en lugar de arrastrar separadores y defaults.
-			var segments = [splits, visible.join(','), relPart, distPart, (this.rowCollapse || '')];
+			var segments = [splits, visible.join(','), relPart, distPart];
 			while (segments.length > 1 && segments[segments.length - 1] === '') segments.pop();
 			return segments.join(';');
 		},

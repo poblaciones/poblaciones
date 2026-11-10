@@ -12,6 +12,12 @@
 			<i :class="mode.Icon" />
 		</button>
 
+		<button v-if="Use.UsePivot" type="button" @click="openTable" :disabled="!hasTableMetrics"
+						class="mp-btn mp-btn--float"
+						:title="tableButtonTitle" :aria-label="tableButtonTitle">
+			<i class="fas fa-table" />
+		</button>
+
 		<mp-dropdown-menu :items="shareItems" @itemClick="shareSelected" :floatRight="false" v-if="!hasNativeShare()"
 											icon="fas fa-share-alt" variant="float" tooltip="Compartir" @dropDownOpened="dropDownOpened" />
 
@@ -46,6 +52,7 @@
 	import arr from '@/common/framework/arr';
 
 	import MapExport from '@/map/classes/MapExport';
+	import TableLink from '@/map/classes/TableLink';
 	import authentication from '@/common/js/authentication';
 
 	export default {
@@ -76,6 +83,10 @@
 			isEmptyObject(obj) {
 				if (!obj || obj.constructor !== Object) return false;
 				return Object.keys(obj).filter(key => key !== '__ob__').length === 0;
+			},
+			// Muestra como tabla los indicadores activos, con la selección del mapa.
+			openTable() {
+				window.Popups.TableView.show(this.metrics);
 			},
 			showTutorial() {
 				window.Popups.Tour.show();
@@ -273,6 +284,15 @@
 		computed: {
 			Use() {
 				return this.config;
+			},
+			hasTableMetrics() {
+				return TableLink.TableMetrics(this.metrics).length > 0;
+			},
+			tableButtonTitle() {
+				if (this.hasTableMetrics) {
+					return 'Ver como tabla';
+				}
+				return 'Ver como tabla (requiere agregar indicadores al mapa)';
 			},
 			Embedded() {
 				return window.Embedded;
