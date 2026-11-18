@@ -17,18 +17,29 @@ use minga\framework\Log;
 use minga\framework\PhpSession;
 use minga\framework\Traffic;
 
-if (PhpSession::GetSessionValue('started', null) === null) {
+use helena\services\mcp\McpRateLimiter;
+
+// El conector MCP es anónimo y sin estado: no abre sesión.
+$requestHost = minga\framework\Request::Host();
+$requestUri = minga\framework\Request::GetRequestURI();
+$isMcpRequest = McpRateLimiter::IsMcpRequest($requestHost, $requestUri);
+$isMcpRoot = McpRateLimiter::IsMcpRoot($requestHost, $requestUri);
+
+if (!$isMcpRequest && PhpSession::GetSessionValue('started', null) === null) {
 	Session::StartSession();
 	PhpSession::SetSessionValue('started', Params::SafeServer('REQUEST_TIME'));
 }
 ob_start();
 
-App::$app->before(function(Request $request) {
+App::$app->before(function(Request $request) use ($isMcpRequest, $isMcpRoot) {
 	Profiling::BeginTimer("Request");
 
-	$add = minga\framework\Request::IP();
-	if ($add != '')
-		Traffic::RegisterIP($add, minga\framework\Request::UserAgent(), minga\framework\Request::GetRequestURI(), Session::IsMegaUser());
+	// El conector tiene un límite global propio (más abajo), no el control de tráfico por IP.
+	if (!$isMcpRequest) {
+		$add = minga\framework\Request::IP();
+		if ($add != '')
+			Traffic::RegisterIP($add, minga\framework\Request::UserAgent(), minga\framework\Request::GetRequestURI(), Session::IsMegaUser());
+	}
 
 	Performance::Begin();
 
@@ -38,6 +49,14 @@ App::$app->before(function(Request $request) {
 			Remember::CheckCookie();
 
 	Performance::ResolveControllerFromUri();
+	if ($isMcpRoot)
+		Performance::SetController(McpRateLimiter::CONTROLLER_NAME, strtolower(Params::SafeServer('REQUEST_METHOD')), true);
+
+	if ($isMcpRequest) {
+		$exceeded = McpRateLimiter::Check();
+		if ($exceeded !== null)
+			return $exceeded;
+	}
 
 	Headers::AcceptAnyCORS();
 	$route = $request->getPathInfo();
@@ -86,6 +105,10 @@ App::$app->options("{anything}", function () {
 	$response->headers->set('Access-Control-Allow-Headers',   'Authorization,Cache-Control,X-Requested-With,Full-Url,Session-Id,Remember-Token,Access-Link,Origin,Content-Type,Accept');
 	return $response;
 })->assert("anything", ".*");
+
+// El conector MCP va primero: en un host mcp.* atiende la raíz, que también define el frontend.
+// No depende de isAPIEnabled: un servidor sin API (cáscara del visor) también lo atiende, consultando al transaccional.
+require_once('api/mcp.php');
 
 require_once('authenticate.php');
 

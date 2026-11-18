@@ -5,10 +5,14 @@ use Symfony\Component\HttpFoundation\Request;
 use helena\controllers\frontend as controllers;
 use helena\classes\App;
 use helena\classes\Links;
+use helena\services\mcp\McpRateLimiter;
 
-App::$app->get('/', function (Request $request) {
-	return App::RedirectKeepingParams(Links::GetMapUrl());
-});
+// En un host mcp.* la raíz es del conector (routes/api/mcp.php): no se la redirige al mapa.
+if (!McpRateLimiter::IsMcpHost(\minga\framework\Request::Host())) {
+	App::$app->get('/', function (Request $request) {
+		return App::RedirectKeepingParams(Links::GetMapUrl());
+	});
+}
 
 App::$app->post('/', function (Request $request) {
 	return App::NotFoundResponse();
@@ -69,6 +73,7 @@ if (App::Settings()->Servers()->IsTransactionServerRequest()) {
 	require_once('frontend/crawler.php');
 	require_once('frontend/metric.php');
 	require_once('frontend/work.php');
+	require_once('frontend/mcp.php');
 
 	require_once('frontend/authentication.php');
 }

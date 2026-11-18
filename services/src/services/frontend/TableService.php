@@ -23,6 +23,7 @@ use helena\db\frontend\SnapshotByDatasetTileData;
 use helena\db\frontend\SnapshotByDatasetCompareTileData;
 use helena\entities\frontend\clipping\TileDataInfo;
 use helena\entities\frontend\geometries\Envelope;
+use helena\entities\frontend\geometries\Frame;
 use helena\entities\frontend\metric\MetricDataInfo;
 
 
@@ -133,6 +134,36 @@ class TableService extends BaseService
 		$version = $metric->GetVersion($metricVersionId);
 		$level = $version->GetLevel($levelId);
 
+		$table = $this->CreateLevelTable($level, $partition);
+
+		$rows = $table->GetAllRows();
+
+		$ret = new MetricDataInfo();
+		$ret->Items = $rows;
+		return $ret;
+	}
+
+	// Mismos datos que GetTableMetricData, limitados a ítems de regiones (sin caché).
+	public function GetTableMetricDataByRegions($metricId, $metricVersionId, $levelId, $partition, $clippingRegionIds)
+	{
+		$selectedService = new SelectedMetricService();
+		$metric = $selectedService->GetSelectedMetric($metricId);
+		$version = $metric->GetVersion($metricVersionId);
+		$level = $version->GetLevel($levelId);
+
+		$table = $this->CreateLevelTable($level, $partition);
+
+		$frame = new Frame();
+		$frame->ClippingRegionIds = $clippingRegionIds;
+		$frame->TileEnvelope = "full";
+
+		$ret = new MetricDataInfo();
+		$ret->Items = $table->GetRows($frame);
+		return $ret;
+	}
+
+	private function CreateLevelTable($level, $partition)
+	{
 		$snapshotTable = SnapshotByDatasetModel::SnapshotTable($level->Dataset->Table);
 
 		$hasDescriptions = false;
@@ -152,12 +183,7 @@ class TableService extends BaseService
 		$table->getGeometries = false;
 		$table->honorTileLimit = false;
 		$table->groupByGeographyItemId = true;
-
-		$rows = $table->GetAllRows();
-
-		$ret = new MetricDataInfo();
-		$ret->Items = $rows;
-		return $ret;
+		return $table;
 	}
 
 

@@ -31,6 +31,12 @@ class RouteProxy
 		$this->route->setRequirement($variable, $pattern);
 		return $this;
 	}
+
+	public function host(string $pattern): self
+	{
+		$this->route->setHost($pattern);
+		return $this;
+	}
 }
 
 // -------------------------------------------------------------------------

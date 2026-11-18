@@ -9,7 +9,7 @@ class Router
 {
 	public static function ProcessPath(&$route)
 	{
-		$specials = array('services', 'json', 'admin', 'geoarchivo', 'descargar');
+		$specials = array('services', 'json', 'admin', 'geoarchivo', 'descargar', 'mcp');
 		$route = Str::RemoveEnding($route, '/');
 		$parts = Str::ExplodeNoEmpty('/', $route);
 		if(count($parts) == 0 || in_array($parts[0], $specials))

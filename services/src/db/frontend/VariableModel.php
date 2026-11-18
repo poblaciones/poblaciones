@@ -26,8 +26,10 @@ class VariableModel extends BaseModel
 
 										data.dco_field AS mvv_data_field,
 										data.dco_variable AS mvv_data_column_variable,
+										data.dco_label AS mvv_data_column_label,
 										normalization.dco_field AS mvv_normalization_field,
 										normalization.dco_variable AS mvv_normalization_column_variable,
+										normalization.dco_label AS mvv_normalization_column_label,
 
 										gap_data.dco_field AS mvv_gap_data_field,
 										gap_data.dco_variable AS mvv_gap_data_column_variable,

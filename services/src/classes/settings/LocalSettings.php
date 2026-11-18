@@ -13,6 +13,7 @@ class LocalSettings extends Settings
 	private static $limits = NULL;
 	private static $help = NULL;
 	private static $suggestions = NULL;
+	private static $mcp = NULL;
 
 	public function Map()
 	{
@@ -30,6 +31,14 @@ class LocalSettings extends Settings
 
 		return self::$suggestions;
 	}
+	public function Mcp() : McpSettings
+	{
+		if (self::$mcp == NULL)
+			self::$mcp = new McpSettings();
+
+		return self::$mcp;
+	}
+
 	public function ServiceCache()
 	{
 		if (self::$cache == NULL)

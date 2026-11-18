@@ -413,6 +413,30 @@ class Variable
 			return self::SpecialColumnToLabel($specialColumnEnum);
 	}
 
+	/**
+	 * Nombre legible del numerador y del denominador de la variable, tal como los muestra
+	 * su fórmula: 'data' (término de datos) y 'normalization' (término de normalización, vacío si no hay).
+	 */
+	public static function GetTermCaptions($variable)
+	{
+		return array(
+			'data' => self::GetTermCaption($variable, 'mvv_data'),
+			'normalization' => self::GetTermCaption($variable, 'mvv_normalization')
+		);
+	}
+
+	private static function GetTermCaption($variable, $field)
+	{
+		if ($field === 'mvv_data' && $variable['mvv_data_column_is_categorical'])
+			return self::SpecialColumnToLabel(SpecialColumnEnum::Count);
+		$label = null;
+		if (isset($variable[$field . '_column_label']))
+			$label = $variable[$field . '_column_label'];
+		if ($label === null || $label === '')
+			$label = $variable[$field . '_column_variable'];
+		return self::GetRichColumnCaption($variable[$field], $label);
+	}
+
 	public static function SpecialColumnToLabel($dc)
 	{
 		$label = null;

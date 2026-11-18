@@ -365,6 +365,9 @@ class SelectedMetricService extends BaseService
 			$variableInfo = new VariableInfo();
 			$variableInfo->Fill($variable);
 			$variableInfo->Formula = Variable::FormulaToString($variable);
+			$termCaptions = Variable::GetTermCaptions($variable);
+			$variableInfo->DataCaption = $termCaptions['data'];
+			$variableInfo->NormalizationCaption = $termCaptions['normalization'];
 			if ($variableInfo->Legend !== null && $variableInfo->Legend !== "")
 			{
 				$variableInfo->Asterisk = $asterisk;

@@ -70,7 +70,7 @@ class WorkFlags
 					$work->getDatasetLabelsChanged() == false &&
 					$work->getDatasetDataChanged() == false &&
 					$work->getMetricLabelsChanged() == false &&
-					$work->getMetricDataChanged();
+					$work->getMetricDataChanged() == false;
 
 		Profiling::EndTimer();
 

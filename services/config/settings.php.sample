@@ -20,6 +20,20 @@ Context::Settings()->Servers()->RegisterServers("http://mapa.institucional.org",
 // Context::Settings()->Servers()->LoopLocalPort = 8000;
 
 
+// **** Conector MCP (servidor para el chat de Claude)
+// Se habilita en el servidor que atiende /mcp y en el servidor transaccional (/services/mcp/*).
+// App::Settings()->Mcp()->Enabled = true;
+// App::Settings()->Mcp()->AllowedOrigins = ['https://claude.ai', 'https://claude.com'];
+// App::Settings()->Mcp()->MaxCallsPerMinute = 600;
+// App::Settings()->Mcp()->MaxResponseChars = 100000;
+// App::Settings()->Mcp()->DefaultRows = 200;
+// App::Settings()->Mcp()->MaxRows = 1000;
+// App::Settings()->Mcp()->MaxListableRows = 20000;
+// App::Settings()->Mcp()->MaxDefaultColumns = 40;
+// App::Settings()->Mcp()->InlineBoundaryItemsLimit = 800;
+// Ids de geografía (por ejemplo, la de radios) cuyos niveles no se listan en el conector:
+// App::Settings()->Mcp()->ListingRestrictedGeographyIds = [];
+
 // **** Keys de terceros
 Context::Settings()->Keys()->GoogleMapsKey = "GOOGLE_MAPS_KEY";
 
