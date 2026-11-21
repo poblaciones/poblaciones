@@ -12,6 +12,7 @@ use helena\classes\App;
 use helena\classes\Links;
 use helena\classes\DbFile;
 use helena\classes\Session;
+use helena\classes\BasemapLayerTypeEnum;
 use helena\classes\Statistics;
 use helena\db\frontend\FileModel;
 use helena\services\common\BaseService;
@@ -193,6 +194,7 @@ class WorkService extends BaseService
 		$workInfo->StatsMonths = Statistics::ResolveWorkMonths($workId);
 		$workInfo->StatsQuarters = Statistics::ResolveWorkQuarters($workId);
 		$workInfo->ExtraMetrics = $this->GetExtraMetrics($workId);
+		$workInfo->BasemapLayers = $this->GetBasemapLayerStarts($workId);
 		$workInfo->Startup = $this->GetStartupInfo($workId);
 		$workInfo->PendingReviewSince = $this->GetPendingReviewSince($workId);
 		$workIdShardified = PublishDataTables::Shardified($workId);
@@ -238,6 +240,56 @@ class WorkService extends BaseService
 		Arr::SortByKey($ret, 'Caption');
 		Profiling::EndTimer();
 		return $ret;
+	}
+
+	// Todas las capas base disponibles con su estado de inicio en la cartografía.
+	// Sin fila propia rige el valor por defecto del tipo de capa.
+	private function GetBasemapLayerStarts($workId)
+	{
+		Profiling::BeginTimer();
+		$sql = "SELECT bml_id AS Id, bml_type AS Type, bml_caption AS Caption,
+						bml_icon AS Icon, wbl_start_active AS StartActive
+					FROM basemap_layer
+					LEFT JOIN draft_work_basemap_layer ON wbl_layer_id = bml_id AND wbl_work_id = ?
+					ORDER BY bml_order, bml_id";
+		$rows = App::Db()->fetchAll($sql, array($workId));
+		$ret = array();
+		foreach ($rows as $row)
+		{
+			if ($row['StartActive'] === null)
+			{
+				$row['StartActive'] = BasemapLayerTypeEnum::IsActiveByDefault($row['Type']);
+			}
+			else
+			{
+				$row['StartActive'] = (bool)$row['StartActive'];
+			}
+			$ret[] = $row;
+		}
+		Profiling::EndTimer();
+		return $ret;
+	}
+
+	public function UpdateBasemapLayerStart($workId, $layerId, $active)
+	{
+		Profiling::BeginTimer();
+		$exists = App::Db()->fetchScalarInt("SELECT COUNT(*) FROM basemap_layer WHERE bml_id = ?", array($layerId));
+		if ($exists == 0)
+		{
+			throw new PublicException('La capa base indicada no existe.');
+		}
+		$activeValue = 0;
+		if ($active)
+		{
+			$activeValue = 1;
+		}
+		App::Db()->exec("INSERT INTO draft_work_basemap_layer (wbl_work_id, wbl_layer_id, wbl_start_active) VALUES (?, ?, ?)
+						ON DUPLICATE KEY UPDATE wbl_start_active = VALUES(wbl_start_active)", array($workId, $layerId, $activeValue));
+		App::Db()->markTableUpdate('draft_work_basemap_layer');
+
+		WorkFlags::SetMetadataDataChanged($workId);
+		Profiling::EndTimer();
+		return self::OK;
 	}
 
 	private function GetWorkStartupClippingRegionExtra($workId)

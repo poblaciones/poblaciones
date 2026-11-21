@@ -176,7 +176,7 @@ ActiveSelectedMetric.prototype.matchesComparableFilter = function (variable) {
 
 ActiveSelectedMetric.prototype.SelectedLevelCanBeCompared = function () {
 	if (!this.useComparer()) return false;
-	if (this.IsMultiLevel() && this.LastLevelDontMultilevel()) {
+	if (this.HasSeparateBottomLevel()) {
 		return this.SelectedLevel() !== this.BottomLevel();
 	}
 	return true;

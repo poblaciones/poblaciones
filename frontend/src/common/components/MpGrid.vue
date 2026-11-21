@@ -42,7 +42,7 @@
 				:md-sort.sync="sortProperty"
 				:md-sort-order.sync="sortOrder"
 				:md-sort-fn="identitySort"
-				:style="[{ maxWidth: maxWidth }, headerWidthVars]"
+				:style="[{ maxWidth: maxWidth }, headerWidthVars, emptyTableStyle]"
 				:class="{ 'mp-grid-has-actions': resolvedActions.length > 0, 'mp-grid-empty-table': rows.length === 0 }"
 				md-card
 				@md-selected="onMdSelected">
@@ -651,6 +651,26 @@ export default {
 			}
 			return vars;
 		},
+		// Sin filas Vue Material no dibuja el encabezado ni las celdas, y la tabla
+		// (que mide lo que miden sus columnas) quedaría de ancho cero: la grilla se
+		// achica con ella y el mensaje de vacío se parte palabra por palabra y
+		// se corta hacia la izquierda. Se le fija como mínimo la suma de sus columnas.
+		emptyTableStyle() {
+			if (this.rows.length > 0) {
+				return {};
+			}
+			var total = 0;
+			for (var i = 0; i < this.allColumns.length; i++) {
+				total += parseInt(this.allColumns[i].width, 10) || 0;
+			}
+			if (this.resolvedActions.length > 0) {
+				total += parseInt(this.actionsColumnWidth, 10);
+			}
+			if (this.isMultiSelectActive) {
+				total += 48;
+			}
+			return { minWidth: total + 'px' };
+		},
 		activeSortColumn() {
 			for (var i = 0; i < this.allColumns.length; i++) {
 				if (this.allColumns[i].property === this.sortProperty) {
@@ -1212,20 +1232,14 @@ export default {
 	position: relative;
 }
 
-// El mensaje de vacío se superpone centrado sobre el área de contenido de
-// la tabla (que conserva su altura mínima), debajo del encabezado, en lugar
-// de quedar como un bloque separado más abajo.
+// El mensaje de vacío va en el flujo normal, debajo del encabezado de la tabla:
+// así siempre se ve (no depende de posicionamiento) y deja claro que la lista
+// está vacía y no cargándose.
 .mp-grid-empty {
-	position: absolute;
-	left: 0;
-	right: 0;
-	top: 48px;
-	bottom: 0;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	color: #888;
-	pointer-events: none;
+	padding: 28px 12px;
+	text-align: center;
+	color: #666;
+	font-size: 15px;
 }
 
 .mp-grid-empty-text {
@@ -1249,12 +1263,6 @@ export default {
 ::v-deep thead th:nth-child(11) { width: var(--mp-col-11-width); }
 ::v-deep thead th:nth-child(12) { width: var(--mp-col-12-width); }
 
-// Con la tabla vacía se reserva una altura mínima (aprox. cuatro filas) en
-// el cuerpo para que el bloque no quede reducido a la línea del encabezado;
-// el mensaje de vacío se centra en ese espacio (ver .mp-grid-empty).
-::v-deep .mp-grid-empty-table .md-table-content {
-	min-height: 160px;
-}
 
 	.mp-grid-pagination-bar {
 		display: grid;

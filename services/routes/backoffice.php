@@ -43,6 +43,7 @@ if (App::Settings()->Servers()->IsTransactionServerRequest())
 	require_once('packs/gradient.php');
 	require_once('packs/metricCatalog.php');
 	require_once('packs/geographyTuple.php');
+	require_once('packs/basemapLayer.php');
 
 }
 

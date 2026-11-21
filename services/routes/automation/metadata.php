@@ -67,7 +67,9 @@ App::$app->post('/services/api/automation/AddSourceToWork', function (Request $r
 });
 
 /**
- * Crea una fuente nueva y la vincula a la cartografía.
+ * Vincula a la cartografía la fuente con ese nombre y edición, y la crea si no existe.
+ * Si ya existe, la reutiliza sin modificar sus datos. Si existe pero es de uso privado en obras ajenas,
+ * falla con un mensaje claro, porque la clave única (nombre, edición) impide crear otra.
  *
  * Parámetros POST:
  *   w           (int, obligatorio)    – work ID
@@ -77,7 +79,7 @@ App::$app->post('/services/api/automation/AddSourceToWork', function (Request $r
  *   web         (string, opcional)    – URL de la fuente
  *   institution (string, opcional)    – nombre de la institución productora
  *
- * Respuesta: { result: "ok", source_id }
+ * Respuesta: { result: "ok", source_id, reused }
  */
 App::$app->post('/services/api/automation/CreateOrReuseAndAddSource', function (Request $request) {
 	AutomationAuth::Authenticate();
@@ -93,6 +95,20 @@ App::$app->post('/services/api/automation/CreateOrReuseAndAddSource', function (
 
 	//
 	$controller = new services\SourceService();
+
+	$work = App::Orm()->find(entities\DraftWork::class, $workId);
+	$metadataId = $work->getMetadata()->getId();
+
+	// Reutilizar la fuente existente con el mismo nombre y edición
+	$existing = $controller->FindByCaptionAndVersion($name, $edition);
+	if ($existing !== null) {
+		$metadataService = new services\MetadataService();
+		$metadataService->CompleteSource($existing);
+		if (!$existing->getIsGlobal() && !$existing->getIsEditableByCurrentUser())
+			throw new PublicException('Ya existe una fuente con ese nombre y edición, de uso privado en otras cartografías. Use otro nombre u otra edición.');
+		$controller->AddSourceToMetadata($workId, $metadataId, $existing->getId());
+		return App::Json(['result' => 'ok', 'source_id' => $existing->getId(), 'reused' => true]);
+	}
 
 	// Construir la entidad Source
 	$source = new entities\DraftSource();
@@ -111,16 +127,13 @@ App::$app->post('/services/api/automation/CreateOrReuseAndAddSource', function (
 		$source->setInstitution($institution);
 	}
 
-	$work = App::Orm()->find(entities\DraftWork::class, $workId);
-	$metadataId = $work->getMetadata()->getId();
-
 	$saved = $controller->Update($workId, $metadataId, $source);
 	$sourceId = $saved->getId();
 
 	// Vincular a la cartografía
 	$controller->AddSourceToMetadata($workId, $metadataId, $sourceId);
 
-	return App::Json(['result' => 'ok', 'source_id' => $sourceId]);
+	return App::Json(['result' => 'ok', 'source_id' => $sourceId, 'reused' => false]);
 });
 
 // ******* Instituciones *******************************************************

@@ -248,6 +248,12 @@ class WorkClone
 		RowDuplicator::DuplicateRows(entities\DraftWorkExtraMetric::class, $this->sourceWorkId, $static, 'wmt_work_id');
 	}
 
+	public function CopyBasemapLayers()
+	{
+		$static = array('wbl_work_id' => $this->targetWorkId);
+		RowDuplicator::DuplicateRows(entities\DraftWorkBasemapLayer::class, $this->sourceWorkId, $static, 'wbl_work_id');
+	}
+
 	public function CopyPermissions()
 	{
 		$static = array('wkp_work_id' => $this->targetWorkId);

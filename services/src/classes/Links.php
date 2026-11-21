@@ -95,6 +95,8 @@ class Links
 	{
 		return '/services/metadata/GetMetadataPdf?m=' . $metadataId;
 	}
+	// $regionItemId: un id de región, o varios separados por coma. Con varios se antepone un bloque de encuadre
+	// vacío ('@'): sin él, el visor tomaría el bloque de recorte como encuadre y fijaría el zoom.
 	public static function GetWorkMetricUrl($workId, $metricId, $regionItemId = null)
 	{
  		// http://desa.poblaciones.org/map/3501/#/l=6301&!r19166
@@ -103,6 +105,8 @@ class Links
 		else
 			$basePart = self::GetMapUrl();
 		$regionPart = ($regionItemId ? '/&!r' . $regionItemId : '');
+		if (strpos(strval($regionItemId), ',') !== false)
+			$regionPart = '/@' . substr($regionPart, 1);
 		$metricPart = ($metricId ? '/l=' . $metricId : '');
 		return $basePart . '/#' . $regionPart . $metricPart;
 	}

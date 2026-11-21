@@ -5,6 +5,7 @@ namespace helena\services\backoffice\publish;
 use helena\caches\DownloadCache;
 use helena\caches\DatasetShapesCache;
 use helena\caches\FabListsCache;
+use helena\caches\BasemapLayersCache;
 use helena\caches\SelectedMetricsMetadataCache;
 use helena\caches\MetricGroupsMetadataCache;
 use helena\caches\MetricProvidersMetadataCache;
@@ -61,12 +62,18 @@ class CacheManager
 		PdfMetadataCache::Cache()->Clear($metadataIdShardified);
 		DictionaryMetadataCache::Cache()->Clear($metadataIdShardified);
 		SelectedBoundaryCache::Cache()->Clear();
+		BasemapLayersCache::Cache()->Clear();
 	}
 
 	public function CleanFabListsCache()
 	{
 		FabListsCache::Cache()->Clear();
 		self::CleanMetricProvidersMetadataCache();
+	}
+
+	public function CleanBasemapLayersCache()
+	{
+		BasemapLayersCache::Cache()->Clear();
 	}
 
 	public function CleanWorkHandlesCache($workId)
@@ -105,6 +112,7 @@ class CacheManager
 		BoundarySummaryCache::Cache()->Clear();
 
 		FabListsCache::Cache()->Clear();
+		BasemapLayersCache::Cache()->Clear();
 
 		SuggestionLabelsCache::Cache()->Clear();
 	}
@@ -112,12 +120,14 @@ class CacheManager
 	{
 		SelectedBoundaryCache::Cache()->Clear();
 		BoundaryVisiblityCache::Cache()->Clear();
+		BasemapLayersCache::Cache()->Clear();
 
 		SuggestionLabelsCache::Cache()->Clear();
 	}
 	public function CleanSelectedMetricCache()
 	{
 		FabListsCache::Cache()->Clear();
+		BasemapLayersCache::Cache()->Clear();
 		SelectedMetricsMetadataCache::Cache()->Clear();
 		self::CleanMetricGroupsMetadataCache();
 		self::CleanMetricProvidersMetadataCache();
@@ -136,6 +146,7 @@ class CacheManager
 		DatasetShapesCache::Cache()->Clear();
 		DownloadCache::Cache()->Clear();
 		FabListsCache::Cache()->Clear();
+		BasemapLayersCache::Cache()->Clear();
 		SelectedMetricsMetadataCache::Cache()->Clear();
 		SuggestionLabelsCache::Cache()->Clear();
 	}

@@ -5,7 +5,7 @@
 				<tr>
 					<td colspan="3" class="statsHeader">
 						<div v-if="!variable.IsSimpleCount || version.Levels.length > 1" :style="levelLabelMargin">
-							<mp-dropdown-menu v-if="version.Levels.length > 1" :items="levelItems"
+							<mp-dropdown-menu v-if="hasLevelSelector" :items="levelItems"
 																icon="fas exp-hiddable-inline fa-caret-down" tooltip="Nivel de agregación" @itemClick="levelSelected">
 								<template slot="trigger">
 									{{ level.Name }}
@@ -124,9 +124,16 @@ export default {
 		},
 	},
 	computed: {
+		// El nivel de ubicaciones aparte no se elige ni se fija: no sigue al zoom.
+		hasLevelSelector() {
+			if (this.metric.HasSeparateBottomLevel() && this.level === this.metric.BottomLevel()) {
+				return false;
+			}
+			return this.metric.MultilevelCount() > 1;
+		},
 		levelLabelMargin() {
 			var margin = 0;
-			if (this.version.Levels.length > 1) {
+			if (this.hasLevelSelector) {
 				margin -= 20;
 			}
 			return 'margin-right: ' + margin + 'px;';
@@ -185,7 +192,7 @@ export default {
 		levelItems() {
 			var ret = [];
 			var levels = this.version.Levels;
-			for (var n = 0; n < levels.length; n++) {
+			for (var n = 0; n < this.metric.MultilevelCount(); n++) {
 				ret.push({
 					label: levels[n].Name,
 					key: n,

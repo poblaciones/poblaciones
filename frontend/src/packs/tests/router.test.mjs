@@ -33,7 +33,7 @@ it('la raíz redirige a /boundaries y cualquier ruta desconocida a /404', () => 
 
 it('/boundaries muestra el Layout con un alias por cada pestaña', () => {
 	const route = routeByPath('/boundaries');
-	expect(route.alias).toEqual(['/regions', '/geographies', '/gradients', '/groups', '/providers', '/geography-tuples']);
+	expect(route.alias).toEqual(['/regions', '/geographies', '/gradients', '/groups', '/providers', '/geography-tuples', '/basemap-layers']);
 	expect(route.name).toBe('Inicio');
 	expect(route.meta.title).toBe('Inicio');
 	expect(route.hidden).toBe(true);

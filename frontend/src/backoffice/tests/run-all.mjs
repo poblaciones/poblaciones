@@ -67,6 +67,7 @@ await import('./datasetView.test.mjs');
 await import('./contentView.test.mjs');
 await import('./codesSelection.test.mjs');
 await import('./customizeMetrics.test.mjs');
+await import('./customizeBasemapLayers.test.mjs');
 await import('./stepMetric.test.mjs');
 await import('./metadataSources.test.mjs');
 await import('./metadataInstitutions.test.mjs');

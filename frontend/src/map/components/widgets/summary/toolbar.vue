@@ -300,9 +300,6 @@
 			basemapMetrics() {
 				return this.toolbarStates.basemapMetrics;
 			},
-			useElevation() {
-				return this.toolbarStates.hasElevation;
-			},
 			hasConfiguration() {
 				return (this.config && !this.isEmptyObject(this.config));
 			},

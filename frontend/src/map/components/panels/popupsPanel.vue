@@ -2,6 +2,7 @@
 	<div>
 		<WorkMetadata ref="showFuente" :backgroundColor="backgroundColor" />
 		<ClippingMetadata ref="showClippingMetadata" :backgroundColor="backgroundColor" />
+		<BasemapMetadata ref="showBasemapMetadata" :backgroundColor="backgroundColor" />
 		<CompareMetadata ref="showCompareMetadata" :backgroundColor="backgroundColor" />
 		<MetricDownload ref="showMetricDownload" :backgroundColor="backgroundColor" />
 		<AnnotationItem ref="showAnnotationItem" :backgroundColor="backgroundColor" />
@@ -21,6 +22,7 @@
 <script>
 import WorkMetadata from '@/map/components/popups/workMetadata';
 import ClippingMetadata from '@/map/components/popups/clippingMetadata';
+import BasemapMetadata from '@/map/components/popups/basemapMetadata';
 import CompareMetadata from '@/map/components/popups/compareMetadata';
 import MetricCustomize from '@/map/components/popups/metricCustomize';
 import AnnotationItem from '@/map/components/popups/annotationItem';
@@ -44,6 +46,7 @@ export default {
 		Tour,
 		Embedding,
 		ClippingMetadata,
+		BasemapMetadata,
 		CompareMetadata,
 		BoundaryCustomize,
 		MetricCustomize,
@@ -59,6 +62,7 @@ export default {
 		window.Popups.Embedding = this.$refs.showEmbedding;
 		window.Popups.WorkMetadata = this.$refs.showFuente;
 		window.Popups.ClippingMetadata = this.$refs.showClippingMetadata;
+		window.Popups.BasemapMetadata = this.$refs.showBasemapMetadata;
 		window.Popups.Tour = this.$refs.showTour;
 		window.Popups.CompareMetadata = this.$refs.showCompareMetadata;
 		window.Popups.BoundaryCustomize = this.$refs.showBoundaryCustomize;

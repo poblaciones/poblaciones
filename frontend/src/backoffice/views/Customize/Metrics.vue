@@ -19,7 +19,7 @@
 								<md-table v-model="metricList" md-sort="Caption" md-sort-order="asc" md-card="">
 									<md-table-row slot="md-table-row" slot-scope="{ item }">
 										<md-table-cell md-label="Nombre">{{ item.Caption }}</md-table-cell>
-										<md-table-cell md-label="¿Activo?" class="mpNoWrap">
+										<md-table-cell md-label="Activo al inicio" class="mpNoWrap">
 											<md-switch v-model="item.StartActive" class="md-primary" :disabled="!Work.CanEdit()"
 																 @change="value => SetActive(value, item)"></md-switch>
 										</md-table-cell>

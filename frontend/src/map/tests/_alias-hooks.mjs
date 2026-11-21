@@ -101,6 +101,10 @@ export function resolve(specifier, context, nextResolve) {
         if (specifier.startsWith('vue-material-design-icons/')) {
                 return { url: stubUrl('mdi-icon.mjs'), shortCircuit: true };
         }
+        // Las imágenes de @/common también las resuelve webpack (devuelve su URL).
+        if (specifier.startsWith('@/common/') && specifier.endsWith('.png')) {
+                return { url: stubUrl('empty.mjs'), shortCircuit: true };
+        }
         // Los .css los resuelve webpack; fuera de él no son módulos.
         if (specifier.endsWith('.css')) {
                 return { url: stubUrl('empty.mjs'), shortCircuit: true };

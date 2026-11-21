@@ -109,6 +109,7 @@
 
 	import session from '@/common/framework/session';
 	import authentication from '@/common/js/authentication';
+	import BasemapLayerSet from '@/map/classes/BasemapLayerSet';
 
 	// Helpers del selector (ajustá la ruta a donde ubiques estos archivos).
 	import { addIndicatorSubtitles, addBoundarySubtitles } from '@/map/components/widgets/sideToolbar/selectorSubtitles';
@@ -171,13 +172,17 @@
 				splitPanels: null,
 				featureNavigation: { Key: null, Values: [], GettingKey: null },
 				toolbarStates: {
-					selectionMode: 'PAN', tutorialOpened: 0, showLabels: true, showElevation: false,
+					selectionMode: 'PAN', tutorialOpened: 0, showLabels: true,
 					collapsed: false, repositionSearch: false, leftPanelVisible: false,
 					legendMinimized: false,
-					basemapMetrics: [
+					// Todas las capas del panel «Detalles del mapa», en orden.
+					basemapLayers: [
 
 					],
-					hasElevation: false
+					// Subconjunto de basemapLayers que carga datos (indicadores y delimitaciones).
+					basemapMetrics: [
+
+					]
 				},
 				flyRightTimeoutId: null,
 				clipping: {
@@ -385,8 +390,9 @@
 					loc.config = res.data;
 					loc.config.IsMobile = loc.$isMobile();
 					loc.user = res.data.User;
-					loc.toolbarStates.hasElevation = (loc.config.ElevationUrl != null);
-					arr.AddRange(loc.toolbarStates.basemapMetrics, loc.config.BasemapMetrics);
+					var basemapLayers = BasemapLayerSet.Build(loc.config.BasemapLayers);
+					arr.AddRange(loc.toolbarStates.basemapLayers, basemapLayers);
+					arr.AddRange(loc.toolbarStates.basemapMetrics, BasemapLayerSet.GetLoadable(basemapLayers));
 
 					if (!Embedded.Active && (loc.config.Suggestions.useSuggestions && (
 						loc.config.Suggestions.selectedUsers.length == 0 || loc.config.Suggestions.selectedUsers.includes(loc.user.User)))) {

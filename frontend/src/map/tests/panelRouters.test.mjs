@@ -35,69 +35,87 @@ it('ToRoute emite [lat recortada, lon recortada, zoom con z]; sin coord usa el c
 describe('BasemapRouter: ruta de salida');
 
 function makeBasemapSegMap() {
-        const segMap = setupWindow();
-        const calls = [];
-        segMap.mapTypeState = 'r';
-        segMap.GetMapTypeState = function () { return segMap.mapTypeState; };
-        segMap.SetShowElevation = function (v) { calls.push(['SetShowElevation', v]); };
-        segMap.SetMapTypeState = function (t) { calls.push(['SetMapTypeState', t]); };
-        segMap.ToggleBasemapMetric = function (layer) { calls.push(['ToggleBasemapMetric', layer.RouteTag]); };
-        segMap.toolbarStates = { showLabels: true, showElevation: false, basemapMetrics: [] };
-        segMap.routerCalls = calls;
-        return segMap;
+	const segMap = setupWindow();
+	const calls = [];
+	segMap.mapTypeState = 'r';
+	segMap.GetMapTypeState = function () { return segMap.mapTypeState; };
+	segMap.SetBasemapRasterVisible = function (layer, v) { calls.push(['SetBasemapRasterVisible', layer.RouteTag, v]); };
+	segMap.SetMapTypeState = function (t) { calls.push(['SetMapTypeState', t]); };
+	segMap.ToggleBasemapMetric = function (layer) { calls.push(['ToggleBasemapMetric', layer.RouteTag]); };
+	segMap.toolbarStates = { showLabels: true, basemapLayers: [], basemapMetrics: [] };
+	segMap.routerCalls = calls;
+	return segMap;
+}
+
+function makeLayer(type, tag, visible) {
+	return { Id: tag, Type: type, RouteTag: tag, Visible: visible };
 }
 
 it('con el mapa base por default la ruta queda vacía (no se serializa)', () => {
-        const segMap = makeBasemapSegMap();
-        expect(new BasemapRouter().ToRoute()).toEqual([]);
+	const segMap = makeBasemapSegMap();
+	segMap.toolbarStates.basemapLayers = [makeLayer('L', null, true), makeLayer('R', 'e', false)];
+	expect(new BasemapRouter().ToRoute()).toEqual([]);
 });
 
-it('etiquetas apagadas, elevación y métricas de base visibles se acumulan al mapType', () => {
-        const segMap = makeBasemapSegMap();
-        const router = new BasemapRouter();
-        segMap.toolbarStates.showLabels = false;
-        expect(router.ToRoute()).toEqual(['rn']);
-        segMap.toolbarStates.showElevation = true;
-        expect(router.ToRoute()).toEqual(['rne']);
-        segMap.toolbarStates.basemapMetrics = [{ Visible: true, RouteTag: 't' }, { Visible: false, RouteTag: 'x' }];
-        expect(router.ToRoute()).toEqual(['rnet']);
-        segMap.mapTypeState = 's';
-        expect(router.ToRoute()).toEqual(['snet']);
+it('etiquetas apagadas, rasters y capas de base visibles se acumulan al mapType en el orden del panel', () => {
+	const segMap = makeBasemapSegMap();
+	const router = new BasemapRouter();
+	const raster = makeLayer('R', 'e', false);
+	const metric = makeLayer('M', 't', false);
+	const hidden = makeLayer('B', 'x', false);
+	segMap.toolbarStates.basemapLayers = [raster, metric, hidden];
+	segMap.toolbarStates.showLabels = false;
+	expect(router.ToRoute()).toEqual(['rn']);
+	raster.Visible = true;
+	expect(router.ToRoute()).toEqual(['rne']);
+	metric.Visible = true;
+	expect(router.ToRoute()).toEqual(['rnet']);
+	segMap.mapTypeState = 's';
+	expect(router.ToRoute()).toEqual(['snet']);
 });
 
-it('una métrica de base invisible no suma su tag', () => {
-        const segMap = makeBasemapSegMap();
-        segMap.toolbarStates.basemapMetrics = [{ Visible: false, RouteTag: 't' }];
-        expect(new BasemapRouter().ToRoute()).toEqual([]);
+it('una capa de base invisible no suma su tag', () => {
+	const segMap = makeBasemapSegMap();
+	segMap.toolbarStates.basemapLayers = [makeLayer('M', 't', false)];
+	expect(new BasemapRouter().ToRoute()).toEqual([]);
 });
 
-it('frameFromRoute interpreta mapType, n (sin etiquetas) y e (elevación), y marca métricas visibles', () => {
-        const segMap = makeBasemapSegMap();
-        const metric = { Visible: false, RouteTag: 't' };
-        segMap.toolbarStates.basemapMetrics = [metric];
-        const router = new BasemapRouter();
-        const frame = router.frameFromRoute(['st']);
-        expect(frame.MapType).toBe('s');
-        expect(frame.ShowLabels).toBeTruthy();
-        expect(frame.Elevation).toBeFalsy();
-        expect(frame.VisibleBaseMetrics).toEqual([metric]);
-        expect(metric.Visible).toBe(true);
-        expect(router.frameFromRoute(['rn']).ShowLabels).toBeFalsy();
-        expect(router.frameFromRoute(['re']).Elevation).toBeTruthy();
+it('frameFromRoute interpreta mapType, n (sin etiquetas), rasters y marca capas visibles', () => {
+	const segMap = makeBasemapSegMap();
+	const metric = makeLayer('M', 't', false);
+	const raster = makeLayer('R', 'e', false);
+	segMap.toolbarStates.basemapLayers = [raster, metric];
+	const router = new BasemapRouter();
+	const frame = router.frameFromRoute(['st']);
+	expect(frame.MapType).toBe('s');
+	expect(frame.ShowLabels).toBeTruthy();
+	expect(frame.VisibleRasters).toEqual([]);
+	expect(frame.VisibleBaseMetrics).toEqual([metric]);
+	expect(metric.Visible).toBe(true);
+	expect(router.frameFromRoute(['rn']).ShowLabels).toBeFalsy();
+	expect(router.frameFromRoute(['re']).VisibleRasters).toEqual([raster]);
 });
 
-it('FromRoute aplica el estado del mapa y activa las métricas viajadas en la ruta', () => {
-        const segMap = makeBasemapSegMap();
-        const metric = { Visible: false, RouteTag: 't' };
-        segMap.toolbarStates.basemapMetrics = [metric];
-        new BasemapRouter().FromRoute(['st']);
-        expect(segMap.routerCalls).toEqual([
-                ['SetShowElevation', false],
-                ['SetMapTypeState', 's'],
-                ['ToggleBasemapMetric', 't'],
-        ]);
-        // el router habilita y deshabilita SaveRoute alrededor de la restauración
-        expect(segMap.SaveRoute.Disabled).toBe(false);
+it('FromRoute aplica el estado del mapa y activa las capas indicadas en la ruta', () => {
+	const segMap = makeBasemapSegMap();
+	const metric = makeLayer('M', 't', false);
+	const raster = makeLayer('R', 'e', false);
+	segMap.toolbarStates.basemapLayers = [raster, metric];
+	new BasemapRouter().FromRoute(['st']);
+	expect(segMap.routerCalls).toEqual([
+		['SetBasemapRasterVisible', 'e', false],
+		['SetMapTypeState', 's'],
+		['ToggleBasemapMetric', 't'],
+	]);
+	// el router habilita y deshabilita SaveRoute alrededor de la restauración
+	expect(segMap.SaveRoute.Disabled).toBe(false);
+});
+
+it('FromRoute enciende un raster cuya letra está en la ruta', () => {
+	const segMap = makeBasemapSegMap();
+	segMap.toolbarStates.basemapLayers = [makeLayer('R', 'e', false)];
+	new BasemapRouter().FromRoute(['re']);
+	expect(segMap.routerCalls[0]).toEqual(['SetBasemapRasterVisible', 'e', true]);
 });
 
 describe('FeatureInfoRouter: feature solicitado por ruta');

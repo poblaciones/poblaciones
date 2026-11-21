@@ -54,7 +54,7 @@ FrameRouter.prototype.FromRoute = function (args, updateRoute, skipRestore) {
 	}
 	if (framing.MapType && framing.MapTypeLegacy) {
 		segmentedMap.toolbarStates.showLabels = framing.ShowLabels;
-		segmentedMap.SetShowElevation(framing.Elevation);
+		segmentedMap.SetBasemapRastersByRouteTag('e', framing.Elevation);
 		segmentedMap.SetMapTypeState(framing.MapType);
 	}
 	segmentedMap.SaveRoute.Disabled = false;

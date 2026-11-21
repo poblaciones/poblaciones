@@ -64,6 +64,9 @@ App::$app->get('/services/backoffice/GetFactories', function (Request $request) 
 	$ret['Boundary'] = $boundaryService->GetNewBoundary();
 	$ret['BoundaryVersion'] = $boundaryService->GetNewBoundaryVersion();
 
+	$basemapLayerService = new packsServices\BasemapLayerService();
+	$ret['BasemapLayer'] = $basemapLayerService->GetNewBasemapLayer();
+
 	$clippingRegionService = new packsServices\ClippingRegionService();
 	$ret['ClippingRegion'] = $clippingRegionService->GetNewClippingRegion();
 
@@ -222,6 +225,16 @@ App::$app->get('/services/backoffice/UpdateExtraMetricStart', function (Request 
 
 	$controller = new services\WorkService();
 	return App::Json($controller->UpdateExtraMetricStart($workId, $metricId, $active));
+});
+
+App::$app->get('/services/backoffice/UpdateBasemapLayerStart', function (Request $request) {
+	$workId = Params::GetIntMandatory('w');
+	if ($denied = Session::CheckIsWorkEditor($workId)) return $denied;
+	$layerId = Params::GetIntMandatory('l');
+	$active = Params::GetBoolMandatory('a');
+
+	$controller = new services\WorkService();
+	return App::Json($controller->UpdateBasemapLayerStart($workId, $layerId, $active));
 });
 
 App::$app->get('/services/backoffice/RemoveExtraMetric', function (Request $request) {

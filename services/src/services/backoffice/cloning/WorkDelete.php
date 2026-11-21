@@ -31,6 +31,7 @@ class WorkDelete
 
 		$this->doDeleteWorkVersions();
 		$this->doDeleteExtraMetrics();
+		$this->doDeleteBasemapLayers();
 		$this->doDeleteIcons();
 		$this->doDeleteAnnotations();
 		$this->doDeleteOnBoarding();
@@ -93,6 +94,12 @@ class WorkDelete
 		App::Db()->exec($delete, array($this->workId));
 		App::Db()->markTableUpdate('draft_work_extra_metric');
 
+	}
+	private function doDeleteBasemapLayers()
+	{
+		$delete = "DELETE FROM draft_work_basemap_layer WHERE wbl_work_id = ?";
+		App::Db()->exec($delete, array($this->workId));
+		App::Db()->markTableUpdate('draft_work_basemap_layer');
 	}
 	private function doDeleteIcons()
 	{

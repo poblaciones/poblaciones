@@ -30,17 +30,22 @@
           <mp-close-button @click="closePanel" title="Cerrar" class="rightButton" />
           <div class="section-title" style="margin-bottom: 4px;">Detalles del mapa</div>
           <div class="map-layers-list">
-            <div v-for="layer, index in activeLayers"
-                 :key="index"
-                 class="mp-list-row layer-item hand" :class="(layer.Separator ? 'layer-separator' : '')"
+            <div v-for="layer in toolbarStates.basemapLayers"
+                 :key="layer.Id"
+                 class="mp-list-row layer-item hand" :class="{ 'layer-separator': layer.Separator }"
                  @click="toggleLayer(layer)">
               <div class="layer-info">
-                <i :class="layer.Icon" class="layer-icon"></i>
+                <i :class="iconOf(layer)" class="layer-icon"></i>
                 <span class="layer-name">{{ layer.Caption }}</span>
               </div>
-              <div class="layer-toggle">
-                <div class="toggle-switch" :class="{ 'active': layer.Visible }">
-                  <div class="toggle-slider"></div>
+              <div class="layer-actions">
+                <button v-if="layer.Metadata" type="button" class="mp-btn mp-btn--icon layer-metadata"
+                        :title="sourceTitle(layer)" :aria-label="sourceTitle(layer)"
+                        @click.stop="showMetadata(layer)"><i class="fas fa-link"></i></button>
+                <div class="layer-toggle">
+                  <div class="toggle-switch" :class="{ 'active': isVisible(layer) }">
+                    <div class="toggle-slider"></div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -77,7 +82,7 @@
 
 	import { mixin as clickaway } from 'vue-clickaway';
 
-  import arr from '@/common/framework/arr';
+  import BasemapLayerSet from '@/map/classes/BasemapLayerSet';
   import defaultMapType from '@/common/assets/maps/default.png';
   import streetsMapType from '@/common/assets/maps/streets.png';
   import satelliteMapType from '@/common/assets/maps/satellite.png';
@@ -121,47 +126,10 @@
             class: 'preview-blank',
             asset: ''
           }
-        ],
-        mapLayers: [{
-          Id: 'labels',
-          Caption: 'Etiquetas',
-          Icon: 'fas fa-tag',
-          Visible: true
-        }, {
-          Id: 'elevation',
-          Caption: 'Relieve',
-          Icon: 'fas fa-mountain',
-          Visible: false
-        }]
-        /*
-                  {
-                    id: 'roads',
-                    name: 'Rutas',
-                    icon: 'fas fa-road',
-                    Visible: true
-                  },
-                  {
-                    id: 'rivers',
-                    name: 'Cursos de agua',
-                    icon: 'fas fa-water',
-                    Visible: false
-                  },
-                  {
-                    id: 'trains',
-                    name: 'Trenes',
-                    icon: 'fas fa-train',
-                    Visible: false
-                  }
-                ]*/
+        ]
       };
     },
     mounted() {
-      // Detectar si es dispositivo táctil
-      //this.isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-      var labels = arr.GetByProperty(this.mapLayers, 'Id', 'labels');
-      if (labels) {
-				labels.Visible = this.toolbarStates.showLabels;
-      }
 			this.escapeHandler = new EscapeCloseHandler(this.closePanel, { useHistory: this.$isMobile() });
       if (this.isExpanded) {
         this.escapeHandler.Open();
@@ -174,9 +142,6 @@
       this.escapeHandler.Close();
     },
     computed: {
-      useElevation() {
-        return this.toolbarStates.hasElevation;
-      },
       currentMapStyle() {
         return this.mapStyles.find(s => s.id === this.currentMapStyleId);
       },
@@ -193,16 +158,7 @@
             break;
         }
         return this.mapStyles.find(s => s.id === next);
-			},
-      activeLayers() {
-        var ret = [];
-        for (var l of this.mapLayers) {
-          if (l.Id != 'elevation' || this.useElevation) {
-            ret.push(l);
-          }
-        }
-        return ret;
-      }
+			}
     },
     methods: {
       handleClick() {
@@ -236,11 +192,26 @@
         }
       },
       expandit() {
-        for (var l of this.mapLayers) {
-          if (l.Id == 'elevation') {
-            l.Visible = this.toolbarStates.showElevation;
-          }
+        // Las capas ya son reactivas (toolbarStates.basemapLayers): nada que sincronizar.
+      },
+      // Etiquetas se rige por el estado general del mapa; el resto, por su propia visibilidad.
+      isVisible(layer) {
+        if (layer.Type === BasemapLayerSet.TYPE_LABELS) {
+          return this.toolbarStates.showLabels;
         }
+        return layer.Visible;
+      },
+      iconOf(layer) {
+        if (layer.Icon) {
+          return layer.Icon;
+        }
+        return 'fas fa-layer-group';
+      },
+      sourceTitle(layer) {
+        return 'Fuente de ' + layer.Caption;
+      },
+      showMetadata(layer) {
+        window.Popups.BasemapMetadata.show(layer);
       },
       closePanel() {
         this.isExpanded = false;
@@ -280,28 +251,20 @@
         }, 150);
       },
       toggleLayer(layer) {
-        if (layer.Id == 'labels') {
-          layer.Visible = !layer.Visible;
+        if (layer.Type === BasemapLayerSet.TYPE_LABELS) {
           window.SegMap.ToggleShowLabels();
-        } else if (layer.Id == 'elevation') {
-          window.SegMap.ToggleShowElevation();
-          layer.Visible = this.toolbarStates.showElevation;
+        } else if (layer.Type === BasemapLayerSet.TYPE_RASTER) {
+          window.SegMap.ToggleBasemapRaster(layer);
         } else {
           window.SegMap.ToggleBasemapMetric(layer);
         }
         this.$emit('layerToggled', {
           layerId: layer.Id,
-          Visible: layer.Visible
+          Visible: this.isVisible(layer)
         });
       }
     },
     watch: {
-      'toolbarStates.showLabels'(val) {
-        var labels = arr.GetByProperty(this.mapLayers, 'Id', 'labels');
-        if (labels) {
-          labels.Visible = val;
-        }
-      },
       isExpanded(value) {
         if (value) {
           this.escapeHandler.Open();
@@ -420,6 +383,47 @@
 .layer-separator {
 	border-bottom: 1px solid #cdcdcd;
 	border-radius: 0px;
+}
+
+.layer-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* Metadatos: a la izquierda del interruptor, visible al pasar el cursor sobre
+   la fila; en pantallas táctiles no hay hover, así que queda siempre visible. */
+.layer-metadata {
+  width: 22px;
+  height: 22px;
+  min-height: 0;
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  line-height: 22px;
+  font-size: 14px;
+  background: transparent;
+  border: 0;
+  color: #666;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.layer-metadata:hover {
+  color: #4a90e2;
+}
+
+.layer-item:hover .layer-metadata,
+.layer-metadata:focus {
+  opacity: 1;
+}
+
+@media (hover: none), (max-width: 768px) {
+  .layer-metadata {
+    opacity: 1;
+  }
 }
 
 .map-type-card:hover {

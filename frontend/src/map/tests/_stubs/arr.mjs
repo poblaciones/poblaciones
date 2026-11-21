@@ -7,6 +7,13 @@ export default {
                         list.splice(i, 1);
                 }
         },
+        RemoveById(list, id) {
+                const i = list.findIndex(function (x) { return x.Id === id; });
+                if (i !== -1) {
+                        list.splice(i, 1);
+                }
+        },
+        GetIds(list) { return list.map(function (x) { return x.Id; }); },
         InsertAt(list, index, item) { list.splice(index, 0, item); },
         Clear(list) { list.splice(0, list.length); },
         Fill(list, items) { list.splice(0, list.length, ...items); },

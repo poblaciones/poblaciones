@@ -194,6 +194,33 @@ App::$app->post('/services/api/automation/AppendExtraMetric', function (Request 
 });
 
 /**
+ * Agrega un ícono propio a la cartografía. Luego se lo usa como símbolo de un
+ * marcador o de una categoría, indicando `name` como nombre del ícono.
+ *
+ * Parámetros POST:
+ *   w     (int, obligatorio)    – work ID
+ *   n     (string, obligatorio) – nombre del ícono (es el nombre que se usa como símbolo)
+ *   image (string, obligatorio) – imagen en base64 con formato data URL (data:image/png;base64,...)
+ *
+ * Respuesta: { icon_id: int, name: string }
+ */
+App::$app->post('/services/api/automation/CreateWorkIcon', function (Request $request) {
+	AutomationAuth::Authenticate();
+
+	$workId = Params::GetIntMandatory('w');
+	if ($denied = Session::CheckIsWorkEditor($workId))
+		return $denied;
+
+	$name = Params::GetMandatory('n');
+	$image = Params::GetMandatory('image');
+
+	$controller = new services\WorkService();
+	$icon = $controller->CreateWorkIcon($workId, $name, $image);
+
+	return App::Json(['icon_id' => $icon->getId(), 'name' => $name]);
+});
+
+/**
  * Descarga todos los datasets de una cartografía como archivo ZIP.
  * El ZIP incluye los datasets y un archivo metadata.json, pero no el PDF
  * de metadatos (descargable por separado vía GetWorkMetadataPdf).

@@ -27,7 +27,7 @@ export const constantRouterMap = [
  },
 {
 	path: '/boundaries',
-	alias: ['/regions', '/geographies', '/gradients', '/groups', '/providers', '/geography-tuples', ],
+	alias: ['/regions', '/geographies', '/gradients', '/groups', '/providers', '/geography-tuples', '/basemap-layers'],
 		name: 'Inicio',
 		hidden: true,
 			component: () => import('@/packs/views/Layout.vue'),

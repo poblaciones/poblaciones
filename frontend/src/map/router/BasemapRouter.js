@@ -1,4 +1,5 @@
 import h from '@/map/js/helper';
+import BasemapLayerSet from '@/map/classes/BasemapLayerSet';
 
 export default BasemapRouter;
 
@@ -24,12 +25,10 @@ BasemapRouter.prototype.ToRoute = function (coord) {
 	if (!segmentedMap.toolbarStates.showLabels) {
 		mapType += 'n';
 	}
-	if (segmentedMap.toolbarStates.showElevation) {
-		mapType += 'e';
-	}
-	for (var basemapMetric of segmentedMap.toolbarStates.basemapMetrics) {
-		if (basemapMetric.Visible) {
-			mapType += basemapMetric.RouteTag;
+	// Rasters, indicadores y delimitaciones visibles, en el orden del panel
+	for (var layer of segmentedMap.toolbarStates.basemapLayers) {
+		if (layer.RouteTag && layer.Visible) {
+			mapType += layer.RouteTag;
 		}
 	}
 	if (mapType !== 'r') {
@@ -47,7 +46,9 @@ BasemapRouter.prototype.FromRoute = function (args, updateRoute, skipRestore) {
 	segmentedMap.SaveRoute.Disabled = true;
 	if (framing.MapType) {
 		segmentedMap.toolbarStates.showLabels = framing.ShowLabels;
-		segmentedMap.SetShowElevation(framing.Elevation);
+		for (var raster of BasemapLayerSet.GetByType(segmentedMap.toolbarStates.basemapLayers, BasemapLayerSet.TYPE_RASTER)) {
+			segmentedMap.SetBasemapRasterVisible(raster, framing.VisibleRasters.includes(raster));
+		}
 		segmentedMap.SetMapTypeState(framing.MapType);
 		for (var layer of framing.VisibleBaseMetrics) {
 			layer.Visible = false;
@@ -60,7 +61,6 @@ BasemapRouter.prototype.FromRoute = function (args, updateRoute, skipRestore) {
 BasemapRouter.prototype.frameFromRoute = function (args) {
 	//var mapType = 'r';
 	var showLabels = true;
-	var elevation = false;
 	var setting = args[0];
 	var segmentedMap = window.SegMap;
 
@@ -71,23 +71,25 @@ BasemapRouter.prototype.frameFromRoute = function (args) {
 	if (setting.includes('n')) {
 		showLabels = false;
 	}
-	if (setting.includes('e')) {
-		elevation = true;
-	}
 	var visibleBaseMetrics = [];
-	/*si contiene estas letras, lo agrega en...
+	var visibleRasters = [];
+	/* Si contiene la letra de una capa, la marca. En indicadores y delimitaciones
 	ojo que no los cargó... solo les setea el visible en true */
-	for (var basemapMetric of segmentedMap.toolbarStates.basemapMetrics) {
-		if (setting.includes(basemapMetric.RouteTag)) {
-			basemapMetric.Visible = true;
-			visibleBaseMetrics.push(basemapMetric);
+	for (var layer of segmentedMap.toolbarStates.basemapLayers) {
+		if (layer.RouteTag && setting.includes(layer.RouteTag)) {
+			if (layer.Type === BasemapLayerSet.TYPE_RASTER) {
+				visibleRasters.push(layer);
+			} else if (BasemapLayerSet.IsLoadable(layer)) {
+				layer.Visible = true;
+				visibleBaseMetrics.push(layer);
+			}
 		}
 	}
 
 	var frame = {
 		MapType: mapType,
-		Elevation: elevation,
 		ShowLabels: showLabels,
+		VisibleRasters: visibleRasters,
 		VisibleBaseMetrics: visibleBaseMetrics
 	};
 	return frame;

@@ -181,6 +181,7 @@ StartMap.prototype.ReceiveWorkStartup = function (startup, frame) {
 		this.StartByDefaultFrame(frame, function () {
 			loc.LoadAnnotations();
 			loc.LoadStartMetrics(startup);
+			window.SegMap.ApplyBasemapLayersStartup(startup.BasemapLayers);
 		});
 		return;
 	}
@@ -188,6 +189,7 @@ StartMap.prototype.ReceiveWorkStartup = function (startup, frame) {
 	this.Finish();
 	this.LoadAnnotations();
 	this.LoadStartMetrics(startup);
+	window.SegMap.ApplyBasemapLayersStartup(startup.BasemapLayers);
 };
 
 StartMap.prototype.LoadAnnotations = function () {

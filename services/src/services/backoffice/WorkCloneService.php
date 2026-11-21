@@ -52,6 +52,7 @@ class WorkCloneService extends BaseService
 				return $this->state->ReturnState(false, array('targetWorkId'));
 			case self::STEP_COPY_PERMISSIONS:
 				$cloner->CopyExtraMetrics();
+				$cloner->CopyBasemapLayers();
 				$cloner->CopyPermissions();
 				$cloner->CopyIcons();
 				$cloner->CopyDiskUsage();

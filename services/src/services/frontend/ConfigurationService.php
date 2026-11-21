@@ -122,6 +122,8 @@ class ConfigurationService extends BaseService
 		}
 
 		$mainServer = App::Settings()->Servers()->Main();
+		$basemapLayerService = new BasemapLayerService();
+		$basemapLayers = $basemapLayerService->GetLayers();
 
 		$mapAccess = '';
 		if (is_array(Context::Settings()->Keys()->GoogleMapsKey))
@@ -148,7 +150,9 @@ class ConfigurationService extends BaseService
 									'StaticWorks' =>  App::Settings()->Map()->ContentServerWorks,
 									'UseGradients' => App::Settings()->Map()->UseGradients,
 									'UseTextures' => App::Settings()->Map()->UseTextures,
+									// BasemapMetrics y ElevationUrl se conservan por compatibilidad: el cliente usa BasemapLayers.
 									'BasemapMetrics' => App::Settings()->Map()->BasemapMetrics,
+									'BasemapLayers' => $basemapLayers,
 
 									'UseAnnotations' =>  App::Settings()->Map()->UseAnnotations,
 									'UsePerimeter' =>  App::Settings()->Map()->UsePerimeter,

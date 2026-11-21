@@ -23,6 +23,7 @@ function ActiveWork(workInfo, workListMetadata) {
 	this.ArkUrl = workInfo.ArkUrl;
 	this.Startup = workInfo.Startup;
 	this.ExtraMetrics = workInfo.ExtraMetrics;
+	this.BasemapLayers = workInfo.BasemapLayers;
 	this.Icons = workInfo.Icons;
 	this.Onboarding = workInfo.Onboarding;
 	this.workListMetadata = workListMetadata;
@@ -291,6 +292,13 @@ ActiveWork.prototype.UpdateExtraMetricStart = function (metric) {
 	this.WorkChanged();
 	return axiosClient.getPromise(window.host + '/services/backoffice/UpdateExtraMetricStart', args,
 		'actualizar el indicador adicional');
+};
+
+ActiveWork.prototype.UpdateBasemapLayerStart = function (layer) {
+	var args = { 'w': this.properties.Id, 'l': layer.Id, 'a': (layer.StartActive ? 1 : 0) };
+	this.WorkChanged();
+	return axiosClient.getPromise(window.host + '/services/backoffice/UpdateBasemapLayerStart', args,
+		'actualizar la capa base predeterminada');
 };
 
 ActiveWork.prototype.RemoveExtraMetric = function (metric) {

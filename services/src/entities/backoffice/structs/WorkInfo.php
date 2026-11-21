@@ -14,6 +14,7 @@ class WorkInfo
 	public $Type;
 	public $Onboarding;
 	public $ExtraMetrics;
+	public $BasemapLayers;
 	public $Startup;
 	public $StatsMonths;
 	public $StatsQuarters;

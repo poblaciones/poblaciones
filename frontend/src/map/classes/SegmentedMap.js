@@ -19,6 +19,7 @@ import ActiveRecents from './ActiveRecents';
 import axios from 'axios';
 import promises from '@/common/framework/promises';
 import str from '@/common/framework/str';
+import BasemapLayerSet from '@/map/classes/BasemapLayerSet';
 import { loadProgressBar } from '@/common/js/axiosProgressBar.js';
 
 // import { loadProgressBar } from 'axios-progress-bar';
@@ -373,9 +374,6 @@ SegmentedMap.prototype.SetTypeControlsDefault = function () {
 };
 
 SegmentedMap.prototype.MapTypeChanged = function (mapTypeState) {
-	/*if (mapTypeState === 's' || mapTypeState === 'h') {
-		this.toolbarStates.showElevation = false;
-	}*/
 	this.Session.UI.BasemapChanged(mapTypeState);
 	this.UpdateLabelsVisibility();
 };
@@ -424,8 +422,9 @@ SegmentedMap.prototype.LoadBasemapMetricLayers = function (basemapMetric) {
 			activeBaseMetric.Hide();
 		}
 	};
+	var pending = [];
 	if (basemapMetric.MetricIds) {
-		(async function () {
+		pending.push((async function () {
 			for (var id of basemapMetric.MetricIds) {
 				var activeBaseMetric = await loc.AddBaseMetricById(id);
 				if (activeBaseMetric) {
@@ -435,25 +434,70 @@ SegmentedMap.prototype.LoadBasemapMetricLayers = function (basemapMetric) {
 				}
 				receive(activeBaseMetric);
 			}
-		})();
+		})());
 	}
 	if (basemapMetric.BoundaryIds) {
 		for (var boundaryId of basemapMetric.BoundaryIds) {
-			this.AddBaseBoundaryById(boundaryId).then(receive);
+			pending.push(this.AddBaseBoundaryById(boundaryId).then(receive));
+		}
+	}
+	basemapMetric.loadPromise = Promise.all(pending);
+	return basemapMetric.loadPromise;
+};
+
+// Devuelve las capas activas de un mapa base, pidiéndolas si todavía no se
+// pidieron (queda oculto si no estaba encendido). Lo usan las descargas desde
+// el popup de metadatos, que necesitan el indicador o la delimitación activa.
+SegmentedMap.prototype.EnsureBasemapLayerLoaded = function (basemapMetric) {
+	if (!basemapMetric.layers) {
+		basemapMetric.layers = [];
+		this.LoadBasemapMetricLayers(basemapMetric);
+	}
+	if (!basemapMetric.loadPromise) {
+		return Promise.resolve(basemapMetric.layers);
+	}
+	return basemapMetric.loadPromise.then(function () {
+		return basemapMetric.layers;
+	});
+};
+
+SegmentedMap.prototype.SetBasemapRasterVisible = function (rasterLayer, value) {
+	rasterLayer.Visible = value;
+	this.MapsApi.SetRasterState(rasterLayer.Id, value);
+};
+
+// Rutas heredadas: el relieve se indicaba con una letra fija. Aplica el estado a
+// los rasters que hoy usan esa letra, si los hay.
+SegmentedMap.prototype.SetBasemapRastersByRouteTag = function (routeTag, value) {
+	var rasters = BasemapLayerSet.GetByType(this.toolbarStates.basemapLayers, BasemapLayerSet.TYPE_RASTER);
+	for (var raster of rasters) {
+		if (raster.RouteTag === routeTag) {
+			this.SetBasemapRasterVisible(raster, value);
 		}
 	}
 };
 
-SegmentedMap.prototype.SetShowElevation = function (value) {
-	this.toolbarStates.showElevation = value;
-	this.MapsApi.SetElevationState(value);
-};
-
-SegmentedMap.prototype.ToggleShowElevation = function () {
-	this.toolbarStates.showElevation = !this.toolbarStates.showElevation;
-	this.MapsApi.SetElevationState(this.toolbarStates.showElevation);
+SegmentedMap.prototype.ToggleBasemapRaster = function (rasterLayer) {
+	this.SetBasemapRasterVisible(rasterLayer, !rasterLayer.Visible);
 	this.MapTypeChanged();
 	this.SaveRoute.UpdateRoute();
+};
+
+// Aplica el estado inicial de las capas base (lista {Id, StartActive} del startup
+// de la cartografía). Sin lista rige el valor por defecto de cada tipo: solo etiquetas.
+SegmentedMap.prototype.ApplyBasemapLayersStartup = function (startLayers) {
+	var layers = this.toolbarStates.basemapLayers;
+	for (var layer of layers) {
+		var active = BasemapLayerSet.GetStartActive(layer, startLayers);
+		if (layer.Type === BasemapLayerSet.TYPE_LABELS) {
+			this.toolbarStates.showLabels = active;
+			this.UpdateLabelsVisibility();
+		} else if (layer.Type === BasemapLayerSet.TYPE_RASTER) {
+			this.SetBasemapRasterVisible(layer, active);
+		} else if (active && !layer.Visible) {
+			this.ToggleBasemapMetric(layer);
+		}
+	}
 };
 
 SegmentedMap.prototype.ToggleShowLabels = function () {

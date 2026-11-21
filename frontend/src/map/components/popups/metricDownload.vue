@@ -1,6 +1,6 @@
 <template>
-	<Modal title="Descargar" ref="dialog" :showCancel="false" :showOk="false" :backgroundColor="backgroundColor">
-		<div v-if="metric">
+	<Modal title="Descargar" ref="dialog" :showCancel="false" :showOk="false" :backgroundColor="backgroundColor" @hidden="cancelDownload">
+		<div v-if="metric && downloader">
 			<div class="fld">
 				<div class="fld-label">Fuente</div>
 				<div class="fld-value">{{ version.Work.Metadata.Name }}</div>
@@ -67,9 +67,8 @@
 				<div class="fld-label">Descarga</div>
 				<div class="fld-value">
 					<div v-if="visibleUrl" class="btn-set">
-						<button @click="process($event, format.key)" v-for="format in getDataFormats()" :key="format.key" class="mp-btn mp-btn--solid">
-							<download-icon title="Descargar" /> {{ format.caption }}
-						</button>
+						<download-menu caption="Dataset" :formats="getDataFormats()" @select="process" />
+						<download-menu v-if="getSpatialFormats().length > 0" caption="Geometrías" :formats="getSpatialFormats()" @select="process" />
 						<button @click="sendFile(resolveMetadataUrl(), true)" class="mp-btn mp-btn--solid">
 							<i class="far fa-file-pdf" /> Metadatos
 						</button>
@@ -94,27 +93,16 @@
 					</div>
 				</div>
 			</div>
-			<div class="fld" v-if="level.HasArea || level.Dataset.AreSegments">
-				<div class="fld-label">Descarga con polígonos</div>
-				<div class="fld-value btn-set">
-					<button @click="process($event, format.key)" v-for="format in getSpatialFormats()" :key="format.key" class="mp-btn mp-btn--solid">
-						<download-icon title="Descargar" /> {{ format.caption }}
-					</button>
-				</div>
-			</div>
 		</div>
 	</Modal>
 </template>
 
 <script>
-import axios from 'axios';
 import h from '@/map/js/helper';
-import DownloadIcon from 'vue-material-design-icons/Download.vue';
+import DownloadMenu from '@/map/components/controls/downloadMenu';
 import creativeCommons from '@/map/components/controls/creativeCommons.vue';
-import err from '@/common/framework/err';
-import arr from '@/common/framework/arr';
 import Modal from '@/map/components/popups/modal';
-import session from '@/common/framework/session';
+import ActiveDownloader from '@/map/classes/ActiveDownloader';
 
 var debounce = require('lodash.debounce');
 
@@ -126,41 +114,53 @@ export default {
 	],
 	components: {
     creativeCommons,
-    DownloadIcon,
+    DownloadMenu,
     Modal
 	},
 	data() {
 		return {
 			metric: null,
-			regions: [],
+			downloader: null,
 			visibleUrl: true,
-			progress: null,
-			downloadLevel: 0,
-			downloadUrbanity: 'N',
-			downloadPartition: null
+			progress: null
 		};
 	},
 	computed: {
 		version() {
-			return this.metric.properties.Versions[this.metric.properties.SelectedVersionIndex];
+			return this.downloader.GetVersion();
 		},
 		clipping() {
 			return window.SegMap.Clipping;
 		},
 		level() {
-			return this.version.Levels[this.downloadLevel];
+			return this.downloader.GetLevel();
 		},
 		Use() {
 			return window.Use;
+		},
+		regions() {
+			return this.downloader.regions;
+		},
+		downloadLevel: {
+			get() { return this.downloader.levelIndex; },
+			set(value) { this.downloader.levelIndex = value; }
+		},
+		downloadUrbanity: {
+			get() { return this.downloader.urbanity; },
+			set(value) { this.downloader.urbanity = value; }
+		},
+		downloadPartition: {
+			get() { return this.downloader.partition; },
+			set(value) { this.downloader.partition = value; }
 		},
 		hasPartitions() {
 			return this.partitions !== null;
 		},
 		partitions() {
-			return this.metric.SelectedLevel().Partitions;
+			return this.downloader.GetPartitions();
 		},
 		useFilter() {
-			return this.regions && this.regions.length > 0;
+			return this.downloader.UsesFilter();
 		},
 		hasUrbanityFilter() {
 			return this.Use.UseUrbanity && this.level.HasUrbanity;
@@ -182,28 +182,22 @@ export default {
 	methods: {
 		show(metric) {
 			this.metric = metric;
-			this.regions = [];
-			if (this.clipping.FrameHasClippingCircle() || this.clipping.FrameHasClippingRegionId()) {
-				this.regions = this.regions.concat(this.clipping.clipping.Region.Summary.Regions);
-			}
-			this.downloadLevel = this.version.SelectedLevelIndex;
-			this.downloadUrbanity = this.metric.properties.SelectedUrbanity;
-			this.downloadPartition = this.metric.GetSelectedPartition();
+			this.downloader = ActiveDownloader.ForMetric(metric);
+			this.visibleUrl = true;
+			this.progress = null;
 			this.$refs.dialog.show();
 		},
-		getDataFormats() {
-			var ret = [];
-			ret.push({ caption: 'Texto (.csv)', key: 'c' });
-			ret.push({ caption: 'Excel (.xlsx)', key: 'x' });
-			ret.push({ caption: 'SPSS (.sav)', key: 's' });
-			ret.push({ caption: 'Stata (.dta)', key: 't' });
-			ret.push({ caption: 'R (.rdata)', key: 'r' });
-			if (!this.level.HasArea) {
-				ret.push({ caption: 'Shapefile (.shp)', key: 'h' });
-				ret.push({ caption: 'GeoPackage (.gpkg)', key: 'g' });
+		// Cerrar la ventana descarta el archivo que se estuviera preparando.
+		cancelDownload() {
+			if (this.downloader) {
+				this.downloader.Cancel();
 			}
-
-			return ret;
+		},
+		getDataFormats() {
+			return this.downloader.GetDataFormats();
+		},
+		getSpatialFormats() {
+			return this.downloader.GetSpatialFormats();
 		},
 		resolveFileUrl(file) {
 			if (file.Web) {
@@ -220,115 +214,25 @@ export default {
 		resolveMetadataDictionaryUrl() {
 			return window.host + '/services/metadata/GetWorkMetadataDictionary?m=' + this.version.Work.Metadata.Id + '&d=' + this.level.Dataset.Id + '&w=' + this.version.Work.Id + h.urlParam('l', window.accessLink);
 		},
-		getSpatialFormats() {
-			var ret = [];
-			//ret.push({ caption: 'Texto con GeoJSON (.csv)', key: 'cg' });
-			ret.push({ caption: 'Texto con WKT (.csv)', key: 'cw' });
-			ret.push({ caption: 'Shapefile (.shp)', key: 'hw' });
-			ret.push({ caption: 'GeoPackage (.gpkg)', key: 'gw' });
-			return ret;
-		},
 		showUrls: debounce(function() {
 								this.visibleUrl = true;
 							}, 3000)
 		,
-		sendFileByType(type) {
-			var url = this.getFileUrl(type);
-			this.sendFile(url);
-		},
 		sendFile(url, newTab = false) {
-			const a = document.getElementById('downloadAnchor');
-			a.href = url;
-			if (newTab) {
-				window.open(url, '_blank');
-			} else {
-				window.location.href = url;
-			}
+			ActiveDownloader.SendFile(url, newTab);
 		},
-		process(e, type) {
-			e.preventDefault();
+		process(format) {
+			var loc = this;
 			this.visibleUrl = false;
 			this.progress = null;
-			window.SegMap.Session.Content.Download(type);
-			var url = this.startDownloadUrl(type);
-			const loc = this;
-			axios.get(url, session.AddSession(url, {
-				headers: (window.accessLink ? { 'Access-Link': window.accessLink } : {})
-			})).then(function (res) {
-				session.ReceiveSession(url, res);
-				if(res.data.done === false) {
-					loc.processStep(type, res.data, 0);
-				} else {
-					loc.progress = 100;
-					loc.sendFileByType(type);
-					loc.showUrls();
-				}
-			}).catch(function(error) {
-			loc.showUrls();
-				err.errDialog('process', 'crear el archivo', error);
-			});
-		},
-		processStep(type, data, i) {
-			var key = data.key;
-			if (data.slice && data.totalSlices && data.slice < data.totalSlices) {
-				this.progress = parseInt(data.slice * 100 / data.totalSlices);
-			}
-			const loc = this;
-			var url = loc.stepDownloadUrl();
-			return axios.get(url, session.AddSession(url, {
-				params: { k: key },
-				headers: (window.accessLink ? { 'Access-Link': window.accessLink } : {})
-			})).then(function (res) {
-					session.ReceiveSession(url, res);
-					if(i >= 1000) {
-						throw new Error('Hard limit reached');
-						}
-					i++;
-
-					if(res.data.done === false) {
-						return loc.processStep(type, res.data, i);
-					} else {
-						loc.progress = 100;
-						loc.sendFileByType(type);
-						loc.showUrls();
-					}
-				}).catch(function(error) {
+			this.downloader.Run(format.key, function (percent) {
+				loc.progress = percent;
+			}).then(function () {
 				loc.showUrls();
-				err.errDialog('processStep', 'crear el archivo', error);
 			});
-		},
-		getFileUrl(type) {
-			return window.host + '/services/download/GetDatasetFile?' + this.urlArgs(type);
-		},
-		startDownloadUrl(type) {
-			return window.host + '/services/download/StartDatasetDownload?' + this.urlArgs(type);
-		},
-		stepDownloadUrl() {
-			return window.host + '/services/download/StepDatasetDownload';
 		},
 		removeFilter(regionId) {
-			arr.RemoveById(this.regions, regionId);
-		},
-		urlArgs(type) {
-			var clippingRegionId = null;
-			var circle = null;
-			if (this.useFilter) {
-				if (this.clipping.FrameHasClippingCircle()) {
-					circle = h.getCircleParam(this.clipping.frame.ClippingCircle);
-				} else if (this.regions) {
-					clippingRegionId = arr.GetIds(this.regions).join(',');
-				}
-			}
-			var urbanity = (this.level.HasUrbanity ? this.downloadUrbanity : null);
-			var partition = (this.partitions ? this.downloadPartition : null);
-			var compareDatasetId = '';
-			if (this.metric.Compare.Active)
-			{
-				compareDatasetId = this.metric.Compare.SelectedLevel().Dataset.Id;
-			}
-
-			return 't=' + type + h.urlParam('d', this.level.Dataset.Id) + h.urlParam('p', compareDatasetId) +  h.urlParam('c', circle) + h.urlParam('r', clippingRegionId)
-				+ h.urlParam('u', urbanity) + h.urlParam('g', partition) + h.urlParam('w', this.version.Work.Id);
+			this.downloader.RemoveRegion(regionId);
 		}
 	},
 };

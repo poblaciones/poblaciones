@@ -66,6 +66,20 @@ class WorkModel extends BaseModel
 		return $ret;
 	}
 
+	// Capas base disponibles con el estado de inicio propio de la cartografía
+	// (StartActive nulo si no lo configuró y rige el valor por defecto del tipo).
+	public function GetBasemapLayerStarts($workId)
+	{
+		Profiling::BeginTimer();
+		$sql = "SELECT bml_id AS Id, bml_type AS Type, wbl_start_active AS StartActive
+					FROM basemap_layer
+					LEFT JOIN work_basemap_layer ON wbl_layer_id = bml_id AND wbl_work_id = ?
+					ORDER BY bml_order, bml_id";
+		$ret = App::Db()->fetchAll($sql, array($workId));
+		Profiling::EndTimer();
+		return $ret;
+	}
+
 	public function GetWorkMetricsInfo($workId)
 	{
 		Profiling::BeginTimer();

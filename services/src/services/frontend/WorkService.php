@@ -18,6 +18,7 @@ use helena\db\frontend\OnboardingModel;
 use helena\db\frontend\FileModel;
 use helena\classes\App;
 use helena\classes\Session;
+use helena\classes\BasemapLayerTypeEnum;
 use helena\entities\frontend\geometries\Envelope;
 
 class WorkService extends BaseService
@@ -82,6 +83,7 @@ class WorkService extends BaseService
 		$ret->CanEdit = Session::IsWorkEditor($workIdUnShardified);
 		$ret->Fill($work);
 		$ret->FillStartup($work);
+		$ret->Startup->BasemapLayers = $this->GetBasemapLayerStarts($worksTable, $workId);
 		if ($work['met_extents'])
 			$ret->Extents = Envelope::FromDb($work['met_extents'])->Trim();
 
@@ -91,6 +93,21 @@ class WorkService extends BaseService
 		$ret->Metadata->Fill($work);
 		$ret->Metadata->FillInstitutions($institutions);
 		$ret->ArkUrl = Links::GetWorkArkUrl($workId);
+		return $ret;
+	}
+
+	private function GetBasemapLayerStarts($worksTable, $workId)
+	{
+		$ret = array();
+		foreach ($worksTable->GetBasemapLayerStarts($workId) as $row)
+		{
+			$active = BasemapLayerTypeEnum::IsActiveByDefault($row['Type']);
+			if ($row['StartActive'] !== null)
+			{
+				$active = (bool)$row['StartActive'];
+			}
+			$ret[] = array('Id' => (int)$row['Id'], 'StartActive' => $active);
+		}
 		return $ret;
 	}
 

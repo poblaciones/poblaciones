@@ -15,6 +15,7 @@ use helena\caches\PdfMetadataCache;
 use helena\caches\DictionaryMetadataCache;
 use helena\services\common\BaseService;
 use helena\db\frontend\MetadataModel;
+use helena\db\frontend\BasemapLayerModel;
 use helena\db\frontend\FileModel;
 use helena\classes\App;
 use minga\framework\Context;
@@ -113,6 +114,13 @@ class MetadataService extends BaseService
 		if ($metadata === null || sizeof($metadata) < 2) throw new PublicException('Metadatos no encontrados.');
 		$friendlyName = $metadata['met_title'] . '.pdf';
 
+		// Los metadatos de la capa de etiquetas se completan dinámicamente y no se cachean
+		$layerModel = new BasemapLayerModel();
+		if ($fromDraft === false && $layerModel->IsLabelsMetadata($metadataId))
+		{
+			return $this->CreateLabelsMetadataPdf($model, $layerModel, $metadata, $metadataId, $friendlyName);
+		}
+
 		// se fija en el caché
 		$key = PdfMetadataCache::CreateKey($datasetId, $boundaryId);
 		$data = null;
@@ -164,6 +172,55 @@ class MetadataService extends BaseService
 		}
 		$friendlyName = Str::SanitizeFilename($friendlyName);
 		return $filename;
+	}
+
+	// Los metadatos de la capa de etiquetas aportan el texto general y la autoría (editables);
+	// los niveles de zoom y las fuentes se arman con los niveles de región y las cartografías
+	// que etiquetan el mapa.
+	private function CreateLabelsMetadataPdf($model, $layerModel, $metadata, $metadataId, &$friendlyName)
+	{
+		$metadata['wrk_access_link'] = $model->GetAccessLink(null);
+		$metadata['met_online_since_formatted'] = $this->formatDate($metadata['met_online_since']);
+		$metadata['met_last_online_formatted'] = $this->formatDate($metadata['met_last_online']);
+
+		$levels = array();
+		$sources = array();
+		$sourceKeys = array();
+		$rows = array_merge($layerModel->GetLabelRegionLevels(), $layerModel->GetLabelDatasets());
+		foreach ($rows as $row)
+		{
+			$levels[] = array('Caption' => $row['Caption'], 'MinZoom' => $row['MinZoom'], 'MaxZoom' => $row['MaxZoom']);
+			$sourceKey = $row['met_title'] . '|' . $row['wrk_id'];
+			if ($row['met_title'] !== null && isset($sourceKeys[$sourceKey]) == false)
+			{
+				$sourceKeys[$sourceKey] = true;
+				$sources[] = $this->BuildLabelSource($row);
+			}
+		}
+		usort($levels, function ($a, $b) {
+			if ($a['MinZoom'] == $b['MinZoom'])
+			{
+				return strcmp($a['Caption'], $b['Caption']);
+			}
+			return $a['MinZoom'] - $b['MinZoom'];
+		});
+
+		$institutions = $model->GetMetadataInstitutions($metadataId);
+		$PdfCreator = new PdfCreator();
+		$filename = $PdfCreator->CreateMetadataPdf($metadata, $sources, $institutions, null, false, $levels);
+		$friendlyName = Str::SanitizeFilename($friendlyName);
+		return $filename;
+	}
+
+	private function BuildLabelSource($row)
+	{
+		$web = '';
+		if ($row['wrk_id'] !== null)
+		{
+			$web = Links::GetWorkStableUrl($row['met_url'], $row['wrk_id']);
+		}
+		return array('src_caption' => $row['met_title'], 'src_version' => '', 'src_authors' => $row['met_authors'],
+			'src_web' => $web, 'src_metadata_url' => '', 'src_wiki' => '', 'con_person' => '');
 	}
 
 	public function GetXlsDictionary($metadataId, $datasetId, $workId)

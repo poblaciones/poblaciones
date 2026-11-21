@@ -1,8 +1,8 @@
 <template>
 	<div class="variablesBlock">
 		<div v-for="(variable, index) in level.Variables" :key="variable.Id" class="variableBlock" :class="rowClass(index)">
-			<div v-if="fixedLevel || metric.matchesComparableFilter(variable)" v-show="!(level.Variables.length === 1 && level.Variables[0].Name === '')
-					 && (!Embedded.Readonly || index === level.SelectedVariableIndex)" class="variableRow hand" :class="activeClass(index)" @click="clickVariable(index)">
+			<div v-if="fixedLevel || metric.matchesComparableFilter(variable)" v-show="isRowVisible(index)"
+					 class="variableRow hand" :class="activeClass(index)" @click="clickVariable(index)">
 				{{ variableName(variable) }} {{ divider(variable) }}<span v-if="isActive(index)" style="padding-left: 1px;">{{ variable.Asterisk }}</span>
 				<span v-if="isActive(index)" @click.stop="toggleVariable()" class='hand exp-hiddable-inline'>
 					<chevron-down-icon v-if="version.LabelsCollapsed"
@@ -60,6 +60,9 @@ export default {
 		Embedded() {
 			return window.Embedded;
 		},
+		hasSingleUnnamedVariable() {
+			return this.level.Variables.length === 1 && this.level.Variables[0].Name === '';
+		},
 		useComparer() {
 			return window.Use.UseCompareSeries && this.metric.properties.Comparable && this.metric.properties.Versions.length > 1;
 		},
@@ -96,6 +99,18 @@ export default {
 		variableName(variable) {
 			var ret = variable.Name ? variable.Name : 'Conteo';
 			return str.RemoveDot(ret);
+		},
+		// Una única variable sin nombre no necesita fila, salvo que el nivel
+		// de ubicaciones esté aparte: ahí la fila es lo que permite alternar
+		// entre ubicaciones y niveles agregados.
+		isRowVisible(index) {
+			if (this.hasSingleUnnamedVariable && !this.metric.HasSeparateBottomLevel()) {
+				return false;
+			}
+			if (this.Embedded.Readonly) {
+				return this.isActive(index);
+			}
+			return true;
 		},
 		activeClass(index) {
 			if (this.isActive(index) && this.level.SelectedVariableIndex === index) {

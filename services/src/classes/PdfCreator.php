@@ -16,9 +16,11 @@ class PdfCreator
 	private $sources;
 	private $institutions;
 	private $dataset;
+	private $labelsLevels;
 
-	public function CreateMetadataPdf($metadata, $sources, $institutions, $dataset = null, $fromDraft = false)
+	public function CreateMetadataPdf($metadata, $sources, $institutions, $dataset = null, $fromDraft = false, $labelsLevels = null)
 	{
+		$this->labelsLevels = $labelsLevels;
 		$this->metadata = $metadata;
 		$this->sources = $sources;
 		$this->institutions = $institutions;
@@ -79,6 +81,8 @@ class PdfCreator
 		$this->WriteContact();
 
 		$this->WriteInstitutions($fromDraft);
+
+		$this->WriteLabelsLevels();
 
 		$this->WriteSources();
 
@@ -169,6 +173,22 @@ class PdfCreator
 			if ($value == null)
 				return;
 			$this->pdf->WritePair("Ark", $value);
+		}
+	}
+
+	// Niveles de zoom de las etiquetas del mapa (solo en los metadatos de la capa de etiquetas).
+	private function WriteLabelsLevels()
+	{
+		if ($this->labelsLevels === null || sizeof($this->labelsLevels) == 0)
+			return;
+		$this->pdf->WriteHeading4('Niveles de zoom');
+		$this->pdf->WriteIndentedPairTitle('Zoom', 'Indicador');
+		foreach($this->labelsLevels as $level)
+		{
+			$zoom = $level['MinZoom'] . ' a ' . $level['MaxZoom'];
+			if ($level['MinZoom'] == $level['MaxZoom'])
+				$zoom = $level['MinZoom'];
+			$this->pdf->WriteIndentedPair($zoom, $level['Caption'], true, true);
 		}
 	}
 

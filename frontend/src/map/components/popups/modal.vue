@@ -131,6 +131,7 @@
 				this.escapeHandler.Open();
 				document.body.className += ' mp-modal-open';
 			} else {
+				this.$emit('hidden');
 				this.escapeHandler.Close();
 				if (!this.duration) {
 					this.duration = window.getComputedStyle(this.$refs.dialog)['transition-duration'].replace('s', '') * 1000;

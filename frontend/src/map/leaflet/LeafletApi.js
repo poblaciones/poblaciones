@@ -25,6 +25,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 
 import MapAttribution from '@/common/js/mapAttribution';
 import BasemapLayers from './BasemapLayers';
+import BasemapLayerSet from '@/map/classes/BasemapLayerSet';
 
 export default LeafletApi;
 
@@ -47,9 +48,11 @@ function LeafletApi() {
 	this.baseMapGroup = null;
 	this.showLabels = true;
 	this.MIN_ZOOM_LABELS = 15;
-	this.useElevation = null;
 	this.mapTypeState = 'r';
-	this.elevationState = false;
+	// Capas base de tipo raster: definición (Id, HideOnSatellite) en orden de panel
+	// y estado de visibilidad por Id.
+	this.rasterLayers = [];
+	this.rasterStates = {};
 	this.overlayMapTypesGroup = null;
 	this.overlayMapTypesLayers = [];
 	this.selector = new FeatureSelector(this);
@@ -302,16 +305,7 @@ LeafletApi.prototype.CreateBaseLayers = function () {
 	this.baseLayers['colored_no_labels'] = basemaps.CreateLayer('colored_no_labels', BasemapLayers.VARIANT_WITHOUT_LABELS);
 	this.baseLayers['roadmap_only_labels'] = basemaps.CreateLayer('roadmap_only_labels', BasemapLayers.VARIANT_ONLY_LABELS);
 
-	this.useElevation = (window.SegMap.Configuration.ElevationUrl != null);
-	if (this.useElevation) {
-		this.baseLayers['elevation'] = new L.TileLayer(window.SegMap.Configuration.ElevationUrl,
-			{
-				tms: true,               // necesario para EPSG:4326
-				maxNativeZoom: 12,
-				maxZoom: 16
-			});
-		this.baseLayers['elevation'].setOpacity(0.5);
-	}
+	this.CreateRasterLayers();
 
 	var zeroItem = [[0, 90], [180, 90], [180, -90], [0, -90], [-180, -90], [-180, 0], [-180, 90], [0, 90]];
 	var featureMask = { type: 'Feature', geometry: { type: 'Polygon', coordinates: [] } };
@@ -360,32 +354,63 @@ LeafletApi.prototype.generateLabelsArray = function (visibility) {
 	return ret;
 };
 
+LeafletApi.prototype.CreateRasterLayers = function () {
+	var layers = window.SegMap.toolbarStates.basemapLayers;
+	for (var layer of BasemapLayerSet.GetByType(layers, BasemapLayerSet.TYPE_RASTER)) {
+		var definition = BasemapLayerSet.GetRasterOptions(layer);
+		var tileLayer = new L.TileLayer(definition.Url, definition.Options);
+		tileLayer.setOpacity(definition.Opacity);
+		this.baseLayers[LeafletApi.RasterName(layer.Id)] = tileLayer;
+		this.rasterLayers.push({ Id: layer.Id, HideOnSatellite: layer.HideOnSatellite });
+		this.rasterStates[layer.Id] = false;
+	}
+};
+
+LeafletApi.RasterName = function (id) {
+	return 'raster_' + id;
+};
+
+// Nombres (precedidos por coma) de los rasters encendidos que corresponde dibujar.
+// En satélite se omiten los que piden no renderizarse sobre él.
+LeafletApi.prototype.GetVisibleRasterNames = function (isSatellite) {
+	var ret = '';
+	for (var raster of this.rasterLayers) {
+		if (this.rasterStates[raster.Id]) {
+			if (!isSatellite || !raster.HideOnSatellite) {
+				ret += ',' + LeafletApi.RasterName(raster.Id);
+			}
+		}
+	}
+	return ret;
+};
+
 LeafletApi.prototype.CheckBaseLayer = function () {
 	var reqLayer;
-	var elevation = (this.elevationState && this.useElevation ? ',elevation' : '');
+	var rasters = this.GetVisibleRasterNames(false);
 	if (this.mapTypeState === 'b') {
 		reqLayer = 'blank';
 		// h lo soporta por compatibilidad para atrás... la referencia es showLabels para etiquetas
 	} else if (this.IsSatelliteType()) {
+		var satelliteRasters = this.GetVisibleRasterNames(true);
 		if (this.map.getZoom() >= this.MIN_ZOOM_LABELS && this.showLabels) {
-			reqLayer = 'satellite,roadmap_only_labels'; // se podría agregar roadmap_only_labels
+			reqLayer = 'satellite' + satelliteRasters + ',roadmap_only_labels';
 		} else {
-			reqLayer = 'satellite'; // se podría agregar roadmap_only_labels
+			reqLayer = 'satellite' + satelliteRasters;
 		}
 	} else if (this.mapTypeState === 'c') {
 		if (this.map.getZoom() >= this.MIN_ZOOM_LABELS && this.showLabels) {
-			reqLayer = 'colored' + elevation;
+			reqLayer = 'colored' + rasters;
 		} else {
-			reqLayer = 'colored_no_labels' + elevation;
+			reqLayer = 'colored_no_labels' + rasters;
 		}
 	} else if (this.mapTypeState === 'r') {
 		if (this.map.getZoom() >= this.MIN_ZOOM_LABELS && this.showLabels) {
-			reqLayer = 'roadmap' + elevation;
+			reqLayer = 'roadmap' + rasters;
 		} else {
-			reqLayer = 'roadmap_no_labels' + elevation;
+			reqLayer = 'roadmap_no_labels' + rasters;
 		}
 	} else {
-		reqLayer = 'roadmap_no_labels' + elevation;
+		reqLayer = 'roadmap_no_labels' + rasters;
 	}
 	this.SetBaseMap(reqLayer);
 };
@@ -850,8 +875,8 @@ LeafletApi.prototype.SetMapTypeState = function (mapTypeState) {
 	this.CheckBaseLayer();
 };
 
-LeafletApi.prototype.SetElevationState = function (elevationState) {
-	this.elevationState = elevationState;
+LeafletApi.prototype.SetRasterState = function (rasterId, visible) {
+	this.rasterStates[rasterId] = visible;
 	this.CheckBaseLayer();
 };
 

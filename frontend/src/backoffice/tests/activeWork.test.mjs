@@ -46,6 +46,7 @@ function makeWorkInfo(workOverrides, infoOverrides) {
 		ArkUrl: null,
 		Startup: { Type: 'M' },
 		ExtraMetrics: [],
+		BasemapLayers: [],
 		Icons: [],
 		Onboarding: { Steps: [] },
 	}, infoOverrides);
@@ -402,6 +403,18 @@ it('las consultas de indicadores adicionales marcan el cambio y envían sus par�
 	expect(lastCall().config.params.a).toBe(0);
 	await work.RemoveExtraMetric({ Id: 4 });
 	expect(lastCall().url).toBe(BASE + 'RemoveExtraMetric');
+	expect(list[0].HasChanges).toBe(1);
+});
+
+it('UpdateBasemapLayerStart marca el cambio y envía la capa y su estado', async () => {
+	setup();
+	const list = [{ Id: 3, HasChanges: 0 }];
+	const work = await makeWork({}, {}, list);
+	await work.UpdateBasemapLayerStart({ Id: 5, StartActive: true });
+	expect(lastCall().url).toBe(BASE + 'UpdateBasemapLayerStart');
+	expect(lastCall().config.params).toEqual({ w: 3, l: 5, a: 1 });
+	await work.UpdateBasemapLayerStart({ Id: 5, StartActive: false });
+	expect(lastCall().config.params.a).toBe(0);
 	expect(list[0].HasChanges).toBe(1);
 });
 

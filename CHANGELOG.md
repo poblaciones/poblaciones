@@ -1,3 +1,9 @@
+- Servidor MCP
+- Fix conteo de usuarios únicos
+- Capas base parametrizables desde configuración.
+- Capas base parametrizables por cartografía.
+
+v5.7 (2026-11-05)
 - Cálculo de columnas.
 - Se reagrega agregar variable al diccionario.
 - Fix botón derecho en celulares.

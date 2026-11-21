@@ -200,6 +200,17 @@ el overlay. `FrameMoved` actualiza el envelope y dispara el resumen; el
 clipping puede fijar el encuadre a una región (`SetClippingRegion`,
 `FitCurrentRegion`) o a un círculo dibujado.
 
+**Nivel de ubicaciones aparte.** Cuando un indicador con varios niveles termina
+en un nivel que no es 'D' (puntos, ejemplo: establecimientos penitenciarios con
+Provincias, Departamentos y Ubicaciones), `HasSeparateBottomLevel()` es
+verdadero. Ese último nivel no sigue al zoom ni se elige o fija desde el selector
+de nivel (`MultilevelCount()` cuenta solo los demás). El panel derecho lo
+presenta en dos bloques de `metricVariables`: primero las variables de las
+ubicaciones (`fixedLevel`, con fila siempre visible, aunque sea una única
+variable sin nombre) y debajo las variables de los niveles agregados, que se
+resuelven por zoom o por pin. Elegir una variable de un bloque cambia
+`SelectedLevelIndex` al nivel de ese bloque y deja intacto `AutomaticLevelIndex`.
+
 ### Resumen y ranking (panel derecho)
 
 `ActiveSelectedMetric.UpdateSummary()` pide `GetSummary` para el encuadre
@@ -675,6 +686,10 @@ desde la raíz del módulo con:
     métricas de resumen válidas (N/I/P/FIL/K/A/D/T y la exclusión de área en
     segmentos), patrones, estilos, visibilidad de categorías, homónimas entre
     niveles.
+  - `bottomLevelApart.test.mjs` — indicadores con nivel de ubicaciones aparte:
+    `HasSeparateBottomLevel`/`MultilevelCount`, opciones y selector de nivel sin
+    las ubicaciones, filas de variables de ambos bloques (incluida la variable
+    única sin nombre y el modo solo lectura) y alternancia entre bloques.
   - `segmentsComposer.test.mjs` — caracterización de la presentación de
     segmentos previa al desarrollo: geometría tomada del dato, clase `ls`,
     filtro por categoría con caché, escape de descripciones, formato del valor

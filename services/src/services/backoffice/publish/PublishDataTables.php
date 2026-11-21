@@ -96,6 +96,7 @@ class PublishDataTables
 																									'children' => array(array('class' => entities\FileChunk::class, 'childKey' => 'chu_file_id')))))));
 
 		$extraMetrics = array('class' => entities\WorkExtraMetric::class, 'childKey' => 'wmt_work_id');
+		$basemapLayers = array('class' => entities\WorkBasemapLayer::class, 'childKey' => 'wbl_work_id');
 		$workStartup = array('class' => entities\WorkStartup::class, 'parentKey' => 'wrk_startup_id');
 
 		// Inicia el pasaje
@@ -105,6 +106,7 @@ class PublishDataTables
 															$iconMatrix,
 															$onboardingMatrix,
 															$extraMetrics,
+															$basemapLayers,
 															$workStartup,
 															$metadataMatrix,
 															$datasetMatrix,

@@ -643,6 +643,22 @@ ActiveMetric.prototype.LastLevelDontMultilevel = function () {
 	return currentVersion.Levels[currentVersion.Levels.length - 1].Dataset.Type !== 'D';
 };
 
+// El indicador tiene niveles agregados y, además, un último nivel que no
+// participa del multinivel (ubicaciones): el panel ofrece sus variables
+// aparte, siempre disponibles, y ese nivel no se elige ni se fija por zoom.
+ActiveMetric.prototype.HasSeparateBottomLevel = function () {
+	return this.IsMultiLevel() && this.LastLevelDontMultilevel();
+};
+
+// Cantidad de niveles que sigue el zoom, sin contar el nivel aparte.
+ActiveMetric.prototype.MultilevelCount = function () {
+	var levelCount = this.SelectedVersion().Levels.length;
+	if (this.HasSeparateBottomLevel()) {
+		return levelCount - 1;
+	}
+	return levelCount;
+};
+
 ActiveMetric.prototype.CalculateProperLevel = function () {
 	var currentVersion = this.SelectedVersion();
 	if (!this.IsMultiLevel()) {
@@ -656,7 +672,7 @@ ActiveMetric.prototype.CalculateProperLevel = function () {
 		// Si es más chico que el primero, devuelve ese
 		return validFrom;
 	}
-	var levelCount = currentVersion.Levels.length - (this.LastLevelDontMultilevel() ? 1 : 0);
+	var levelCount = this.MultilevelCount();
 	var last = levelCount - 1;
 	if (currentZoom > currentVersion.Levels[last].MaxZoom) {
 		// Si es más grande que el máximo, devuelve ese

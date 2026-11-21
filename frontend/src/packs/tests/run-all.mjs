@@ -20,5 +20,6 @@ await import('./geographies.test.mjs');
 await import('./clippingRegions.test.mjs');
 await import('./clippingRegionPopups.test.mjs');
 await import('./boundaries.test.mjs');
+await import('./basemapLayers.test.mjs');
 
 await report();

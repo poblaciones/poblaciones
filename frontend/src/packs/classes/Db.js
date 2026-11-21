@@ -67,6 +67,37 @@ Db.prototype.MoveBoundaryDown = function (boundary) {
 // como el resto de los métodos de este archivo): trae el MetadataId
 // resultante, necesario para refrescar el ícono de metadatos en la grilla
 // sin recargarla entera (ver ClippingRegionPopup.vue::saveEdit).
+Db.prototype.GetBasemapLayers = function () {
+	return axiosClient.getPromise(window.host + '/services/packs/GetBasemapLayers',
+		{}, 'obtener la lista de capas base');
+};
+
+Db.prototype.SearchBasemapMetrics = function (query) {
+	return axiosClient.getPromise(window.host + '/services/packs/SearchBasemapMetrics',
+		{ q: query }, 'buscar indicadores');
+};
+
+// Se propaga la respuesta del servidor: trae el Id y el MetadataId resultantes.
+Db.prototype.UpdateBasemapLayer = function (layer) {
+	return axiosClient.postPromise(window.host + '/services/packs/UpdateBasemapLayer',
+		{ l: layer }, 'actualizar la capa base');
+};
+
+Db.prototype.DeleteBasemapLayer = function (layer) {
+	return axiosClient.postPromise(window.host + '/services/packs/DeleteBasemapLayer',
+		{ l: layer.Id }, 'eliminar la capa base');
+};
+
+Db.prototype.MoveBasemapLayerUp = function (layer) {
+	return axiosClient.postPromise(window.host + '/services/packs/MoveBasemapLayerUp',
+		{ l: layer.Id }, 'mover la capa base');
+};
+
+Db.prototype.MoveBasemapLayerDown = function (layer) {
+	return axiosClient.postPromise(window.host + '/services/packs/MoveBasemapLayerDown',
+		{ l: layer.Id }, 'mover la capa base');
+};
+
 Db.prototype.UpdateClippingRegion = function (region) {
 	return axiosClient.postPromise(window.host + '/services/packs/UpdateClippingRegion',
 		{ r: region }, 'actualizar la región');

@@ -347,6 +347,8 @@ App::$app->post('/services/api/automation/OmmitAllDatasetErrors', function (Requ
  *   marker_type      (string, opcional)  – 'I' ícono | 'T' texto
  *   marker_text      (string, opcional)  – texto del marcador si marker_type='T' (máx. 4 chars)
  *   marker_autoscale (int, opcional)     – 1 = ajustar tamaño al zoom, 0 = no
+ *   marker_source    (string, opcional)  – 'F' mismo ícono para todos los puntos | 'V' ícono tomado de una columna
+ *   marker_symbol    (string, opcional)  – nombre del ícono (máx. 100 chars), usado si marker_type='I' y marker_source='F'
  *
  * Respuesta: { result: "ok" }
  */
@@ -384,12 +386,21 @@ App::$app->post('/services/api/automation/UpdateDatasetIdentity', function (Requ
 		$markerType      = Params::Get('marker_type');
 		$markerText      = Params::Get('marker_text');
 		$markerAutoscale = Params::GetInt('marker_autoscale');
+		$markerSource    = Params::Get('marker_source');
+		$markerSymbol    = Params::Get('marker_symbol');
+
+		if ($markerSource !== null && $markerSource !== 'F' && $markerSource !== 'V')
+			throw new PublicException("marker_source inválido: debe ser 'F' o 'V'.");
+		if ($markerSymbol !== null && mb_strlen($markerSymbol) > 100)
+			throw new PublicException("marker_symbol no puede superar los 100 caracteres.");
 
 		if ($markerSize      !== null) $marker->setSize($markerSize);
 		if ($markerFrame     !== null) $marker->setFrame($markerFrame);
 		if ($markerType      !== null) $marker->setType($markerType);
 		if ($markerText      !== null) $marker->setText($markerText);
 		if ($markerAutoscale !== null) $marker->setAutoScale($markerAutoscale === 1);
+		if ($markerSource    !== null) $marker->setSource($markerSource);
+		if ($markerSymbol    !== null) $marker->setSymbol($markerSymbol);
 	}
 
 	$controller = new services\DatasetService();

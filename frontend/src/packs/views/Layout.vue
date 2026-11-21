@@ -43,6 +43,10 @@
 							<geography-tuples></geography-tuples>
 						</md-tab>
 
+						<md-tab class="transparentTab" id="basemap-layers-tab" v-if="isAdminReader" to="/basemap-layers" :md-active="isPath('/basemap-layers')" md-label="Capas base">
+							<basemap-layers></basemap-layers>
+						</md-tab>
+
 					</md-tabs>
 				</div>
 			</div>
@@ -55,6 +59,7 @@
 
 import ClippingRegions from './ClippingRegions/ClippingRegions';
 import Boundaries from './Boundaries/Boundaries';
+import BasemapLayers from './BasemapLayers/BasemapLayers';
 import Geographies from './Geographies/Geographies';
 import Gradients from './Gradients/Gradients';
 import MetricGroups from './MetricGroups/MetricGroups';
@@ -66,6 +71,7 @@ export default {
 	components: {
 		TopWelcome,
 		Boundaries,
+		BasemapLayers,
 		ClippingRegions,
 		Geographies,
 		Gradients,

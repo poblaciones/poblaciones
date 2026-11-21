@@ -33,8 +33,8 @@
 			<mp-filter-badge style="margin-top: 0.9rem;" v-if="hasUrbanityFilter && urbanity != 'N'"
 											 :title="getUrbanityTextActive" :tooltip="getUrbanityTextTooltip"
 											 @click="changeUrbanity('N')" />
-			<MetricVariables v-if="metric.IsMultiLevel() && metric.LastLevelDontMultilevel()" @variableChanged="variableChanged"
-											 :metric="metric" :fixedLevel="metric.BottomLevel()" style="margin-bottom: -2rem;" />
+			<MetricVariables v-if="metric.HasSeparateBottomLevel()" @variableChanged="variableChanged"
+											 :metric="metric" :fixedLevel="metric.BottomLevel()" style="margin-bottom: -1.5rem;" />
 			<MetricVariables :metric="metric" @variableChanged="variableChanged" />
 		</template>
 		<div class="coverageBox" v-if="hasLegends(metric.SelectedLevel())">

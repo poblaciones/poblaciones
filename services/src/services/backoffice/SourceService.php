@@ -31,6 +31,19 @@ class SourceService extends BaseService
 		return $entity;
 	}
 
+	/**
+	 * Busca una fuente por nombre y edición. La clave única de la tabla es (nombre, edición), de modo que
+	 * hay a lo sumo una. Alcanza también a las fuentes que no están ligadas a ninguna obra y que por eso
+	 * no aparecen en GetAllSourcesByCurrentUser. Sin edición no se busca: la clave única admite varias.
+	 */
+	public function FindByCaptionAndVersion($caption, $version)
+	{
+		if ($version === null)
+			return null;
+		return App::Orm()->findByProperties($this->ApplyDraft(entities\DraftSource::class),
+													array('Caption' => $caption, 'Version' => $version));
+	}
+
 	public function GetAllPublicSources()
 	{
 		$records = App::Orm()->findManyByProperty($this->ApplyDraft(entities\DraftSource::class), 'IsGlobal', true, array('Caption' => 'ASC', 'Version' => 'DESC'));

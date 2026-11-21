@@ -12,6 +12,7 @@ class StartupInfo extends BaseMapModel
 	public $ClippingRegionItemId;
 	public $Selected;
 	public $ActiveMetrics;
+	public $BasemapLayers;
 
 	public static function GetMap()
 	{

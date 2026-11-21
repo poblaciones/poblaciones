@@ -7,7 +7,6 @@
 
 <script>
 import axios from 'axios';
-import arr from '@/common/framework/arr';
 import err from '@/common/framework/err';
 import color from '@/common/framework/color';
 import mpBasemapButton from '@/map/components/controls/mpBasemapButton';
@@ -72,9 +71,6 @@ export default {
 					this.$refs.selector.selectMapStyleById('blank');
 					break;
 			}
-			// Carga los layers de base
-			arr.AddRange(this.$refs.selector.mapLayers, window.SegMap.toolbarStates.basemapMetrics);
-
 		}
 	},
 };
