@@ -351,19 +351,19 @@ class BasemapLayerService extends BaseService
 			$existingMetadataId = App::Db()->fetchScalarIntNullable(
 				"SELECT bml_metadata_id FROM basemap_layer WHERE bml_id = ?", array($layer->getId()));
 		}
-		if ($wantsOwnMetadata && $existingMetadataId === null)
+		if ($wantsOwnMetadata)
 		{
-			$metadataService = new MetadataService();
-			$layer->setMetadata($metadataService->CreateMinimalMetadata($layer->getCaption(), null));
-			return null;
-		}
-		if ($wantsOwnMetadata && $existingMetadataId !== null)
-		{
-			// El cliente envía solo MetadataId (Metadata está excluido): se conserva el de la base.
+			if ($existingMetadataId == null)
+			{
+				$metadataService = new MetadataService();
+				$layer->setMetadata($metadataService->CreateMinimalMetadata($layer->getCaption(), null));
+				return null;
+			}
 			$layer->setMetadata(App::Orm()->find(entities\Metadata::class, $existingMetadataId));
 			return null;
 		}
-		if ($wantsOwnMetadata == false && $existingMetadataId !== null)
+
+		if ($existingMetadataId != null)
 		{
 			$layer->setMetadata(null);
 			return $existingMetadataId;
