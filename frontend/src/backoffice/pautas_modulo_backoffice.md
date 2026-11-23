@@ -105,8 +105,10 @@ src/backoffice/tests/run-all.mjs`).
   lógica de `classes/` (permisos, escalas, acceso a datos), la consistencia de
   la tabla de rutas y los componentes con lógica propia (listado de
   cartografías, menú lateral, grilla, diccionario, categorías, simbología,
-  asistente de indicadores calculados). Quedan fuera de la batería: templates y
-  estilos, `GeographyOverlay` y `Relocate.vue` (dependen de Leaflet), `main.js`
+  asistente de indicadores calculados, popup de indicador y su diagnóstico de
+  comparación entre series). Quedan fuera de la batería: templates y
+  estilos, `GeographyOverlay` y `Relocate.vue` (dependen de Leaflet; este último arma el mapa base con
+  `BasemapLayers` del visor, porque la configuración puede ser vectorial), `main.js`
   y la página de paletas (`Paletas/*`). Tampoco tienen suite los componentes de
   solo presentación (`SvgIcon`, `Icon`, `AppMain` y los pasos de bienvenida del
   asistente); conviene sumarles una cuando se les agregue lógica.

@@ -1,7 +1,7 @@
 <template>
 	<div class="variablesBlock">
 		<div v-for="(variable, index) in level.Variables" :key="variable.Id" class="variableBlock" :class="rowClass(index)">
-			<div v-if="fixedLevel || metric.matchesComparableFilter(variable)" v-show="isRowVisible(index)"
+			<div v-if="showsVariable(variable)" v-show="isRowVisible(index)"
 					 class="variableRow hand" :class="activeClass(index)" @click="clickVariable(index)">
 				{{ variableName(variable) }} {{ divider(variable) }}<span v-if="isActive(index)" style="padding-left: 1px;">{{ variable.Asterisk }}</span>
 				<span v-if="isActive(index)" @click.stop="toggleVariable()" class='hand exp-hiddable-inline'>
@@ -11,13 +11,20 @@
 				</span>
 			</div>
 			<mp-collapse>
-				<div v-show="isDetailVisible(index)" class="variableDetail">
-					<metricChart v-if="useCharts && metric.ShowChart == 1 && metric.useChart()" :metric="metric" :variable="variable" />
-					<metricValues :metric="metric" :variable="variable" />
+				<div v-show="isActive(index)" class="variableDetail">
+					<mp-collapse>
+						<div v-show="isDetailVisible(index)">
+							<metricChart v-if="useCharts && metric.ShowChart == 1 && metric.useChart()" :metric="metric" :variable="variable" />
+							<metricValues :metric="metric" :variable="variable" />
+						</div>
+					</mp-collapse>
+					<div v-if="isActive(index)" class="detailSlot" :class="{ 'detailSlot--followed': isFollowedByVariable(index) }">
+						<slot></slot>
+					</div>
 				</div>
 			</mp-collapse>
 		</div>
-		<div v-if="hasComparableVariables && hasNonComparableVariables" class="coverageBox" style="padding: 12px 0px 0px 0px">
+		<div v-if="ownsSelectedLevel && hasComparableVariables && hasNonComparableVariables" class="coverageBox" style="padding: 12px 0px 0px 0px">
 			<sup>+</sup> {{ hiddenLegend }}
 		</div>
 	</div>
@@ -60,6 +67,10 @@ export default {
 		Embedded() {
 			return window.Embedded;
 		},
+		// Con dos bloques, la leyenda de variables ocultas corresponde solo al que muestra el nivel elegido.
+		ownsSelectedLevel() {
+			return this.metric.SelectedLevel() === this.level;
+		},
 		hasSingleUnnamedVariable() {
 			return this.level.Variables.length === 1 && this.level.Variables[0].Name === '';
 		},
@@ -96,9 +107,51 @@ export default {
 				return 'keyboard_arrow_down';
 			}
 		},
+		// Las ubicaciones aparte se ofrecen completas salvo que alguna de sus variables se pueda comparar.
+		// Indica si debajo del detalle de la variable se ve la fila de otra variable: en ese caso el contenido
+		// del detalle (el ranking) necesita un espacio inferior. El bloque de ubicaciones aparte va siempre
+		// antes del principal.
+		isFollowedByVariable(index) {
+			if (this.fixedLevel) {
+				return true;
+			}
+			for (var n = index + 1; n < this.level.Variables.length; n++) {
+				if (this.showsVariable(this.level.Variables[n]) && this.isRowVisible(n)) {
+					return true;
+				}
+			}
+			return false;
+		},
+		showsVariable(variable) {
+			if (this.fixedLevel && !this.metric.LevelHasComparableVariables(this.level)) {
+				return true;
+			}
+			return this.metric.matchesComparableFilter(variable);
+		},
 		variableName(variable) {
-			var ret = variable.Name ? variable.Name : 'Conteo';
+			if (this.isLocationsBlockWithGenericVariable(variable)) {
+				return this.locationsBlockTitle();
+			}
+			var ret = variable.Name;
+			if (!ret) {
+				ret = 'Conteo';
+			}
 			return str.RemoveDot(ret);
+		},
+		// En el bloque de ubicaciones aparte, una única variable sin nombre o llamada "Total" no dice nada
+		// del contenido: la fila se rotula con el tipo de elementos del nivel.
+		isLocationsBlockWithGenericVariable(variable) {
+			if (!this.fixedLevel || this.level.Variables.length !== 1) {
+				return false;
+			}
+			var name = String(variable.Name || '').trim().toLowerCase();
+			return name === '' || name === 'total';
+		},
+		locationsBlockTitle() {
+			if (this.level.Dataset.Type === 'S') {
+				return 'Zonas';
+			}
+			return 'Ubicaciones';
 		},
 		// Una única variable sin nombre no necesita fila, salvo que el nivel
 		// de ubicaciones esté aparte: ahí la fila es lo que permite alternar
@@ -157,26 +210,7 @@ export default {
 			this.$emit('variableChanged');
 		},
 		selectVariable(index) {
-			if (this.fixedLevel) {
-				for (var v = 0; v < this.metric.properties.Versions.length; v++) {
-					var version = this.metric.properties.Versions[v];
-					var level = version.Levels[version.Levels.length - 1];
-					if (level.Variables.length > index) {
-						level.SelectedVariableIndex = index;
-					}
-				}
-			} else {
-				for (var v = 0; v < this.metric.properties.Versions.length; v++) {
-					var version = this.metric.properties.Versions[v];
-					var lastLevelDontMultilevel = version.Levels.length > 1 && version.Levels[version.Levels.length - 1].Dataset.Type !== 'D';
-					for (var l = 0; l < version.Levels.length - (lastLevelDontMultilevel ? 1 : 0); l++) {
-						var level = version.Levels[l];
-						if (level.Variables.length > index) {
-							level.SelectedVariableIndex = index;
-						}
-					}
-				}
-			}
+			this.metric.SelectVariableInAllVersions(this.level, index, !!this.fixedLevel);
 			var variable = this.metric.SelectedVariable();
 			if (variable) {
 				window.SegMap.Session.Content.SelectVariable(variable.Id);
@@ -195,6 +229,12 @@ export default {
 .variableDetail
 {
 	display: flow-root;
+	padding-left: 10px;
+	padding-right: 10px;
+}
+.detailSlot--followed
+{
+	padding-bottom: 12px;
 }
 .fa-left
 {

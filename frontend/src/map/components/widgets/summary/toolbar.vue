@@ -1,6 +1,14 @@
 <template>
 	<div class="no-print summaryToolbar" v-if="hasConfiguration" style="flex-direction: row; align-self: flex-end;">
 
+		<button type="button" class="mp-btn mp-btn--float" :disabled="!history.CanUndo"
+						@click="undo" :title="undoTitle" :aria-label="history.UndoLabel" aria-keyshortcuts="Control+Z">
+			<i class="fas fa-undo-alt" />
+		</button>
+		<button type="button" class="mp-btn mp-btn--float" :disabled="!history.CanRedo"
+						@click="redo" :title="redoTitle" :aria-label="history.RedoLabel" aria-keyshortcuts="Control+Y">
+			<i class="fas fa-redo-alt" />
+		</button>
 
 		<mp-dropdown-menu :items="captureItems" @itemClick="captureSelected" :floatRight="false"
 											icon="fas fa-camera" variant="float" tooltip="Guardar como" />
@@ -11,6 +19,9 @@
 						:title="mode.Name" :aria-label="mode.Name" :aria-pressed="$ariaPressed(isModeSelected(mode.Action))">
 			<i :class="mode.Icon" />
 		</button>
+
+		<mp-dropdown-menu v-if="Use.UseAnnotations" :items="annotationItems" @itemClick="annotationSelected" :floatRight="false"
+											icon="fas fa-pencil-alt" variant="float" tooltip="Anotaciones" :selected="isAnnotationModeActive" />
 
 		<button v-if="Use.UsePivot" type="button" @click="openTable" :disabled="!hasTableMetrics"
 						class="mp-btn mp-btn--float"
@@ -55,6 +66,9 @@
 	import TableLink from '@/map/classes/TableLink';
 	import authentication from '@/common/js/authentication';
 
+	// Herramientas de dibujo del menú «Anotaciones».
+	const ANNOTATION_MODES = ['MARKER', 'LINE', 'POLYGON', 'COMMENT'];
+
 	export default {
 		name: 'toolbar',
 		data() {
@@ -75,6 +89,12 @@
 		mounted() {
 		},
 		methods: {
+			undo() {
+				window.SegMap.History.Undo();
+			},
+			redo() {
+				window.SegMap.History.Redo();
+			},
 			switchMapProvider() {
 				window.SegMap.SwitchSessionProvider().then(function () {
 					location.reload();
@@ -271,6 +291,14 @@
 			setMode(mode) {
 				window.SegMap.SetSelectionMode(mode);
 			},
+			// Dibujar requiere una cuenta: las anotaciones se guardan en la cuenta de quien las hace.
+			annotationSelected(item) {
+				if (!this.user.Logged) {
+					window.Popups.AnnotationsLogin.show();
+					return;
+				}
+				this.setMode(item.key);
+			},
 			isModeSelected(mode) {
 				return this.toolbarStates.selectionMode === mode;
 			},
@@ -284,6 +312,16 @@
 		computed: {
 			Use() {
 				return this.config;
+			},
+			// Estado de deshacer y rehacer publicado por UndoHistory.
+			history() {
+				return this.toolbarStates.history;
+			},
+			undoTitle() {
+				return this.history.UndoLabel + ' (Ctrl+Z)';
+			},
+			redoTitle() {
+				return this.history.RedoLabel + ' (Ctrl+Y)';
 			},
 			hasTableMetrics() {
 				return TableLink.TableMetrics(this.metrics).length > 0;
@@ -369,49 +407,27 @@
 				}
 				return this.user.Picture;
 			},
+			isAnnotationModeActive() {
+				return ANNOTATION_MODES.indexOf(this.toolbarStates.selectionMode) !== -1;
+			},
+			annotationItems() {
+				var ret = [];
+				ret.push({ label: 'Punto', key: 'MARKER', icon: 'fas fa-map-marker-alt' });
+				ret.push({ label: 'Línea', key: 'LINE', icon: 'fas fa-slash' });
+				ret.push({ label: 'Polígono', key: 'POLYGON', icon: 'fas fa-draw-polygon' });
+				ret.push({ label: 'Comentario', key: 'COMMENT', icon: 'fas fa-comment' });
+				if (this.isAnnotationModeActive) {
+					ret.push({ separator: true });
+					ret.push({ label: 'Dejar de anotar', key: 'PAN', icon: 'fas fa-times' });
+				}
+				return ret;
+			},
 			selectionModes() {
 				var ret = [];
 				if (this.frame && this.frame.Zoom >= 10) {
 					ret.push(
 						{ Action: 'BUFFER', Name: 'Seleccionar una zona arrastrando en el mapa.', Icon: 'fa fa-circle-notch' });
 				}
-				// Agrega las herramientas para dibujar
-				// Para eso se basa en las listas existentes del work
-				if (this.work.Current && this.Use.UseAnnotations) {
-					// Se fija qué funciona permite las listas permitidas
-					// Las acciones pueden hacerse si es editor de la cartografía o si el permiso
-					// para invitados es A o E.
-					var annotationTypes = {
-						'M': { Action: 'MARKER', Name: 'Anotar punto', Icon: 'fas fa-map-marker-alt' },   // Punto
-						'L': { Action: 'LINE', Name: 'Anotar línea', Icon: 'fas fa-slash' },            // Línea
-						'P': { Action: 'POLYGON', Name: 'Anotar polígono', Icon: 'fas fa-draw-polygon' },  // Polígono
-						'C': { Action: 'COMMENT', Name: 'Agregar comentario', Icon: 'fas fa-comment' },    // Comentario
-						'Q': { Action: 'QUESTION', Name: 'Agregar pregunta', Icon: 'fas fa-question' } // Pregunta
-					};
-					if (this.work.Current.Annotations.length == 0) {
-						// ofrece todos los tipos
-						if (this.work.Current.CanEdit) {
-							for (const [key, value] of Object.entries(annotationTypes)) {
-								ret.push(value);
-							}
-						}
-					} else {
-						// ofrece solo las permitidas
-						for (var annotationList of this.work.Current.Annotations) {
-							for (const [key, value] of Object.entries(annotationTypes)) {
-								// Va sumando los types editables
-								if (this.work.Current.CanEdit || annotationList.AllowedTypes.includes(key)) {
-									ret.push(value);
-								}
-							}
-						}
-					}
-				}
-				/*
-				if (ret.length > 0) {
-					// Agrega el neutro
-					arr.InsertAt(ret, 0, { Action: 'PAN', Name: 'Navegar el mapa', Icon: 'far fa-hand-paper' });
-				}*/
 				return ret;
 			}
 		},
@@ -448,9 +464,6 @@
 					case 'COMMENT':
 						window.SegMap.MapsApi.Annotations.setMode('draw-comment');
 						break;
-					case 'QUESTION':
-						window.SegMap.MapsApi.Annotations.setMode('draw-question');
-						break;
 				}
 			}
 		}
@@ -471,6 +484,10 @@
 		z-index: 1000;
 		right: 12px;
 		border: 0px solid transparent;
+	}
+	.mp-btn--float:disabled {
+		opacity: .35;
+		pointer-events: none;
 	}
 	.avatar {
 		height: 40px;

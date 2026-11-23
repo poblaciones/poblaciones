@@ -234,7 +234,7 @@ SelectedInfoRouter.prototype.VariablesToRoute = function (activeSelectedMetric) 
 
 SelectedInfoRouter.prototype.FromRoute = function (args, updateRoute, skipRestore) {
 	var infos = this.parseInfos(args);
-	this.LoadInfos(infos, updateRoute, skipRestore);
+	return this.LoadInfos(infos, updateRoute, skipRestore);
 };
 
 SelectedInfoRouter.prototype.InfosHaveComparer = function (infos) {
@@ -251,7 +251,7 @@ SelectedInfoRouter.prototype.LoadInfos= function (infos, updateRoute, skipRestor
 	var segmentedMap = window.SegMap;
 	if (infos.length === 0) {
 		segmentedMap.Metrics.ClearUserMetrics();
-		return;
+		return Promise.resolve();
 	}
 	var currentMetrics = this.parseInfos(this.ToRoute(true));
 	// Si cambiaron, recarga todos
@@ -263,7 +263,7 @@ SelectedInfoRouter.prototype.LoadInfos= function (infos, updateRoute, skipRestor
 			infoIds += (infos[l].IsBoundary ? 'b' : '') + infos[l].Id +
 												(l < infos.length - 1 ? ',' : '');
 		}
-		window.SegMap.Get(window.host + '/services/metrics/GetSelectedInfos', {
+		return window.SegMap.Get(window.host + '/services/metrics/GetSelectedInfos', {
 			params: { l: infoIds },
 		}).then(function (res) {
 			segmentedMap.SaveRoute.Disabled = true;
@@ -296,6 +296,8 @@ SelectedInfoRouter.prototype.LoadInfos= function (infos, updateRoute, skipRestor
 			segmentedMap.Labels.UpdateMap();
 			segmentedMap.SaveRoute.Disabled = false;
 			segmentedMap.InfoWindow.CheckUpdateNavigation();
+			// Cargar capas desde la ruta no es una acción del usuario.
+			segmentedMap.History.Rebase();
 			if (updateRoute) {
 				segmentedMap.SaveRoute.UpdateRoute();
 			}
@@ -304,6 +306,7 @@ SelectedInfoRouter.prototype.LoadInfos= function (infos, updateRoute, skipRestor
 		});
 	} else {
 		this.restoreInfoStates(infos);
+		return Promise.resolve();
 	}
 };
 
@@ -505,7 +508,7 @@ SelectedInfoRouter.prototype.RestoreMetricState = function (activeSelectedMetric
 	}
 	var automaticLevelIndex = parseInt(state.AutomaticLevelIndex);
 	if (automaticLevelIndex !== version.AutomaticLevelIndex &&
-		automaticLevelIndex < version.Levels.length) {
+		automaticLevelIndex < activeSelectedMetric.MultilevelCount()) {
 		version.AutomaticLevelIndex = automaticLevelIndex;
 		if (state.PinnedLevel === '1') {
 			activeSelectedMetric.AutomaticLevel().Pinned = true;
@@ -514,10 +517,15 @@ SelectedInfoRouter.prototype.RestoreMetricState = function (activeSelectedMetric
 	}
 	var level = version.Levels[version.SelectedLevelIndex];
 	var variableIndex = parseInt(state.VariableIndex);
-	if (variableIndex !== level.SelectedVariableIndex &&
-		variableIndex < level.Variables.length) {
-		level.SelectedVariableIndex = variableIndex;
-		mapChanged = true;
+	if (variableIndex < level.Variables.length) {
+		if (variableIndex !== level.SelectedVariableIndex) {
+			mapChanged = true;
+		}
+		// Igual que al elegir la variable en el panel: se lleva a todas las series, para que
+		// al moverse por la serie se conserve.
+		var isBottomApart = activeSelectedMetric.HasSeparateBottomLevel() &&
+			level === version.Levels[version.Levels.length - 1];
+		activeSelectedMetric.SelectVariableInAllVersions(level, variableIndex, isBottomApart);
 	}
 	if (state.LabelsCollapsed !== version.LabelsCollapsed) {
 		version.LabelsCollapsed = state.LabelsCollapsed;

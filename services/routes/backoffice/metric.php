@@ -68,6 +68,15 @@ App::$app->get('/services/backoffice/GetMetricVersionsByMetric', function (Reque
 	return $ret;
 });
 
+// Informe de comparabilidad entre series del indicador publicado (para el autor; no se sirve al visor).
+App::$app->get('/services/backoffice/GetMetricComparabilityReport', function (Request $request) {
+	$controller = new services\MetricComparabilityService();
+	$workId = Params::GetIntMandatory('w');
+	$metricId = Params::GetIntMandatory('m');
+	if ($denied = Session::CheckIsWorkReader($workId)) return $denied;
+	return App::Json($controller->GetReport($metricId));
+});
+
 App::$app->get('/services/backoffice/GetCartographyMetrics', function (Request $request) {
 	$controller = new services\MetricService();
 	$ret = App::OrmJson($controller->GetCartographyMetrics());

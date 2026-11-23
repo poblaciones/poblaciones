@@ -2,6 +2,8 @@
 - Fix conteo de usuarios únicos
 - Capas base parametrizables desde configuración.
 - Capas base parametrizables por cartografía.
+- Comparación de atributos en mapas de puntos
+- Mejoras para capas de puntos multinivel.
 
 v5.7 (2026-11-05)
 - Cálculo de columnas.

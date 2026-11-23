@@ -201,10 +201,12 @@ class FabService extends BaseService
 		foreach ($userMetrics as $userMetric)
 			$userMetricsById[$userMetric['Id']] = $userMetric;
 
-		// Trae todas las métricas (sin el filtro de públicas) y se queda con las del usuario
+		// Trae las versiones de las cartografías del usuario, sin los filtros del catálogo
+		// público (tipo "public data", indexada, no privada), y se queda con sus métricas.
 		$table = new SnapshotMetricModel();
-		$allRows = $table->GetFabMetricSnapshot();
-		$rows = []; foreach ($allRows as $row) {
+		$allRows = $table->GetUserMetricSnapshot((int)Session::GetCurrentUser()->GetUserId());
+		$rows = [];
+		foreach ($allRows as $row) {
 			if (array_key_exists($row['myv_metric_id'], $userMetricsById))
 				$rows[] = $row;
 		}

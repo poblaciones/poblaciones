@@ -467,7 +467,13 @@ export default {
       this.close();
     },
     removeRecent(item) {
-      window.SegMap.Recents.Remove(item.DedupeKey);
+      const recents = window.SegMap.Recents;
+      const removed = recents.Remove(item.DedupeKey);
+      if (removed !== null) {
+        window.SegMap.History.RecordCustom('Quitar «' + removed.Item.Caption + '» de recientes',
+          () => recents.Restore(removed.Item, removed.Index),
+          () => recents.Remove(removed.Item.DedupeKey));
+      }
       this.refreshRecents();
     },
     refreshRecents() {

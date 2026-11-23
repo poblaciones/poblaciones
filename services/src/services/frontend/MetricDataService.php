@@ -39,6 +39,50 @@ class MetricDataService extends BaseService
 		return $data;
 	}
 
+	// Igual que GetMetricData, pero con la variación contra otra serie: cada fila trae el valor de ambas
+	// series y la categoría de variación (LID). Solo para capas de ubicaciones, que no se piden por tiles.
+	public function GetMetricDataCompare($frame, $metricId, $metricVersionId, $levelId, $levelCompareId, $urbanity, $partition)
+	{
+		Profiling::BeginTimer();
+		$this->CheckNotNullNumeric($metricId);
+		$this->CheckNotNullNumeric($metricVersionId);
+		$this->CheckNotNullNumeric($levelCompareId);
+		$this->CheckNotNumericNullable($levelId);
+
+		$data = $this->CalculateLayerDataCompare($frame, $metricId, $metricVersionId, $levelId, $levelCompareId, $urbanity, $partition);
+
+		Profiling::EndTimer();
+		return $data;
+	}
+
+	private function CalculateLayerDataCompare($frame, $metricId, $metricVersionId, $levelId, $levelCompareId, $urbanity, $partition)
+	{
+		$selectedService = new SelectedMetricService();
+		$metric = $selectedService->GetSelectedMetric($metricId);
+		$version = $metric->GetVersion($metricVersionId);
+		$level = $version->GetLevel($levelId);
+		$levelCompare = $metric->GetLevel($levelCompareId);
+
+		$snapshotTable = SnapshotByDatasetModel::SnapshotTable($level->Dataset->Table);
+		$mergeTable = MergeSnapshotsByDatasetModel::TableName($snapshotTable, $levelCompare->Dataset->Id);
+		$variablePairs = MergeSnapshotsByDatasetModel::GetRequiredVariablesForLevelPairObjects($level, $levelCompare);
+
+		$frame->TileEnvelope = "full";
+
+		$hasDescriptions = $level->HasDescriptions;
+		$hasSymbols = $level->Dataset->Marker && $level->Dataset->Marker->Type !== 'N' && $level->Dataset->Marker->Source === 'V';
+
+		$table = new SnapshotByDatasetCompareTileData($mergeTable, $level->Dataset->Type, $level->Dataset->AreSegments,
+											$variablePairs, $urbanity, $partition, $hasSymbols, $hasDescriptions);
+		MergeSnapshotsByDatasetModel::CheckTableExists($table->tableName, $level->Dataset->Id, $levelCompare->Dataset->Id);
+
+		// A diferencia de los tiles, la capa completa se entrega sin muestreo
+		$table->honorTileLimit = false;
+
+		$rows = $table->GetRows($frame);
+		return TileDataService::CreateTileDataInfo($rows);
+	}
+
 	private function CalculateLayerData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $partition)
 	{
 		$selectedService = new SelectedMetricService();

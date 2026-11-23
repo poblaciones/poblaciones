@@ -25,6 +25,7 @@
  *      Luego repetir paso 5 con reset=0 para continuar.
  *
  *   Opcionales:
+ *   POST /api/automation/DeleteDataset
  *   POST /api/automation/UpdateDatasetIdentity
  *   POST /api/automation/SetColumnLabels
  *   POST /api/automation/LinkMultilevel
@@ -62,6 +63,32 @@ App::$app->post('/services/api/automation/CreateDataset', function (Request $req
 	$controller = new services\DatasetService();
 	$entity = $controller->Create($workId, $name);
 	return App::OrmJson($entity);
+});
+
+/**
+ * Elimina un dataset de una cartografía en borrador, con sus columnas, indicadores, marcador y tablas.
+ * Es irreversible. Verifica que el dataset pertenezca a la cartografía indicada.
+ *
+ * Parámetros POST:
+ *   w  (int, obligatorio) – work ID
+ *   d  (int, obligatorio) – dataset ID
+ *
+ * Respuesta: { result: "ok" }
+ */
+App::$app->post('/services/api/automation/DeleteDataset', function (Request $request) {
+	AutomationAuth::Authenticate();
+
+	$workId = Params::GetIntMandatory('w');
+	if ($denied = Session::CheckIsWorkEditor($workId)) return $denied;
+
+	$datasetId = Params::GetIntMandatory('d');
+	$dataset = App::Orm()->find(entities\DraftDataset::class, $datasetId);
+	if ($dataset === null || (int)$dataset->getWork()->getId() !== (int)$workId)
+		throw new PublicException("Dataset no encontrado en la cartografía.");
+
+	$controller = new services\DatasetService();
+	$controller->DeleteDataset($workId, $datasetId);
+	return App::Json(array('result' => 'ok'));
 });
 
 // ******* Upload e import ****************************************************

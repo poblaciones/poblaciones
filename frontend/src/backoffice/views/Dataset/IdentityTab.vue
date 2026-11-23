@@ -19,6 +19,13 @@
 														 :list='Dataset.Columns' v-model='Dataset.properties.CaptionColumn'
 														 :render="formatColumn" />
 								</div>
+								<div v-if="supportsCode" class='md-layout-item md-size-50 md-small-size-100'>
+									<mp-select label='Variable con el código de los elementos' :allowNull='true'
+														 @selected='UpdateRegen' :canEdit='canEdit' placeholder="Seleccione la variable..."
+														 helper='Código que identifica a cada elemento y se mantiene entre series. Permite comparar las series. Ej. CUEAnexo de la escuela. No admite repetidos.'
+														 :list='Dataset.Columns' v-model='Dataset.properties.CodeColumn'
+														 :render="formatColumn" />
+								</div>
 								<div v-if="useTextures" class='md-layout-item md-size-50 md-small-size-100'>
 									<mp-select label="Textura" :list="validTextures" :modelKey="true" :canEdit="canEdit"
 														 v-model="Dataset.properties.TextureId" @selected="Update" />
@@ -220,6 +227,10 @@
 			},
 			Work() {
 				return window.Context.CurrentWork;
+			},
+			// En los datasets estándar los elementos se vinculan entre series por equivalencias geográficas
+			supportsCode() {
+				return this.Dataset.properties.Type === 'L' || this.Dataset.properties.Type === 'S';
 			},
 			polygonPluralName() {
 				switch (this.Dataset.properties.Marker.Frame) {

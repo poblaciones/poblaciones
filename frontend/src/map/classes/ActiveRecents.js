@@ -141,10 +141,27 @@ ActiveRecents.prototype.register = function (entry) {
 	this.saveToStorage();
 };
 
+// Devuelve el ítem quitado y su posición, o null si no estaba, para poder volver a ponerlo.
 ActiveRecents.prototype.Remove = function (dedupeKey) {
+	var index = this.items.findIndex(function (existing) {
+		return existing.DedupeKey === dedupeKey;
+	});
+	if (index === -1) {
+		return null;
+	}
+	var item = this.items[index];
 	this.items = this.items.filter(function (existing) {
 		return existing.DedupeKey !== dedupeKey;
 	});
+	this.saveToStorage();
+	return { Item: item, Index: index };
+};
+
+ActiveRecents.prototype.Restore = function (item, index) {
+	this.items = this.items.filter(function (existing) {
+		return existing.DedupeKey !== item.DedupeKey;
+	});
+	this.items.splice(index, 0, item);
 	this.saveToStorage();
 };
 

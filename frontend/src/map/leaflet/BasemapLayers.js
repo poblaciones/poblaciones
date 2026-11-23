@@ -26,8 +26,11 @@ BasemapLayers.VARIANT_WITH_LABELS = 'labels';
 BasemapLayers.VARIANT_WITHOUT_LABELS = 'noLabels';
 BasemapLayers.VARIANT_ONLY_LABELS = 'onlyLabels';
 
-// La variante solo se aplica a los mapas vectoriales.
-BasemapLayers.prototype.CreateLayer = function (name, vectorVariant) {
+// Para quienes no dibujan por su cuenta los nombres de lugares (p. ej. el popup de relocalización del backoffice).
+BasemapLayers.NO_HIDDEN_SOURCE_LAYERS = [];
+
+// La variante y las capas de origen ocultas solo se aplican a los mapas vectoriales.
+BasemapLayers.prototype.CreateLayer = function (name, vectorVariant, hiddenSourceLayers) {
 	var url = this.basemapUrls[name];
 	var attribution = this.basemapAttributions[name];
 	// Una URL con {z} es una plantilla de teselas raster; cualquier otra es el estilo JSON de un mapa vectorial.
@@ -35,14 +38,18 @@ BasemapLayers.prototype.CreateLayer = function (name, vectorVariant) {
 	if (isRasterBasemap) {
 		return this.createRasterLayer(url, attribution);
 	}
-	return this.createVectorLayer(url, vectorVariant, attribution);
+	var hidden = hiddenSourceLayers;
+	if (hidden === undefined) {
+		hidden = HIDDEN_SOURCE_LAYERS;
+	}
+	return this.createVectorLayer(url, vectorVariant, attribution, hidden);
 };
 
 BasemapLayers.prototype.createRasterLayer = function (tileUrlTemplate, attribution) {
 	return new L.TileLayer(tileUrlTemplate, { attribution: attribution });
 };
 
-BasemapLayers.prototype.createVectorLayer = function (styleUrl, variant, attribution) {
+BasemapLayers.prototype.createVectorLayer = function (styleUrl, variant, attribution, hiddenSourceLayers) {
 	var loc = this;
 	var layer = new BasemapGL({ zIndex: 0, attributionControl: { customAttribution: attribution } });
 
@@ -53,7 +60,7 @@ BasemapLayers.prototype.createVectorLayer = function (styleUrl, variant, attribu
 		layer.getMaplibreMap().setStyle(styleUrl, {
 			diff: false,
 			transformStyle: function (previousStyle, fetchedStyle) {
-				return loc.buildStyleVariant(fetchedStyle, variant);
+				return loc.buildStyleVariant(fetchedStyle, variant, hiddenSourceLayers);
 			}
 		});
 	});
@@ -69,18 +76,22 @@ BasemapLayers.prototype.createVectorLayer = function (styleUrl, variant, attribu
 	return layer;
 };
 
-BasemapLayers.prototype.buildStyleVariant = function (style, variant) {
+BasemapLayers.prototype.buildStyleVariant = function (style, variant, hiddenSourceLayers) {
 	var keptLayers = [];
 	for (var layer of style.layers) {
-		if (this.isLayerKept(layer, variant)) {
+		if (this.isLayerKept(layer, variant, hiddenSourceLayers)) {
 			keptLayers.push(layer);
 		}
 	}
 	return Object.assign({}, style, { layers: keptLayers });
 };
 
-BasemapLayers.prototype.isLayerKept = function (layer, variant) {
-	if (HIDDEN_SOURCE_LAYERS.includes(layer['source-layer'])) {
+BasemapLayers.prototype.isLayerKept = function (layer, variant, hiddenSourceLayers) {
+	var hidden = hiddenSourceLayers;
+	if (hidden === undefined) {
+		hidden = HIDDEN_SOURCE_LAYERS;
+	}
+	if (hidden.includes(layer['source-layer'])) {
 		return false;
 	}
 	if (variant === BasemapLayers.VARIANT_WITH_LABELS) {

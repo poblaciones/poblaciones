@@ -52,6 +52,7 @@ await import('./sharePopup.test.mjs');
 await import('./identityTab.test.mjs');
 await import('./attachmentPopup.test.mjs');
 await import('./metricPopup.test.mjs');
+await import('./comparabilityPopup.test.mjs');
 await import('./levelPopup.test.mjs');
 await import('./variableOptionsPopup.test.mjs');
 await import('./newMetric.test.mjs');

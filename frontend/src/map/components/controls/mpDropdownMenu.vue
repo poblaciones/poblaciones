@@ -68,6 +68,8 @@
 			separator: { type: Boolean, default: false },
 			label: { type: String, default: '' },
 			child: { type: Boolean, default: false },
+			// Marca el disparador como activo (p. ej. con una herramienta de dibujo elegida).
+			selected: { type: Boolean, default: false },
 			// Estilo inline del disparador. Va por prop y no por clase porque
 			// el CSS scoped del padre no alcanza a los hijos de este componente.
 			triggerStyle: { type: String, default: '' },
@@ -148,6 +150,9 @@
 				},
 				triggerClass() {
 					if (this.variant === 'float') {
+						if (this.selected) {
+							return 'mp-btn mp-btn--float is-selected';
+						}
 						return 'mp-btn mp-btn--float';
 					}
 					if (this.variant === 'icon') {

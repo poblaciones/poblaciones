@@ -146,13 +146,26 @@ it('abre los diálogos de personalización, estadísticas y compartir', () => {
 	};
 	const pushed = [];
 	browser.window.Context.CurrentWork = { properties: { Id: 3 } };
-	const vm = mountLite(TopbarWorkActions, { mocks: { $refs: refs, $router: { push(route) { pushed.push(route); } } } });
+	const vm = mountLite(TopbarWorkActions, { mocks: { $refs: refs, $route: { path: '/cartographies/3/content' }, $router: { push(route) { pushed.push(route); } } } });
 	vm.openCustomize();
 	vm.openStats();
 	vm.openShare();
 	vm.openMetadata();
 	expect(shown).toEqual(['customize', 'stats', 'share']);
 	expect(pushed).toEqual([{ path: '/cartographies/3/metadata' }]);
+});
+
+it('openMetadata no navega si ya se está en los metadatos de la cartografía', () => {
+	const browser = setupBackoffice('P');
+	const pushed = [];
+	browser.window.Context.CurrentWork = { properties: { Id: 3 } };
+	const route = { path: '/cartographies/3/metadata/content' };
+	const vm = mountLite(TopbarWorkActions, { mocks: { $route: route, $router: { push(target) { pushed.push(target); } } } });
+	vm.openMetadata();
+	expect(pushed).toHaveLength(0);
+	route.path = '/cartographies/3/metadata';
+	vm.openMetadata();
+	expect(pushed).toHaveLength(0);
 });
 
 describe('NoticeChangesV5: aviso de cambios');

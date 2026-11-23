@@ -115,6 +115,9 @@ App::$app->post('/services/api/automation/CreateIndicator', function (Request $r
  *   caption              (string, obligatorio) – nombre de la variable (ej. 'Porcentaje NBI')
  *   data_column_id       (int, opcional)       – ID de la columna de datos; si se omite se usa Conteo
  *   normalization_col_id (int, opcional)       – ID de la columna de normalización
+ *   normalization_type   (string, opcional)    – normalización por una magnitud propia del sistema, sin columna:
+ *                                                'P' población | 'H' hogares | 'A' adultos | 'C' niños | 'M' área en m2 | 'K' área en km2.
+ *                                                Es excluyente con normalization_column_id.
  *   normalization_scale  (int, opcional)       – escala de normalización: 100 (%), 1000 (‰) (default: 100)
  *   cut_mode             (string, opcional)    – 'S' simple | 'J' Jenks | 'T' ntiles | 'M' manual | 'V' categorías (default: 'J')
  *   categories           (int, opcional)       – cantidad de cortes, 2–10 (default: 4)
@@ -143,6 +146,7 @@ App::$app->post('/services/api/automation/AddVariable', function (Request $reque
 	$normColId = Params::GetInt('normalization_column_id');
 	$gapDataColumnId = Params::GetInt('gap_data_column_id');
 	$gapNormColId = Params::GetInt('gap_normalization_column_id');
+	$normalizationType = Params::Get('normalization_type');
 	$normScale = Params::GetInt('normalization_scale', 100);
 	$isGap = Params::GetInt('is_gap', 0) === 1;
 	$cutMode = Params::Get('cut_mode', 'J');
@@ -166,6 +170,12 @@ App::$app->post('/services/api/automation/AddVariable', function (Request $reque
 	if (!in_array($paletteType, ['P', 'G'])) {
 		throw new PublicException("palette_type inválido. Valores válidos: P, G.");
 	}
+	if ($normalizationType !== null && !in_array($normalizationType, ['P', 'H', 'A', 'C', 'M', 'K'])) {
+		throw new PublicException("normalization_type inválido. Valores válidos: P, H, A, C, M, K.");
+	}
+	if ($normalizationType !== null && $normColId !== null) {
+		throw new PublicException("normalization_type y normalization_column_id son excluyentes.");
+	}
 
 	// Determinar si el dato es columna (O) o conteo (N)
 	$dataType = ($dataColumnId !== null) ? 'O' : 'N';
@@ -182,6 +192,9 @@ App::$app->post('/services/api/automation/AddVariable', function (Request $reque
 	if ($normColId !== null) {
 		$normType = 'O';
 		$normColObj = App::Orm()->find(entities\DraftDatasetColumn::class, $normColId);
+	}
+	else if ($normalizationType !== null) {
+		$normType = $normalizationType;
 	}
 
 	// Construir GapDataColumn (si aplica)

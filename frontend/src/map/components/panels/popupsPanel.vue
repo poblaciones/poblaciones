@@ -6,6 +6,7 @@
 		<CompareMetadata ref="showCompareMetadata" :backgroundColor="backgroundColor" />
 		<MetricDownload ref="showMetricDownload" :backgroundColor="backgroundColor" />
 		<AnnotationItem ref="showAnnotationItem" :backgroundColor="backgroundColor" />
+		<AnnotationsLogin ref="showAnnotationsLogin" :backgroundColor="backgroundColor" />
 		<BoundaryDownload ref="showBoundaryDownload" :backgroundColor="backgroundColor" />
 		<Embedding ref="showEmbedding" :backgroundColor="backgroundColor" />
 		<BoundaryCustomize ref="showBoundaryCustomize" :backgroundColor="backgroundColor" />
@@ -26,6 +27,7 @@ import BasemapMetadata from '@/map/components/popups/basemapMetadata';
 import CompareMetadata from '@/map/components/popups/compareMetadata';
 import MetricCustomize from '@/map/components/popups/metricCustomize';
 import AnnotationItem from '@/map/components/popups/annotationItem';
+import AnnotationsLogin from '@/map/components/popups/annotationsLogin';
 import BoundaryCustomize from '@/map/components/popups/boundaryCustomize';
 import AddMetric2 from '@/map/components/popups/addMetric2';
 import AddMetric from '@/map/components/popups/addMetric';
@@ -42,6 +44,7 @@ export default {
 		AddMetric,
 		AddMetric2,
 		AnnotationItem,
+		AnnotationsLogin,
 		WorkMetadata,
 		Tour,
 		Embedding,
@@ -68,6 +71,7 @@ export default {
 		window.Popups.BoundaryCustomize = this.$refs.showBoundaryCustomize;
 		window.Popups.MetricCustomize = this.$refs.showCustomize;
 		window.Popups.AnnotationItem = this.$refs.showAnnotationItem;
+		window.Popups.AnnotationsLogin = this.$refs.showAnnotationsLogin;
 		window.Popups.AddMetric = this.$refs.addMetric;
 		window.Popups.TableView = this.$refs.showTableView;
 	},

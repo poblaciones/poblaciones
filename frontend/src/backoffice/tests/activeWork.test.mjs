@@ -365,6 +365,7 @@ it('cada consulta usa su servicio y sus parámetros', async () => {
 		[function () { return work.GetWorkStatistics('2024-05'); }, 'GetWorkStatistics', { w: 3, m: '2024-05' }],
 		[function () { return work.VerifyDatasetsImportFile('b1', 'xlsx'); }, 'Dataset/VerifyDatasetsImportFile', { b: 'b1', fe: 'xlsx' }],
 		[function () { return work.GetMetricVersionsByMetric({ Id: 4 }); }, 'GetMetricVersionsByMetric', { m: 4, w: 3 }],
+		[function () { return work.GetMetricComparabilityReport({ Id: 4 }); }, 'GetMetricComparabilityReport', { m: 4, w: 3 }],
 		[function () { return work.GetGeographyItems(6); }, 'GetGeographyItems', { g: 6 }],
 		[function () { return work.GetStepImage(2); }, 'GetStepImage', { w: 3, s: 2 }],
 		[function () { return work.RequestReview(); }, 'RequestReview', { w: 3 }],

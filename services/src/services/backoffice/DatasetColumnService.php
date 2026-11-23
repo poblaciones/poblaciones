@@ -156,6 +156,7 @@ class DatasetColumnService extends DbSession
 								$this->conditionalResetter('dat_latitude_column_segment_id', $colsId) . "," .
 								$this->conditionalResetter('dat_longitude_column_segment_id', $colsId) . "," .
 								$this->conditionalResetter('dat_caption_column_id', $colsId) . "," .
+								$this->conditionalResetter('dat_code_column_id', $colsId) . "," .
 								$this->conditionalResetter('dat_geography_item_column_id', $colsId) . "
 									WHERE dat_id = ?";
 		App::Db()->exec($queryCols, array($datasetId));

@@ -210,9 +210,49 @@ export default {
 			}
 			this.doToggle();
 		},
+		// Cerrar el panel de una lista se puede deshacer. El de un elemento se deshace por la ruta
+		// (FeatureInfoRouter), por eso no se registra acá.
 		doClose(e, fid) {
 			let panelPositionEnum = this.getLocated(fid);
 			if(panelPositionEnum === null) {
+				return;
+			}
+			var closed = this[panelPositionEnum];
+			var layout = this.captureLayout();
+			this.removePanel(panelPositionEnum);
+			if (closed.panelType === PanelType.ListPanel) {
+				var loc = this;
+				window.SegMap.History.RecordCustom('Cerrar el panel de ' + this.listPanelName(closed),
+					function () { loc.restoreLayout(layout); },
+					function () { loc.removePanel(loc.getLocated(fid)); });
+			}
+		},
+		listPanelName(panel) {
+			var name = panel.Title || panel.Code;
+			if (name) {
+				return '«' + name + '»';
+			}
+			return 'la lista';
+		},
+		captureLayout() {
+			return {
+				Full: this.Full, Top: this.Top, Bottom: this.Bottom,
+				isFullFront: this.isFullFront, hasContent: this.hasContent, collapsed: this.collapsed
+			};
+		},
+		restoreLayout(layout) {
+			this.Full = layout.Full;
+			this.Top = layout.Top;
+			this.Bottom = layout.Bottom;
+			this.isFullFront = layout.isFullFront;
+			this.hasContent = layout.hasContent;
+			this.collapsed = layout.collapsed;
+			window.SegMap.toolbarStates.leftPanelVisible = !layout.collapsed;
+			this.arrangePanels();
+			window.SegMap.SaveRoute.UpdateRoute();
+		},
+		removePanel(panelPositionEnum) {
+			if (panelPositionEnum === null) {
 				return;
 			}
 			this[panelPositionEnum] = null;
@@ -233,10 +273,23 @@ export default {
 			window.SegMap.toolbarStates.leftPanelVisible = false;
 			window.SegMap.SaveRoute.UpdateRoute();
 		},
+		// Ocultar o mostrar el panel de información se puede deshacer, igual que el de estadísticas.
 		doToggle() {
-			this.collapsed = !this.collapsed;
-			window.SegMap.toolbarStates.leftPanelVisible = !this.collapsed;
-			window.SegMap.Session.UI.ToggleLeftPanel(!this.collapsed);
+			var wasCollapsed = this.collapsed;
+			var loc = this;
+			this.setCollapsed(!wasCollapsed);
+			var label = 'Cerrar el panel de información';
+			if (wasCollapsed) {
+				label = 'Abrir el panel de información';
+			}
+			window.SegMap.History.RecordCustom(label,
+				function () { loc.setCollapsed(wasCollapsed); },
+				function () { loc.setCollapsed(!wasCollapsed); });
+		},
+		setCollapsed(collapsed) {
+			this.collapsed = collapsed;
+			window.SegMap.toolbarStates.leftPanelVisible = !collapsed;
+			window.SegMap.Session.UI.ToggleLeftPanel(!collapsed);
 		},
 		// --mp-side-offset corre hacia la derecha los paneles flotantes anclados al borde izquierdo (map/styles/layout.css).
 		updateSidePanel() {

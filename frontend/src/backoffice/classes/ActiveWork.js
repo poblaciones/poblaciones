@@ -199,6 +199,12 @@ ActiveWork.prototype.GetMetricVersionsByMetric = function (metric) {
 		{ 'm': metric.Id, 'w': this.properties.Id }, 'obtener información del indicador');
 };
 
+// Diagnóstico de comparabilidad entre series del indicador publicado; sin filas si no hay otra serie.
+ActiveWork.prototype.GetMetricComparabilityReport = function (metric) {
+	return axiosClient.getPromise(window.host + '/services/backoffice/GetMetricComparabilityReport',
+		{ 'm': metric.Id, 'w': this.properties.Id }, 'obtener el diagnóstico de comparación del indicador');
+};
+
 ActiveWork.prototype.GetStepDatasetFileImportUrl = function () {
 	return window.host + '/services/backoffice/Dataset/StepMultiImportFile';
 };

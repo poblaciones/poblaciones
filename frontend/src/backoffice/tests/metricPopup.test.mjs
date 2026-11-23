@@ -14,7 +14,7 @@ function makeLevel(overrides) {
 	}, overrides);
 }
 
-function setup(sameVersions) {
+function setup(sameVersions, comparabilityRows) {
 	const browser = setupBackoffice('P');
 	const context = browser.window.Context;
 	const dataset = makeGridDataset();
@@ -27,7 +27,16 @@ function setup(sameVersions) {
 	if (sameVersions === undefined) {
 		versions = [{ Caption: '2023' }, { Caption: '2024' }];
 	}
-	const work = { requested: [], GetMetricVersionsByMetric(metric) { this.requested.push(metric); return Promise.resolve(versions); } };
+	let report = comparabilityRows;
+	if (comparabilityRows === undefined) {
+		report = [];
+	}
+	const work = {
+		requested: [],
+		reportRequested: [],
+		GetMetricVersionsByMetric(metric) { this.requested.push(metric); return Promise.resolve(versions); },
+		GetMetricComparabilityReport(metric) { this.reportRequested.push(metric); return Promise.resolve(report); },
+	};
 	context.CurrentWork = work;
 	const refs = {
 		invoker: { saved: [], result: Promise.resolve({ LevelId: 21, MetricVersionId: 31, MetricId: 41 }), doSave(...args) { this.saved.push(args); return this.result; } },
@@ -35,6 +44,7 @@ function setup(sameVersions) {
 		pickMetric: { shown: 0, show() { this.shown++; } },
 		confirmUnbindDialog: { shown: 0, show() { this.shown++; } },
 		confirmDialog: { shown: 0, show() { this.shown++; } },
+		comparabilityPopup: { shown: [], show(rows) { this.shown.push(rows); } },
 	};
 	const vm = mountLite(MetricPopup, { mocks: { $refs: refs } });
 	return { vm: vm, dataset: dataset, work: work, refs: refs, browser: browser, context: context };
@@ -175,4 +185,51 @@ it('doSave guarda el nivel editado y, al terminar, traslada el nombre y los iden
 	expect(level.MetricVersion.Metric.Caption).toBe('Habitantes');
 	expect([level.Id, level.MetricVersion.Id, level.MetricVersion.Metric.Id]).toEqual([21, 31, 41]);
 	expect(vm.showDialog).toBe(false);
+});
+
+describe('MetricPopup: diagnóstico de comparación');
+
+it('show pide el diagnóstico del indicador publicado', async () => {
+	const { vm, work } = setup();
+	const level = await open(vm);
+	expect(work.reportRequested).toHaveLength(1);
+	expect(work.reportRequested[0] === level.MetricVersion.Metric).toBeTruthy();
+});
+
+it('sin filas en el diagnóstico no se ofrece el enlace', async () => {
+	const { vm } = setup();
+	await open(vm);
+	expect(vm.hasNonComparableVariables).toBe(false);
+});
+
+it('con todas las variables comparables no se ofrece el enlace', async () => {
+	const { vm } = setup(undefined, [{ Comparable: true, Message: 'Comparable.' }]);
+	await open(vm);
+	expect(vm.hasNonComparableVariables).toBe(false);
+});
+
+it('con alguna variable no comparable se ofrece el enlace', async () => {
+	const rows = [
+		{ Comparable: true, Message: 'Comparable.' },
+		{ Comparable: false, Message: 'No comparable por fórmula diferente.' },
+	];
+	const { vm } = setup(undefined, rows);
+	await open(vm);
+	expect(vm.hasNonComparableVariables).toBe(true);
+});
+
+it('showComparability abre el popup con las filas del diagnóstico', async () => {
+	const rows = [{ Comparable: false, Message: 'No comparable por ser ubicaciones sin una columna de código.' }];
+	const { vm, refs } = setup(undefined, rows);
+	await open(vm);
+	vm.showComparability();
+	expect(refs.comparabilityPopup.shown).toHaveLength(1);
+	expect(refs.comparabilityPopup.shown[0]).toEqual(rows);
+});
+
+it('al abrir otro indicador se descartan las filas del anterior', async () => {
+	const { vm } = setup(undefined, [{ Comparable: false, Message: 'x' }]);
+	await open(vm);
+	vm.show(makeLevel());
+	expect(vm.ComparabilityRows).toEqual([]);
 });

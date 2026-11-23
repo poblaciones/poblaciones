@@ -23,6 +23,11 @@
 			<mp-filter-badge style="margin-top: 0.3rem; margin-bottom: 0.9rem;" v-if="hasUrbanityFilter && urbanity != 'N'"
 											 :title="getUrbanityTextActive" :tooltip="getUrbanityTextTooltip"
 											 @click="changeUrbanity('N')" />
+			<mp-collapse>
+				<div ref="rankings" v-if="rankingVisible" class="rankingBox">
+					<Ranking :metric="metric" :clipping="clipping" />
+				</div>
+			</mp-collapse>
 		</div>
 		<template v-else>
 			<h4 class="title">
@@ -34,8 +39,20 @@
 											 :title="getUrbanityTextActive" :tooltip="getUrbanityTextTooltip"
 											 @click="changeUrbanity('N')" />
 			<MetricVariables v-if="metric.HasSeparateBottomLevel()" @variableChanged="variableChanged"
-											 :metric="metric" :fixedLevel="metric.BottomLevel()" style="margin-bottom: -1.5rem;" />
-			<MetricVariables :metric="metric" @variableChanged="variableChanged" />
+											 :metric="metric" :fixedLevel="metric.BottomLevel()" :style="bottomBlockStyle">
+				<mp-collapse>
+					<div ref="rankings" v-if="rankingVisible" class="rankingBox">
+						<Ranking :metric="metric" :clipping="clipping" />
+					</div>
+				</mp-collapse>
+			</MetricVariables>
+			<MetricVariables :metric="metric" @variableChanged="variableChanged">
+				<mp-collapse>
+					<div ref="rankings" v-if="rankingVisible" class="rankingBox">
+						<Ranking :metric="metric" :clipping="clipping" />
+					</div>
+				</mp-collapse>
+			</MetricVariables>
 		</template>
 		<div class="coverageBox" v-if="hasLegends(metric.SelectedLevel())">
 			<template v-for="variable, index in metric.SelectedLevel().Variables">
@@ -70,11 +87,6 @@
 							@clickTable="openTable" />
 			<div style="clear: both; height: 0px"></div>
 		</div>
-			<mp-collapse>
-				<div ref="rankings" v-if="metric.ShowRanking && metric.useRankings()" class="rankingBox">
-					<Ranking :metric="metric" :clipping="clipping" />
-				</div>
-			</mp-collapse>
 		</div>
 </template>
 <script>
@@ -175,6 +187,10 @@ export default {
 			window.Popups.WorkMetadata.showByMetric(this.metric, this.metric.properties.Metric.Name);
 		},
 		hasCompareMetadata() {
+			// Ubicaciones y zonas se vinculan por código: no hay equivalencias geográficas que documentar
+			if (this.metric.SelectedLevel().Dataset.Type !== 'D') {
+				return false;
+			}
 				return this.metric.SelectedLevel().GeographyId !== this.metric.Compare.SelectedLevel().GeographyId;
 		},
 		clickCompareFuente() {
@@ -388,6 +404,21 @@ export default {
 		}
 	},
 	computed: {
+		rankingVisible() {
+			return this.metric.ShowRanking && this.metric.useRankings();
+		},
+		// Con el detalle de las ubicaciones desplegado, el bloque de niveles agregados debe quedar separado:
+		// pegado a la tabla se lee como la unidad de sus valores. Con el detalle cerrado, las filas se apilan juntas.
+		bottomBlockStyle() {
+			var level = this.metric.BottomLevel();
+			var detailVisible = !this.metric.SelectedVersion().LabelsCollapsed &&
+				this.metric.SelectedLevel() === level &&
+				level.SelectedVariableIndex >= 0;
+			if (detailVisible) {
+				return '';
+			}
+			return 'margin-bottom: -1.5rem;';
+		},
 			Use() {
 				return window.Use;
 		},

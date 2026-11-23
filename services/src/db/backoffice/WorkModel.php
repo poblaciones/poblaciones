@@ -43,6 +43,7 @@ class WorkModel extends BaseModel
 
 		$sql = "SELECT d.*, geography.*,
 							caption.dco_field AS dat_caption_field,
+							code.dco_field AS dat_code_field,
 							longitude.dco_field AS dat_longitude_field,
 							latitude.dco_field AS dat_latitude_field,
 							longitudeSegment.dco_field AS dat_longitude_field_segment,
@@ -58,6 +59,7 @@ class WorkModel extends BaseModel
 							LEFT JOIN " . $this->resolveTableName('dataset_column') . " latitudeSegment ON latitudeSegment.dco_id = dat_latitude_column_segment_id
 							LEFT JOIN " . $this->resolveTableName('dataset_column') . " longitudeSegment ON longitudeSegment.dco_id = dat_longitude_column_segment_id
 							LEFT JOIN " . $this->resolveTableName('dataset_column') . " caption ON caption.dco_id = dat_caption_column_id
+							LEFT JOIN " . $this->resolveTableName('dataset_column') . " code ON code.dco_id = dat_code_column_id
 							JOIN " . $this->resolveTableName('dataset_marker') . " dataset_marker ON dmk_id = dat_marker_id
 							LEFT JOIN " . $this->resolveTableName('dataset_column') . " marker ON marker.dco_id = dmk_content_column_id
 

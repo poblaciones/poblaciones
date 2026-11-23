@@ -63,7 +63,7 @@
 	import h from '@/map/js/helper';
 	import str from '@/common/framework/str';
 	import GeographyOverlay from '../classes/GeographyOverlay';
-	import MapAttribution from '@/common/js/mapAttribution';
+	import BasemapLayers from '@/map/leaflet/BasemapLayers';
 
 	// 1. Elimina la configuración de íconos por defecto que viene rota
 	delete L.Icon.Default.prototype._getIconUrl;
@@ -143,14 +143,11 @@
 					attributionControl: true
 				});
 
-				var basemapUrls = window.Context.Configuration.BasemapUrls;
-				var BASEMAP_URL = basemapUrls.roadmap;
-				var BASEMAP_ATTRIBUTION = window.Context.Configuration.BasemapAttributions.roadmap;
-
-				L.tileLayer(BASEMAP_URL, {
-					attribution: BASEMAP_ATTRIBUTION,
-					maxZoom: 20
-				}).addTo(map);
+				// La configuración puede traer mapas vectoriales (estilo JSON) o raster; BasemapLayers resuelve ambos.
+				var basemaps = new BasemapLayers(window.Context.Configuration.BasemapUrls,
+					window.Context.Configuration.BasemapAttributions);
+				basemaps.CreateLayer('roadmap', BasemapLayers.VARIANT_WITH_LABELS,
+					BasemapLayers.NO_HIDDEN_SOURCE_LAYERS).addTo(map);
 
 				if (this.useMarker) {
 					var marker = L.marker(latLng, { draggable: true });

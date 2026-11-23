@@ -548,7 +548,7 @@ module.exports = {
 		});
 		return ret;
 	},
-	getLayerDataParams(metric, frame) {
+	getLayerDataParams(metric, frame, compareLevelId) {
 		const ver = metric.Versions[metric.SelectedVersionIndex];
 		var ret = this.mergeObject({
 			l: metric.Metric.Id,
@@ -558,6 +558,9 @@ module.exports = {
 			g: metric.EffectivePartition,
 			w: metric.Metric.Signature
 		}, this.getFrameParams(frame));
+		if (compareLevelId !== undefined && compareLevelId !== null) {
+			ret.p = compareLevelId;
+		}
 		delete ret.e;
 		delete ret.z;
 		ret.e = null;

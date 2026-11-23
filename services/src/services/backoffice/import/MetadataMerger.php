@@ -108,6 +108,8 @@ class MetadataMerger
 
 		$message = "La variable seleccionada para la descripción ha quedado vacía debido a que el nuevo dataset no contiene una variable llamada 'VARIABLE_CAPTION'.";
 		$turnedToNull .= $this->MigrateColumnFormatted($datasetInfo, 'dat_caption_column_id', $message);
+		$message = "La variable seleccionada para el código ha quedado vacía debido a que el nuevo dataset no contiene una variable llamada 'VARIABLE_CAPTION'.";
+		$turnedToNull .= $this->MigrateColumnFormatted($datasetInfo, 'dat_code_column_id', $message);
 		$message = "La variable seleccionada para la imagen ha quedado vacía debido a que el nuevo dataset no contiene una variable llamada 'VARIABLE_CAPTION'.";
 		$turnedToNull .= $this->MigrateColumnFormatted($datasetInfo, 'dat_images_column_id', $message);
 		$message = "La variable seleccionada para la partición ha quedado vacía debido a que el nuevo dataset no contiene una variable llamada 'VARIABLE_CAPTION'.";

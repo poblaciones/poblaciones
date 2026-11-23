@@ -68,7 +68,7 @@ class PublishDataTables
 																			))));
 
 		$datasetMatrix = array('class' => entities\Dataset::class, 'childKey' => 'dat_work_id',
-																			'postUpdateColumns' => array('dat_caption_column_id', 'dat_images_column_id', 'dat_partition_column_id',
+																			'postUpdateColumns' => array('dat_caption_column_id', 'dat_code_column_id', 'dat_images_column_id', 'dat_partition_column_id',
 																																		'dat_latitude_column_id', 'dat_longitude_column_id',
 																																		'dat_latitude_column_segment_id', 'dat_longitude_column_segment_id',
 																																		'dat_geography_item_column_id'),
@@ -383,6 +383,7 @@ class PublishDataTables
 		if ($slice < sizeof($datasets))
 		{
 			$dataset = $datasets[$slice];
+			$this->CheckAllRowsAreGeoreferenced($dataset);
 			$this->CopyWorkDatasetTable($dataset['dat_table'], $dataset['dat_id']);
 		}
 		Profiling::EndTimer();
@@ -407,7 +408,8 @@ class PublishDataTables
 									 d1.dat_latitude_column_segment_id = d2.dat_latitude_column_segment_id * 100 + " . $shard . ",
 									 d1.dat_longitude_column_segment_id = d2.dat_longitude_column_segment_id * 100 + " . $shard . ",
 									 d1.dat_geography_item_column_id = d2.dat_geography_item_column_id * 100 + " . $shard . ",
-									 d1.dat_caption_column_id = d2.dat_caption_column_id * 100 + " . $shard;
+									 d1.dat_caption_column_id = d2.dat_caption_column_id * 100 + " . $shard . ",
+									 d1.dat_code_column_id = d2.dat_code_column_id * 100 + " . $shard;
 		App::Db()->exec($query, array($workId));
 		App::Db()->markTableUpdate('dataset');
 
@@ -467,6 +469,42 @@ class PublishDataTables
 		App::Db()->markTableUpdate($target_table);
 	}
 
+	const MAX_REPORTED_ROWS = 10;
+
+	// La tabla publicada exige geography_item_id: una fila no omitida sin georreferenciar haría fallar la copia
+	// con un error de base de datos que no dice qué dataset es.
+	private function CheckAllRowsAreGeoreferenced(array $dataset): void
+	{
+		$sql = "SELECT id FROM " . $dataset['dat_table'] . " WHERE ommit = 0 AND geography_item_id IS NULL ORDER BY id LIMIT " . (self::MAX_REPORTED_ROWS + 1);
+		$rows = App::Db()->fetchAll($sql);
+		if (sizeof($rows) > 0)
+		{
+			throw new PublicException($this->BuildNotGeoreferencedMessage($dataset, $rows));
+		}
+	}
+
+	private function BuildNotGeoreferencedMessage(array $dataset, array $rows): string
+	{
+		$reportedCount = min(sizeof($rows), self::MAX_REPORTED_ROWS);
+		$ids = array();
+		for($n = 0; $n < $reportedCount; $n++)
+		{
+			$ids[] = $rows[$n]['id'];
+		}
+		$text = "El dataset '" . $dataset['dat_caption'] . "' tiene filas sin georreferenciar que no están omitidas, por lo que no se puede publicar.\n\n";
+		if (sizeof($rows) > self::MAX_REPORTED_ROWS)
+		{
+			$text .= "Primeras " . self::MAX_REPORTED_ROWS . " filas afectadas (identificador de fila): ";
+		}
+		else
+		{
+			$text .= "Filas afectadas (identificador de fila): ";
+		}
+		$text .= implode(', ', $ids) . ".\n\n";
+		$text .= "Vuelva a georreferenciar el dataset e intente publicar nuevamente.";
+		return $text;
+	}
+
 	private function CopyWorkDatasetTable($table, $datasetId)
 	{
 		Profiling::BeginTimer();
@@ -502,7 +540,8 @@ class PublishDataTables
 													dat_latitude_column_segment_id = NULL,
 													dat_longitude_column_segment_id = NULL,
 													dat_geography_item_column_id = NULL,
-													dat_caption_column_id = NULL
+													dat_caption_column_id = NULL,
+													dat_code_column_id = NULL
 									WHERE dat_work_id = ?" . $datasetCondition;
 		App::Db()->exec($queryCols, array($workId));
 		App::Db()->markTableUpdate($drafting . "dataset");

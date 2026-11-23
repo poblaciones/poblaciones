@@ -182,6 +182,8 @@ InfoWindow.prototype.InfoRequestedInteractive = function (position, parent, fid)
 	} else {
 		window.SegMap.Session.Content.SelectFeature(fid);
 	}
+	// Abrir el elemento puede mover el encuadre: deshacer debe volver al que había antes del clic.
+	window.SegMap.History.NoteFrame();
 	this.InfoRequested(position, parent, fid, true);
 };
 

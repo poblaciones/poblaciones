@@ -175,6 +175,49 @@ ActiveMetric.prototype.ChangeAutomaticLevelIndex = function (index) {
 	this.SetSelectedVariableByName(name);
 };
 
+// Elige la variable de la posición `index` en `level` y la lleva a las demás series por nombre, para que al
+// moverse por la serie se conserve aunque las series ordenen distinto sus variables. Con el nivel de
+// ubicaciones aparte solo se toca ese nivel; si no, los niveles que siguen al zoom. Una serie o un nivel
+// que no tiene una variable con ese nombre queda como estaba. Con -1 (ninguna) se deselecciona en todas.
+ActiveMetric.prototype.SelectVariableInAllVersions = function (level, index, onlyBottomLevel) {
+	level.SelectedVariableIndex = index;
+	var name = null;
+	if (index >= 0) {
+		name = level.Variables[index].Name;
+	}
+	var versions = this.properties.Versions;
+	for (var v = 0; v < versions.length; v++) {
+		var version = versions[v];
+		var lastIndex = version.Levels.length - 1;
+		if (onlyBottomLevel) {
+			this.selectVariableInLevelByName(version.Levels[lastIndex], name);
+		} else {
+			var lastLevelDontMultilevel = version.Levels.length > 1 && version.Levels[lastIndex].Dataset.Type !== 'D';
+			var levelCount = version.Levels.length;
+			if (lastLevelDontMultilevel) {
+				levelCount = lastIndex;
+			}
+			for (var l = 0; l < levelCount; l++) {
+				this.selectVariableInLevelByName(version.Levels[l], name);
+			}
+		}
+	}
+};
+
+// name === null significa ninguna variable.
+ActiveMetric.prototype.selectVariableInLevelByName = function (level, name) {
+	if (name === null) {
+		level.SelectedVariableIndex = -1;
+		return;
+	}
+	for (var n = 0; n < level.Variables.length; n++) {
+		if (level.Variables[n].Name === name) {
+			level.SelectedVariableIndex = n;
+			return;
+		}
+	}
+};
+
 ActiveMetric.prototype.SetSelectedVariableByName = function (name) {
 	var level = this.SelectedLevel();
 	for (var l = 0; l < level.Variables.length; l++) {
@@ -251,7 +294,7 @@ ActiveMetric.prototype.SelectVersion = function (index) {
 // hubo cambio.
 ActiveMetric.prototype.ApplyPinnedLevel = function () {
 	var version = this.SelectedVersion();
-	for (var l = 0; l < version.Levels.length; l++) {
+	for (var l = 0; l < this.MultilevelCount(); l++) {
 		if (version.Levels[l].Pinned) {
 			if (version.SelectedLevelIndex === l && version.AutomaticLevelIndex === l) {
 				return false;
@@ -483,8 +526,9 @@ ActiveMetric.prototype.isClickeable = function () {
 
 ActiveMetric.prototype.IsFiltering = function () {
 	var variable = this.SelectedVariable();
-	for (let i = 0; i < variable.ValueLabels.length; i++) {
-		var value = variable.ValueLabels[i];
+	var labels = this.getVariableValueLabels(variable);
+	for (let i = 0; i < labels.length; i++) {
+		var value = labels[i];
 		if (!value.Visible) {
 			return true;
 		}
@@ -694,7 +738,8 @@ ActiveMetric.prototype.LevelValidFrom = function() {
 		return 0;
 	}
 	var currentVersion = this.SelectedVersion();
-	for (var l = 0; l < currentVersion.Levels.length; l++) {
+	// Las ubicaciones aparte no siguen al zoom: no pueden ser el primer nivel válido.
+	for (var l = 0; l < this.MultilevelCount(); l++) {
 		var currentLevel = currentVersion.Levels[l];
 		if (window.SegMap.Clipping.LevelMachLevels(currentLevel)) {
 			return l;
@@ -873,12 +918,24 @@ ActiveMetric.prototype.GetLevelData = function () {
 	return promise;
 };
 
+// Las capas que no se comparan (base, anotaciones) no tienen otra serie contra la cual pedir datos.
+ActiveMetric.prototype.CompareLevelForData = function () {
+	return null;
+};
+
 ActiveMetric.prototype.GetMetricDataService = function (seed) {
 	var useStaticQueue = window.SegMap.Configuration.StaticWorks.indexOf(this.SelectedVersion().Work.Id) !== -1;
 	var server = '';
 
 	var service = (this.isBaseMetric ? 'Base' : '');
+	var compareLevel = this.CompareLevelForData();
 	var path = '/services/frontend/metrics/Get' + service + 'MetricData';
+	var compareLevelId = null;
+	if (compareLevel !== null) {
+		// Variación contra la otra serie: respuesta propia, cacheada en el servidor
+		path = path + 'Compare';
+		compareLevelId = compareLevel.Id;
+	}
 
 	if (useStaticQueue) {
 		server = h.selectMultiUrl(window.SegMap.Configuration.StaticServer, seed);
@@ -886,7 +943,7 @@ ActiveMetric.prototype.GetMetricDataService = function (seed) {
 		server = window.host;
 	}
 	this.properties.EffectivePartition = this.GetSelectedPartition();
-	var params = h.getLayerDataParams(this.properties, window.SegMap.frame);
+	var params = h.getLayerDataParams(this.properties, window.SegMap.frame, compareLevelId);
 	return { server: server, path: path, useStaticQueue: useStaticQueue, params: params };
 };
 

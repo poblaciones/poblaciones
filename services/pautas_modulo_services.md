@@ -188,6 +188,14 @@ Las **banderas de cambio** (`WorkFlags`) deciden cuánto se recalcula: los datos
 cambiaron los datasets o los indicadores. Si todo está sin marcar, `StartPublication` entiende que se pide una publicación
 completa y marca todo (ver el hallazgo 1 de la sección 20).
 
+**Validación previa.** `StartPublication` rechaza la publicación si un dataset de ubicaciones o de zonas propias repite valores
+en su columna de código (`DatasetCodeValidator`, sobre las tablas de borrador). El error enumera hasta 20 valores repetidos, con
+la cantidad de veces, y detiene el proceso antes de tocar lo publicado.
+
+**Informe de comparabilidad (backoffice).** `GET /services/backoffice/GetMetricComparabilityReport?w=&m=` (`MetricComparabilityService`)
+devuelve, para el indicador publicado, una fila por nivel, variable y diagnóstico con las ediciones que la comparten. Queda vacío
+si el indicador no está publicado o tiene una única serie. Requiere ser lector de la cartografía.
+
 ## 6. Lectura pública
 
 | Área | Endpoints (prefijo `/services/`) | Servicio |
@@ -196,7 +204,7 @@ completa y marca todo (ver el hallazgo 1 de la sección 20).
 | Cartografía | `works/GetWorkAndDefaultFrame`, `clipping/GetDefaultFrame` | `frontend\WorkService`, `ClippingService` |
 | Catálogos | `metrics/GetFabIndicators`, `GetFabBoundaries`, `GetFabBoundaryVersions`, `GetUserFabIndicators` | `FabService` |
 | Indicador | `metrics/GetSelectedMetric`, `GetSelectedInfos`, `GetSelectedMetricByFID` | `SelectedMetricService` |
-| Datos por tile | `frontend/metrics/GetTileData`, `GetBlockTileData`, `GetMetricData` (y variantes `GetBase*`) | `TileDataService`, `MetricDataService` |
+| Datos por tile | `frontend/metrics/GetTileData`, `GetBlockTileData`, `GetMetricData`, `GetMetricDataCompare` (y variantes `GetBase*`) | `TileDataService`, `MetricDataService` |
 | Geometría | `frontend/geographies/GetGeography`, `frontend/shapes/GetShapesByEnvelope`, `frontend/clipping/GetLabels`, `GetBlockLabels`, `CreateClipping` | `GeographyService`, `ShapesService`, `LabelsService`, `ClippingService` |
 | Análisis del encuadre | `frontend/metrics/GetSummary`, `GetRanking`, `metrics/GetMetricNavigationInfo`, `GetMetricItemInfo`, `GetLabelInfo` | `SummaryService`, `RankingService`, `InfoWindowService` |
 | Delimitaciones | `routes/frontend/boundary.php` | `frontend\BoundaryService` |
@@ -208,10 +216,20 @@ completa y marca todo (ver el hallazgo 1 de la sección 20).
 | Metadatos | `/map/{obra}/metadata`, PDF y diccionario | `common\MetadataService` |
 | Indexación | `/handle/…`, `/ark:/…`, `/sitemap`, `robots.txt` | `cHandle`, `cArk`, `cSitemap` |
 
+
+`GetUserFabIndicators` antepone el grupo «Mis indicadores», que se arma con `SnapshotMetricModel::GetUserMetricSnapshot`: toma las versiones de las cartografías sobre las que el usuario tiene permiso, sin los filtros del catálogo público (tipo «public data», indexada y no privada). `GetFabMetricSnapshot` no debe usarse para ese grupo.
+
 **Cómo se arma una respuesta de datos.** El visor pide por tile (256 px, con bloques opcionales de `s` × `s` tiles). El servicio
 resuelve el indicador seleccionado (cacheado), toma el **snapshot** del dataset del nivel, arma la consulta espacial con
 `SpatialConditions` y devuelve filas con `FID`, `VID`, `LID`, `Value`, `Total`, `Description`, coordenadas y, en comparación,
 las columnas gap. El encuadre llega siempre como `Frame` (`Frame::FromParams()`).
+
+**Capas de ubicaciones (deck.gl).** Los puntos no se piden por tile: `GetMetricData` entrega el nivel completo y el visor filtra
+en el cliente. Con la comparación activa, el visor pide `GetMetricDataCompare` (parámetro `p`: nivel de la otra serie), que lee la
+tabla matriz con `SnapshotByDatasetCompareTileData` sin el muestreo por tile y trae en `LID` la categoría de variación. Comparte
+`MetricDataCache` con `GetMetricData` (la clave agrega `@compare<nivel>`), de modo que se guarda en disco y se invalida junto con
+el resto de los datos del indicador. `GetSelectedMetric` no lleva información de diagnóstico: el informe de comparabilidad es
+exclusivo del backoffice (sección 5).
 
 **Control de acceso en lectura.** Cada endpoint de datos verifica `Session::CheckIsWorkPublicOrAccessible*`. Si la obra es
 restringida (privada o con enlace), la respuesta no se cachea en el cliente (se usa `App::Json` en lugar de `JsonImmutable`).
@@ -259,7 +277,12 @@ restringida (privada o con enlace), la respuesta no se cachea en el cliente (se 
    haya un proceso automático.
 8. **Las geometrías se simplifican por calidad** (tolerancias en metros) al importar cartografía base.
 9. **La comparación entre versiones** usa tablas matriz (`<snapshot>_matrix_<datasetId>`) que se invalidan al regenerar el
-   snapshot de cualquiera de los dos datasets.
+   snapshot de cualquiera de los dos datasets. Los datasets estándar (`D`) se vinculan por equivalencias geográficas (tuplas). Los de
+   ubicaciones (`L`) y zonas propias (`S`) que declaran una columna de código (`dat_code_column_id`) se vinculan por ese código
+   (`sna_code`, indexado en el snapshot): solo figuran los elementos presentes en ambas series y los de código vacío no se comparan.
+   El código no puede repetirse dentro de un dataset (se valida al publicar). `MarkComparableVariables` agrupa los `D` por nombre
+   de nivel y los `L`/`S` por tipo, sin mezclarlos. Un nivel estándar solo se marca comparable si su geografía coincide con la del
+   otro o hay tuplas entre ambas (`HasGeographyRelation`): sin equivalencias, el visor no lo ofrece.
 10. **Si el tamaño de bloque de etiquetas o de datos que pide el cliente difiere de la configuración**, el servidor responde con
     un error que pide recargar el mapa.
 11. **Un recorte circular no usa caché del servidor** (datos por tile y datos de indicador).
@@ -523,7 +546,8 @@ pasos como constantes y el rótulo de cada `NextStep`.
 
 **Agregar o cambiar una entidad ORM**
 1. Clase `Draft<Nombre>` y publicada en `entities/backoffice`, con sus anotaciones y `@ClientReadonly` donde corresponda.
-2. Regenerar los proxies (`generateDoctrineProxies.bat`): en producción Doctrine no los autogenera (a confirmar).
+2. Regenerar los proxies (`generateDoctrineProxies.bat`): en producción Doctrine no los autogenera (a confirmar). Si no se puede
+   regenerar, agregar a mano la propiedad a las listas de `__sleep` de ambos proxies y los métodos `get`/`set` nuevos.
 3. Revisar las matrices de `PublishDataTables::PrepareDraftTablesOperation`, el clonado (`WorkClone`, `RowDuplicator`) y el
    borrado (`WorkDelete`).
 4. Revisar `WorkFlags` y `CacheManager`.

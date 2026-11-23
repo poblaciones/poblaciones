@@ -72,9 +72,38 @@ class SnapshotByDatasetModel
 			throw new PublicException($text);
 		}
 	}
+	const CODE_MAX_LENGTH = 100;
+
 	public static function SnapshotTable($table)
 	{
 		return $table . "_snapshot";
+	}
+
+	// El código solo identifica elementos de ubicaciones y zonas propias: en los datasets
+	// estándar la comparación usa las equivalencias geográficas.
+	public static function DatasetUsesCode($dataset): bool
+	{
+		$type = $dataset['dat_type'];
+		$isLocationsOrShapes = ($type === DatasetTypeEnum::Locations || $type === DatasetTypeEnum::Shapes);
+		return $isLocationsOrShapes && $dataset['dat_code_field'] !== null;
+	}
+
+	// Vacío equivale a sin código. La misma expresión arma sna_code y valida duplicados al publicar.
+	public static function CodeExpression(string $field): string
+	{
+		return "LEFT(NULLIF(TRIM(CAST(" . $field . " AS CHAR)), ''), " . self::CODE_MAX_LENGTH . ")";
+	}
+
+	private static function HasColumn(array $columns, string $name): bool
+	{
+		foreach($columns as $column)
+		{
+			if ($column[0] === $name)
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private function CreateTable($dataset, $columns)
@@ -89,8 +118,14 @@ class SnapshotByDatasetModel
 		$sqlCols = '';
 		foreach($columns as $column)
 			$sqlCols .= "," . $column[0] . ' ' . $column[1];
+		$sqlIndexes = "INDEX (sna_geography_item_id), SPATIAL INDEX(sna_envelope), SPATIAL INDEX(sna_location)";
+		if (self::HasColumn($columns, 'sna_code'))
+		{
+			// Es la clave del join de la tabla de comparación entre series
+			$sqlIndexes .= ", INDEX (sna_code)";
+		}
 		$sql = "CREATE TABLE " . $table . " (" . substr($sqlCols, 1) . ",
-								 INDEX (sna_geography_item_id), SPATIAL INDEX(sna_envelope), SPATIAL INDEX(sna_location)) ENGINE=MyISAM;";
+								 " . $sqlIndexes . ") ENGINE=MyISAM;";
 		App::Db()->execDDL($sql);
 		App::Db()->markTableUpdate($table);
 
@@ -373,6 +408,10 @@ class SnapshotByDatasetModel
 		if ($description !== 'null')
 			 $description = 'LEFT(' . $description . ', 250)';
 		$columns[] = ['sna_description', 'varchar(250) COLLATE utf8_unicode_ci DEFAULT NULL', $description];
+		if (self::DatasetUsesCode($dataset))
+		{
+			$columns[] = ['sna_code', 'varchar(' . self::CODE_MAX_LENGTH . ') COLLATE utf8_unicode_ci DEFAULT NULL', self::CodeExpression($dataset['dat_code_field'])];
+		}
 		// resuelve el ícono
 		if ($dataset['dmk_type'] !== 'N' && $dataset['dmk_source'] === 'V')
 		{

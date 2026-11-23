@@ -65,20 +65,26 @@
 				</div>
 			</md-dialog-content>
 			<md-dialog-actions>
-				<md-button @click="bind" class="leftActionButton" v-if="SameMetricVersions && SameMetricVersions.length < 2">
-					<md-icon>link</md-icon>
-					Vincular
-					<md-tooltip md-direction="bottom">Poner en serie con un indicador existente</md-tooltip>
-				</md-button>
-				<md-button @click="unbind" class="leftActionButton" v-if="SameMetricVersions && SameMetricVersions.length > 1">
-					<md-icon>link_off</md-icon>
-					Desvincular
-					<md-tooltip md-direction="bottom">Desvincular de la serie ({{ SameMetricVersionsAsText }})</md-tooltip>
-				</md-button>
+				<div class="leftActions">
+					<md-button @click="bind" v-if="SameMetricVersions && SameMetricVersions.length < 2">
+						<md-icon>link</md-icon>
+						Vincular
+						<md-tooltip md-direction="bottom">Poner en serie con un indicador existente</md-tooltip>
+					</md-button>
+					<md-button @click="unbind" v-if="SameMetricVersions && SameMetricVersions.length > 1">
+						<md-icon>link_off</md-icon>
+						Desvincular
+						<md-tooltip md-direction="bottom">Desvincular de la serie ({{ SameMetricVersionsAsText }})</md-tooltip>
+					</md-button>
+					<md-button @click="showComparability" v-if="hasNonComparableVariables" class="comparabilityLink">
+						¿Por qué no es comparable?
+					</md-button>
+				</div>
 
 				<md-button @click="hide">Cancelar</md-button>
 				<md-button class="md-primary" @click="save">Guardar</md-button>
 			</md-dialog-actions>
+			<comparability-popup ref="comparabilityPopup" />
 			<mp-confirm ref="confirmDialog"
 									title="Cambiar el nombre del indicador"
 									text="Al cambiar el nombre del indicador, modificará el nombre para toda la serie (las diferentes versiones del indicador). Si solamente desea cambiar el nombre para esta versión, debe desvincular primero esta versión."
@@ -98,11 +104,13 @@
 import axios from 'axios';
 import f from '@/backoffice/classes/Formatter';
 import PickMetric from './PickMetric.vue';
+import ComparabilityPopup from './ComparabilityPopup.vue';
 
 export default {
   name: 'MetricPopup',
 		components: {
-			PickMetric
+			PickMetric,
+			ComparabilityPopup
 	},
   methods: {
 		show(level) {
@@ -110,17 +118,32 @@ export default {
 			this.MetricVersionLevel = level;
 			this.newMetricVersionLevel = f.clone(level);
 			this.SameMetricVersions = null;
+			this.ComparabilityRows = [];
 			this.showDialog = true;
 			var loc = this;
-			this.Work.GetMetricVersionsByMetric(this.MetricVersionLevel.MetricVersion.Metric).then(function (data) {
+			var metric = this.MetricVersionLevel.MetricVersion.Metric;
+			this.Work.GetMetricVersionsByMetric(metric).then(function (data) {
 				loc.SameMetricVersions = data;
 			});
+			this.loadComparability(metric);
 			setTimeout(() => {
 					this.$refs.metricInput.focus();
 				}, 75);
 		},
 		hide() {
 			this.showDialog = false;
+		},
+		// El diagnóstico llega aparte y sin demorar el diálogo: solo existe para indicadores ya publicados.
+		loadComparability(metric) {
+			var loc = this;
+			this.Work.GetMetricComparabilityReport(metric).then(function (rows) {
+				if (loc.MetricVersionLevel.MetricVersion.Metric === metric) {
+					loc.ComparabilityRows = rows;
+				}
+			});
+		},
+		showComparability() {
+			this.$refs.comparabilityPopup.show(this.ComparabilityRows);
 		},
 		bind() {
 			this.$refs.pickMetric.show();
@@ -184,6 +207,14 @@ export default {
 		MetricProviders() {
 			return window.Context.MetricProviders.list;
 		},
+		hasNonComparableVariables() {
+			for (var row of this.ComparabilityRows) {
+				if (!row.Comparable) {
+					return true;
+				}
+			}
+			return false;
+		},
 		SameMetricVersionsAsText() {
 			var ret = '';
 			for (var version of this.SameMetricVersions) {
@@ -204,16 +235,18 @@ export default {
 			showDialog: false,
 			newMetricVersionLevel: null,
 			MetricVersionLevel: null,
-			SameMetricVersions: null
+			SameMetricVersions: null,
+			ComparabilityRows: []
 		};
 	},
 };
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
-	.leftActionButton {
+	.leftActions {
 		position: absolute;
 		left: 8px;
+		display: flex;
 	}
 </style>
 

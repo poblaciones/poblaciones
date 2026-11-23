@@ -38,6 +38,17 @@ it('polygonPluralName y polygonFixedSizeMetric nombran la forma y la medida fija
 	expect(vm.polygonFixedSizeMetric).toBe('');
 });
 
+describe('IdentityTab: código de los elementos');
+
+it('supportsCode es verdadero para ubicaciones y zonas propias', () => {
+	expect(setup({}, { Type: 'L' }).vm.supportsCode).toBe(true);
+	expect(setup({}, { Type: 'S' }).vm.supportsCode).toBe(true);
+});
+
+it('supportsCode es falso para los datasets estándar, que se vinculan por geografía', () => {
+	expect(setup({}, { Type: 'D' }).vm.supportsCode).toBe(false);
+});
+
 describe('IdentityTab: propiedades calculadas');
 
 it('publicLabelsStatus e infoEnabledStatus muestran Activado o Desactivado', () => {

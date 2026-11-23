@@ -42,7 +42,12 @@ export default {
 		openStats() { this.$refs.statisticsPopup.show(); },
 		openShare() { this.$refs.sharePopup.show(); },
 		openMetadata() {
-			this.$router.push({ path: '/cartographies/' + window.Context.CurrentWork.properties.Id + '/metadata' });
+			var path = '/cartographies/' + window.Context.CurrentWork.properties.Id + '/metadata';
+			// La ruta redirige a su primera pestaña: navegar estando ya en los metadatos es una navegación redundante
+			if (this.$route.path.indexOf(path) === 0) {
+				return;
+			}
+			this.$router.push({ path: path });
 		},
 	}
 };

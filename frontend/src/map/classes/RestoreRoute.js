@@ -21,6 +21,8 @@ RestoreRoute.prototype.LoadRoute = function (route, updateRoute = false) {
 	}
 
 	window.SegMap.Session.UI.isRegisterEnabled = true;
+	// Cargar la ruta no es una acción del usuario: el historial toma este estado como punto de partida.
+	window.SegMap.History.Rebase();
 };
 
 RestoreRoute.prototype.parseRoute = function (route, subscriber) {

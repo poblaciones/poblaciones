@@ -41,8 +41,9 @@ BasemapRouter.prototype.FromRoute = function (args, updateRoute, skipRestore) {
 	if (!args || args.length < 1) {
 		return;
 	}
-	var framing = this.frameFromRoute(args);
 	var segmentedMap = window.SegMap;
+	var visibleBefore = this.visibleLoadableLayers();
+	var framing = this.frameFromRoute(args);
 	segmentedMap.SaveRoute.Disabled = true;
 	if (framing.MapType) {
 		segmentedMap.toolbarStates.showLabels = framing.ShowLabels;
@@ -54,8 +55,24 @@ BasemapRouter.prototype.FromRoute = function (args, updateRoute, skipRestore) {
 			layer.Visible = false;
 			segmentedMap.ToggleBasemapMetric(layer);
 		}
+		// Las capas que estaban visibles y la ruta no menciona se apagan.
+		for (var hidden of visibleBefore) {
+			if (framing.VisibleBaseMetrics.indexOf(hidden) === -1) {
+				segmentedMap.ToggleBasemapMetric(hidden);
+			}
+		}
 	}
 	segmentedMap.SaveRoute.Disabled = false;
+};
+
+BasemapRouter.prototype.visibleLoadableLayers = function () {
+	var ret = [];
+	for (var layer of window.SegMap.toolbarStates.basemapLayers) {
+		if (BasemapLayerSet.IsLoadable(layer) && layer.Visible) {
+			ret.push(layer);
+		}
+	}
+	return ret;
 };
 
 BasemapRouter.prototype.frameFromRoute = function (args) {

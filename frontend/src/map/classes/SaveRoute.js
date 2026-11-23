@@ -28,13 +28,16 @@ function SaveRoute() {
 	this.DisableOnce = false;
 	this.lastState = null;
 
-	this.subscribers = [	new FrameRouter(),
-												new BasemapRouter(),
-												new ClippingRouter(),
-												new SelectedInfoRouter(),
-												new LeftPanelRouter(),
-												new FeatureInfoRouter(),
-												new ZoomFeatureRouter()];
+	this.subscribersByName = {
+		frame: new FrameRouter(),
+		basemap: new BasemapRouter(),
+		clipping: new ClippingRouter(),
+		infos: new SelectedInfoRouter(),
+		leftPanel: new LeftPanelRouter(),
+		featureInfo: new FeatureInfoRouter(),
+		zoomFeature: new ZoomFeatureRouter()
+	};
+	this.subscribers = Object.values(this.subscribersByName);
 };
 
 SaveRoute.prototype.UpdateRoute = function (coord) {
@@ -55,6 +58,7 @@ SaveRoute.prototype.UpdateRoute = function (coord) {
 	urlPath = h.ensureFinalBar(urlPath);
 	urlPath += '#' + args;
 	window.history.pushState({ 'route': args }, '', urlPath);
+	window.SegMap.History.OnRouteChanged();
 };
 
 // Reconcilia la URL con el estado actual del mapa después de que

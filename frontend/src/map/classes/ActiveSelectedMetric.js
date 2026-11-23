@@ -174,12 +174,30 @@ ActiveSelectedMetric.prototype.matchesComparableFilter = function (variable) {
 	return (!this.Compare.Active || variable.Comparable);
 };
 
+// Las ubicaciones aparte solo se comparan si alguna de sus variables lo permite (dataset con código).
 ActiveSelectedMetric.prototype.SelectedLevelCanBeCompared = function () {
 	if (!this.useComparer()) return false;
-	if (this.HasSeparateBottomLevel()) {
-		return this.SelectedLevel() !== this.BottomLevel();
+	if (this.HasSeparateBottomLevel() && this.SelectedLevel() === this.BottomLevel()) {
+		return this.LevelHasComparableVariables(this.BottomLevel());
 	}
 	return true;
+};
+
+ActiveSelectedMetric.prototype.LevelHasComparableVariables = function (level) {
+	for (var variable of level.Variables) {
+		if (variable.Comparable) {
+			return true;
+		}
+	}
+	return false;
+};
+
+// Nivel de la otra serie contra el que se piden los datos de la capa, o null si no se compara.
+ActiveSelectedMetric.prototype.CompareLevelForData = function () {
+	if (this.Compare.Active && this.SelectedLevelCanBeCompared()) {
+		return this.Compare.SelectedLevel();
+	}
+	return null;
 };
 
 // Al activar la comparación, la lista de variables ofrecidas se reduce a

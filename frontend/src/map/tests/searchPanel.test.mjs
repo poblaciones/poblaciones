@@ -22,9 +22,18 @@ function makeRecentsMock(items, groups) {
 		},
 		Remove(dedupeKey) {
 			removeCalls.push(dedupeKey);
+			const index = currentItems.findIndex(function (existing) { return existing.DedupeKey === dedupeKey; });
+			if (index === -1) {
+				return null;
+			}
+			const item = currentItems[index];
 			currentItems = currentItems.filter(function (existing) {
 				return existing.DedupeKey !== dedupeKey;
 			});
+			return { Item: item, Index: index };
+		},
+		Restore(item, index) {
+			currentItems.splice(index, 0, item);
 		},
 	};
 }
@@ -182,4 +191,22 @@ it('delega en Recents.Remove con el DedupeKey del ítem, y refresca recentsList'
 	expect(segMap.Recents.removeCalls).toEqual(['metric:1']);
 	expect(panel.recentsList).toHaveLength(1);
 	expect(panel.recentsList[0].DedupeKey).toBe('metric:2');
+});
+
+it('registra la baja en el historial, con el nombre del ítem, y permite volver a ponerlo en su lugar', () => {
+	const items = [{ DedupeKey: 'metric:1', Caption: 'Uno' }, { DedupeKey: 'metric:2', Caption: 'Dos' }];
+	const { panel, segMap } = mountSearchPanel(items);
+	panel.removeRecent({ DedupeKey: 'metric:1' });
+	expect(segMap.History.customEntries).toHaveLength(1);
+	expect(segMap.History.customEntries[0].label).toBe('Quitar «Uno» de recientes');
+
+	segMap.History.customEntries[0].undo();
+	panel.refreshRecents();
+	expect(panel.recentsList.map(i => i.DedupeKey)).toEqual(['metric:1', 'metric:2']);
+});
+
+it('si el ítem ya no estaba, no registra nada en el historial', () => {
+	const { panel, segMap } = mountSearchPanel([]);
+	panel.removeRecent({ DedupeKey: 'metric:9' });
+	expect(segMap.History.customEntries).toHaveLength(0);
 });

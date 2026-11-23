@@ -21,6 +21,9 @@ export function setupWindow(overrides) {
 			clipping: { IsUpdating: false, Region: { Envelope: null } },
 		},
 		SaveRoute: { UpdateRoute() {}, Disabled: false },
+		// Historial de deshacer: las pruebas que lo ejercitan reemplazan este stub por el real.
+		History: { Rebase() {}, NoteFrame() {}, OnRouteChanged() {}, NoteUserInput() {}, customEntries: [],
+			RecordCustom(label, undo, redo) { this.customEntries.push({ label: label, undo: undo, redo: redo }); } },
 		Session: { Content: makeCallRecorder(), UI: makeCallRecorder() },
 		Configuration: { UseGradients: false, UseTextures: false, IsMobile: false, StaticWorks: [], StaticServer: 'http://static' },
 		Signatures: { Boundary: 'rev', Suffix: 'suffix', Preffix: 'preffix' },

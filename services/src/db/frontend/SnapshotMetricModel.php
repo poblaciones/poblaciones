@@ -30,9 +30,16 @@ class SnapshotMetricModel extends BaseModel
 		Profiling::EndTimer();
 		return $item;
 	}
-	private function GetMetricViewQuery($getAllPublicData = false)
+	private function GetMetricViewQuery($getAllPublicData = false, $onlyUserWorks = false)
 	{
-		if ($getAllPublicData)
+		if ($onlyUserWorks)
+		{
+			// Solo versiones de cartografías del usuario, sin importar su tipo, privacidad ni indexación.
+			$where = "WHERE mvw_work_id IN (SELECT " . PublishDataTables::ShardifiedDb('wkp_work_id') . " FROM draft_work_permission WHERE wkp_user_id = ?) ";
+			$having = "";
+			$orderBy = "ORDER BY myv_metric_caption ";
+		}
+		else if ($getAllPublicData)
 		{
 			$where = "WHERE mvw_work_is_private = 0 and mvw_work_is_indexed = 1 ";
 			$having = "HAVING SUM(case when mvw_work_type = 'P' then 1 else 0 end) > 0 AND myv_metric_group_id IS NOT NULL ";
@@ -77,6 +84,18 @@ class SnapshotMetricModel extends BaseModel
 		return $ret;
 	}
 
+
+	public function GetUserMetricSnapshot(int $userId): array
+	{
+		Profiling::BeginTimer();
+
+		App::Db()->PrepareGroupConcat();
+		$sql = $this->GetMetricViewQuery(false, true);
+		$ret = App::Db()->fetchAll($sql, array($userId));
+
+		Profiling::EndTimer();
+		return $ret;
+	}
 
 	public function HasVisibleVersions($metricId)
 	{

@@ -15,6 +15,8 @@ import Queue from './Queue';
 import Session from '@/map/session/Session';
 import OverlapRectangles from './OverlapRectangles';
 import InfoWindow from './InfoWindow';
+import UndoHistory from '@/map/classes/UndoHistory';
+import RouteStateDriver from '@/map/classes/RouteStateDriver';
 import ActiveRecents from './ActiveRecents';
 import axios from 'axios';
 import promises from '@/common/framework/promises';
@@ -80,6 +82,22 @@ function SegmentedMap(mapsApi, frame, clipping, toolbarStates, selectedMetricCol
 	}
 	this.Session = new Session(config);
 	this.Recents = new ActiveRecents();
+	this.History = new UndoHistory(new RouteStateDriver(this), toolbarStates.history);
+	this.BindUserInputToHistory();
+};
+
+// Las acciones se registran solo si siguen a una interacción del usuario (ver UndoHistory).
+// También se enlazan los atajos de teclado de deshacer y rehacer.
+SegmentedMap.prototype.BindUserInputToHistory = function () {
+	var history = this.History;
+	var noteInput = function () {
+		history.NoteUserInput();
+	};
+	document.addEventListener('pointerdown', noteInput, true);
+	document.addEventListener('keydown', noteInput, true);
+	document.addEventListener('keydown', function (event) {
+		history.HandleKeyDown(event);
+	});
 };
 
 SegmentedMap.prototype.WaitForFullLoading = function () {

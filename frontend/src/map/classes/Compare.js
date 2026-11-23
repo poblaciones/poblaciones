@@ -176,11 +176,20 @@ Compare.prototype.SelectedVariable = function () {
 	throw new Error('No hay valores para esa variable en la serie ' + serie);
 };
 
+// Los niveles estándar se emparejan por nombre (provincias, departamentos...); las ubicaciones y
+// las zonas propias, por tipo, porque se vinculan por código y no por geografía.
+Compare.prototype.LevelsMatch = function (level, otherLevel) {
+	if (level.Dataset.Type === 'D') {
+		return otherLevel.Dataset.Type === 'D' && otherLevel.ShortName === level.ShortName;
+	}
+	return otherLevel.Dataset.Type === level.Dataset.Type;
+};
+
 Compare.prototype.SelectedLevel = function () {
 	var compareVersion = this.SelectedVersion();
-	var serieName = this.metric.SelectedLevel().ShortName;
+	var selectedLevel = this.metric.SelectedLevel();
 	for (var level of compareVersion.Levels) {
-		if (level.ShortName === serieName) {
+		if (this.LevelsMatch(selectedLevel, level)) {
 			return level;
 		}
 	}

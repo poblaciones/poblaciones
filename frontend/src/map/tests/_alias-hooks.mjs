@@ -25,6 +25,7 @@ const packageStubs = {
         'svg.js': 'svgjs.mjs',
         'html2canvas': 'html2canvas.mjs',
         'canvg': 'canvg.mjs',
+        'split.js': 'empty.mjs',
         'vue-clickaway': 'vue-clickaway.mjs',
         'leaflet': 'leaflet.mjs',
         '@tweenjs/tween.js': 'tween.mjs',
@@ -48,6 +49,9 @@ const commonStubs = {
         '@/common/framework/promises': 'promises.mjs',
         '@/common/framework/session': 'session.mjs',
         '@/common/js/iconManager': 'iconManager.mjs',
+        '@/common/js/authentication': 'empty.mjs',
+        // Exportación a imagen y PDF: requiere canvas y librerías del navegador.
+        '@/map/classes/MapExport': 'empty.mjs',
         '@/common/js/axiosProgressBar.js': 'axiosProgressBar.mjs',
         '@/common/js/citationAPA': 'citationAPA.mjs',
         '@/common/js/creativeCommons': 'creativeCommons.mjs',

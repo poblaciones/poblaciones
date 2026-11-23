@@ -10,9 +10,14 @@ class MetricDataCache extends BaseCache
 	{
 		return new TwoLevelObjectCache("Metrics/MetricData", true);
 	}
-	public static function CreateKey($frame, $metricVersionId, $levelId, $urbanity, $partition)
+	public static function CreateKey($frame, $metricVersionId, $levelId, $urbanity, $partition, $levelCompareId = null)
 	{
 		$key = $frame->GetKeyNoFeature() . "@" .  $metricVersionId . "@" . $levelId  . "@" .  ($urbanity ?  $urbanity : '') . ($partition !== null ?  "@" . $partition : '');
+		if ($levelCompareId !== null)
+		{
+			// Las comparaciones comparten la caché (y su invalidación por indicador) con los datos simples
+			$key .= "@compare" . $levelCompareId;
+		}
 		return $key;
 	}
 }

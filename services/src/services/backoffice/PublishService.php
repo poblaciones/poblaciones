@@ -8,6 +8,7 @@ use helena\services\backoffice\notifications\NotificationManager;
 use helena\services\backoffice\publish\WorkStateBag;
 use helena\services\backoffice\publish\PublishDataTables;
 use helena\services\backoffice\publish\WorkFlags;
+use helena\services\backoffice\publish\DatasetCodeValidator;
 use helena\services\backoffice\publish\PublishSnapshots;
 use helena\services\backoffice\publish\RevokeSnapshots;
 use helena\db\backoffice\WorkModel;
@@ -32,8 +33,28 @@ class PublishService extends BaseService
 
 	private $state = null;
 
+	private function ValidateDatasetsAreGeoreferenced($workId)
+	{
+		$rows = App::Db()->fetchAll("SELECT dat_caption FROM draft_dataset
+										WHERE dat_work_id = ? AND dat_geocoded = 0
+										ORDER BY dat_caption", array($workId));
+		if (sizeof($rows) === 0)
+			return;
+		$captions = array();
+		foreach($rows as $row)
+			$captions[] = "'" . $row['dat_caption'] . "'";
+		if (sizeof($captions) === 1)
+			$message = "El dataset " . $captions[0] . " no está georreferenciado.";
+		else
+			$message = "Los datasets " . implode(', ', $captions) . " no están georreferenciados.";
+		throw new PublicException($message . " Debe georreferenciar o eliminar antes de publicar.");
+	}
+
 	public function StartPublication($workId)
 	{
+		$this->ValidateDatasetsAreGeoreferenced($workId);
+		$codeValidator = new DatasetCodeValidator();
+		$codeValidator->Validate($workId);
 		$this->state = WorkStateBag::Create($workId);
 		$this->state->SetTotalSteps(self::STEP_COMPLETED);
 		$this->state->SetProgressLabel('Preparando datasets');

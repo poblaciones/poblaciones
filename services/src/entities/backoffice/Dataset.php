@@ -210,6 +210,18 @@ class Dataset
      */
     private $CaptionColumn;
 
+    /**
+     * Columna con el código que identifica a cada elemento entre series (se usa para comparar).
+     *
+     * @var \helena\entities\backoffice\DatasetColumn
+     *
+     * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\DatasetColumn")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="dat_code_column_id", referencedColumnName="dco_id", nullable=true)
+     * })
+     */
+    private $CodeColumn;
+
 		 /**
      * @var integer
 		 *
@@ -839,6 +851,30 @@ class Dataset
     public function getCaptionColumn()
     {
         return $this->CaptionColumn;
+    }
+
+    /**
+     * Set codeColumn
+     *
+     * @param \helena\entities\backoffice\DatasetColumn $codeColumn
+     *
+     * @return Dataset
+     */
+    public function setCodeColumn(\helena\entities\backoffice\DatasetColumn $codeColumn = null)
+    {
+        $this->CodeColumn = $codeColumn;
+
+        return $this;
+    }
+
+    /**
+     * Get codeColumn
+     *
+     * @return \helena\entities\backoffice\DatasetColumn
+     */
+    public function getCodeColumn()
+    {
+        return $this->CodeColumn;
     }
 
     /**

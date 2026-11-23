@@ -175,6 +175,8 @@
 					selectionMode: 'PAN', tutorialOpened: 0, showLabels: true,
 					collapsed: false, repositionSearch: false, leftPanelVisible: false,
 					legendMinimized: false,
+					// Lo publica UndoHistory: habilita los botones deshacer y rehacer y arma sus tooltips.
+					history: { CanUndo: false, CanRedo: false, UndoLabel: 'Deshacer', RedoLabel: 'Rehacer' },
 					// Todas las capas del panel «Detalles del mapa», en orden.
 					basemapLayers: [
 
@@ -573,9 +575,23 @@
 				Vue.config.errorHandler = err.HandleError;
 				window.onerror = err.HandleError;
 			},
+			// Cerrar o abrir el panel de estadísticas se puede deshacer: quien lo cierra sin querer
+			// no siempre encuentra cómo volver a abrirlo.
 			doToggle() {
-				this.toolbarStates.collapsed = !this.toolbarStates.collapsed;
-				window.SegMap.Session.UI.ToggleRightPanel(!this.toolbarStates.collapsed);
+				var wasCollapsed = this.toolbarStates.collapsed;
+				var loc = this;
+				this.setRightPanelCollapsed(!wasCollapsed);
+				var label = 'Cerrar el panel de estadísticas';
+				if (wasCollapsed) {
+					label = 'Abrir el panel de estadísticas';
+				}
+				window.SegMap.History.RecordCustom(label,
+					function () { loc.setRightPanelCollapsed(wasCollapsed); },
+					function () { loc.setRightPanelCollapsed(!wasCollapsed); });
+			},
+			setRightPanelCollapsed(collapsed) {
+				this.toolbarStates.collapsed = collapsed;
+				window.SegMap.Session.UI.ToggleRightPanel(!collapsed);
 			},
 			changeSidebarPosition(position) {
 				this.sidebarPosition = position;

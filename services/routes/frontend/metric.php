@@ -116,6 +116,35 @@ $getMetricData = function (Request $request) {
 App::$app->get('/services/frontend/metrics/GetMetricData', $getMetricData);
 App::$app->get('/services/frontend/metrics/GetBaseMetricData', $getMetricData);
 
+// Variación de una capa de ubicaciones contra otra serie (p: nivel de la serie de comparación).
+// La respuesta se cachea en disco: armarla recorre la tabla de comparación completa.
+$getMetricDataCompare = function (Request $request) {
+	$metricId = Params::GetInt('l');
+	$metricVersionId = Params::GetInt('v');
+
+	if ($denied = Session::CheckIsWorkPublicOrAccessibleByMetricVersion($metricId, $metricVersionId, $isRestricted)) return $denied;
+
+	$frame = Frame::FromParams();
+	$levelId = Params::GetInt('a');
+	$levelCompareId = Params::GetIntMandatory('p');
+	$urbanity = App::SanitizeUrbanity(Params::Get('u'));
+	$partition = Params::GetInt('g');
+
+	$key = MetricDataCache::CreateKey($frame, $metricVersionId, $levelId, $urbanity, $partition, $levelCompareId);
+
+	return App::JsonCacheableImmutable(
+				MetricDataCache::Cache(),
+				[$metricId, $key],
+				function() use ($frame, $metricId, $metricVersionId, $levelId, $levelCompareId, $urbanity, $partition) {
+					$controller = new services\MetricDataService();
+					return $controller->GetMetricDataCompare($frame, $metricId, $metricVersionId, $levelId, $levelCompareId, $urbanity, $partition);
+				},
+				($frame->ClippingCircle != null), // skipCache
+				$isRestricted // skipClientCache
+		);
+};
+App::$app->get('/services/frontend/metrics/GetMetricDataCompare', $getMetricDataCompare);
+
 
 // ej. http://mapas/services/metrics/GetTileData?l=8&v=12&a=62&z=12&x=1383&y=2470
 $getTileData = function (Request $request) {

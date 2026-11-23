@@ -30,6 +30,17 @@ FeatureInfoRouter.prototype.ToRoute = function () {
 	return vals;
 };
 
+// Cierra el panel del elemento seleccionado, por el mismo camino que su botón de cerrar.
+FeatureInfoRouter.prototype.Clear = function () {
+	var key = window.Panels.Content.FeatureInfoKey;
+	if (key === null) {
+		return;
+	}
+	window.Panels.Content.FeatureInfoKey = null;
+	window.SegMap.MapsApi.ClearSelectedFeature();
+	window.Panels.Left.doClose(null, key.Id);
+};
+
 FeatureInfoRouter.prototype.FromRoute = function (args) {
 	if (!args) {
 		return;

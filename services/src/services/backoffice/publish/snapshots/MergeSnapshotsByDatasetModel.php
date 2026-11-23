@@ -76,8 +76,11 @@ class MergeSnapshotsByDatasetModel
 		}
 		Profiling::BeginTimer();
 
+		// Ubicaciones y zonas propias con código se vinculan por ese código; el resto, por geografía
+		$useCode = (!$sameDataset && $this->BothDatasetsUseCode($dataset, $datasetCompare));
+
 		// Trae las tuplas que lo conectan
-		if (!$sameDataset)
+		if (!$sameDataset && !$useCode)
 		{
 			$tuple = $this->GetTuple($dataset['dat_geography_id'], $datasetCompare['dat_geography_id']);
 			if (!$tuple && $dataset['dat_geography_id'] !== $datasetCompare['dat_geography_id'])
@@ -105,7 +108,12 @@ class MergeSnapshotsByDatasetModel
 
 		try
 		{
-			$this->InsertValues($tmpTable, $table, $tableCompare, ($tuple ? $tuple['gtu_id'] : null), $columns);
+			$tupleId = null;
+			if ($tuple)
+			{
+				$tupleId = $tuple['gtu_id'];
+			}
+			$this->InsertValues($tmpTable, $table, $tableCompare, $tupleId, $columns, $useCode);
 			App::Db()->renameTable($tmpTable, $mergeTable);
 
 			$lock->Release();
@@ -117,6 +125,11 @@ class MergeSnapshotsByDatasetModel
 			throw $e;
 		}
 		Profiling::EndTimer();
+	}
+
+	private function BothDatasetsUseCode($dataset, $datasetCompare): bool
+	{
+		return SnapshotByDatasetModel::DatasetUsesCode($dataset) && SnapshotByDatasetModel::DatasetUsesCode($datasetCompare);
 	}
 
 	public static function TableName($table, $compareDatasetId)
@@ -261,6 +274,19 @@ class MergeSnapshotsByDatasetModel
 		}
 		return $ret;
 	}
+	// Dos niveles estándar solo se pueden comparar si comparten geografía o hay equivalencias definidas entre ambas.
+	public static function HasGeographyRelation($geographyId, $otherGeographyId): bool
+	{
+		if ($geographyId === $otherGeographyId)
+		{
+			return true;
+		}
+		$sql = "SELECT COUNT(*) FROM geography_tuple
+						WHERE (gtu_geography_id = ? AND gtu_previous_geography_id = ?)
+							 OR (gtu_geography_id = ? AND gtu_previous_geography_id = ?)";
+		return App::Db()->fetchScalarInt($sql, array($geographyId, $otherGeographyId, $otherGeographyId, $geographyId)) > 0;
+	}
+
 	private function GetTuple($geographyId, $compareGeographyId)
 	{
 		Profiling::BeginTimer();
@@ -320,7 +346,7 @@ class MergeSnapshotsByDatasetModel
 		Profiling::EndTimer();
 	}
 
-	private function InsertValues($mergeTable, $table1, $table2, $tupleId, $columns)
+	private function InsertValues($mergeTable, $table1, $table2, $tupleId, $columns, $useCode)
 	{
 		Profiling::BeginTimer();
 
@@ -339,7 +365,12 @@ class MergeSnapshotsByDatasetModel
 		$sql .= " FROM " . $table1 . " t1 ";
 		if ($table1 !== $table2)
 		{
-			if ($tupleId)
+			if ($useCode)
+			{
+				// El código es único en cada tabla (se valida al publicar): cada punto tiene a lo sumo un par.
+				$sql .= " INNER JOIN " . $table2 . " t2 ON t2.sna_code = t1.sna_code ";
+			}
+			else if ($tupleId)
 			{
 // 					  INNER JOIN geography_item g ON g.gei_id = t1.sna_geography_item_id
 					$sql .= " INNER JOIN geography_tuple_item ON gti_geography_item_id = t1.sna_geography_item_id
@@ -354,6 +385,11 @@ class MergeSnapshotsByDatasetModel
 				$args = [];
 			}
 
+		}
+		if ($useCode)
+		{
+			// Sin código no hay con qué vincular: esos elementos no se comparan
+			$sql .= " WHERE t1.sna_code IS NOT NULL ";
 		}
 		// Cierra el select
 		$sql .= " ORDER BY t1.sna_id";

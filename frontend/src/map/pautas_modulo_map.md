@@ -121,7 +121,8 @@ Todo lo que se dibuja en el mapa es una "capa activa" con un contrato común
 - `ActiveBoundary` / `ActiveBaseBoundary` — delimitaciones (contornos), con
   color, grosor y descripciones.
 - `ActiveLabels` — etiquetas del mapa base propio.
-- `ActiveAnnotations` — anotaciones del work (dibujos del editor).
+- `ActiveAnnotations` — anotaciones del work (dibujos del editor). **En reactivación**: ver
+  «Anotaciones» más abajo.
 
 **El estado de selección vive en `properties`** (el JSON del servidor
 enriquecido con índices `SelectedVersionIndex`, `SelectedLevelIndex`,
@@ -190,6 +191,14 @@ Los datos de tile traen por registro `FID`, `VID` (variable), `LID`
 para comparación, `ValueCompare`/`TotalCompare` (+ variantes Gap). El
 `DataShapeComposer` cruza datos y cartografía por `FID` (merge ordenado).
 
+**Comparación de ubicaciones.** Los puntos siguen por deck.gl (`IsDeckGLLayer`) y no pasan al camino por tiles. Con la comparación
+activa, `ActiveMetric.GetMetricDataService` pide `GetMetricDataCompare` en lugar de `GetMetricData`, con el nivel de la otra serie en
+`p` (`CompareLevelForData()`); el servidor trae en `LID` la categoría de variación y el coloreo usa `ComparableValueLabels`
+(rojos y azules) con las mismas funciones que los polígonos. El pedido comparado tiene su propia clave en `GetLevelData`, así que
+no reutiliza la caché del simple. `Compare.LevelsMatch` empareja los niveles estándar por nombre y las ubicaciones y zonas por
+tipo (se vinculan por código, no por geografía). El nivel de ubicaciones aparte se puede comparar solo si alguna de sus variables
+es comparable (`LevelHasComparableVariables`); el bloque de ubicaciones oculta las no comparables recién entonces.
+
 ### Nivel según zoom, clipping y encuadre
 
 `ZoomChanged` recorre las capas: `UpdateLevel()` calcula el nivel adecuado
@@ -208,8 +217,14 @@ de nivel (`MultilevelCount()` cuenta solo los demás). El panel derecho lo
 presenta en dos bloques de `metricVariables`: primero las variables de las
 ubicaciones (`fixedLevel`, con fila siempre visible, aunque sea una única
 variable sin nombre) y debajo las variables de los niveles agregados, que se
-resuelven por zoom o por pin. Elegir una variable de un bloque cambia
+resuelven por zoom o por pin. Si ese bloque tiene una única variable, sin nombre o
+llamada «Total», la fila se rotula «Ubicaciones» (o «Zonas» si el dataset es 'S'). Entre los dos bloques, `metric.vue` solo apila las filas (margen negativo) cuando el detalle de las ubicaciones está cerrado; desplegado, los separa para que la fila de niveles agregados no se lea como la unidad de la tabla. Elegir una variable de un bloque cambia
 `SelectedLevelIndex` al nivel de ese bloque y deja intacto `AutomaticLevelIndex`.
+Invariante: `AutomaticLevelIndex` es siempre menor que `MultilevelCount()`; si
+no, los dos bloques quedarían activos a la vez. Por eso `LevelValidFrom`,
+`ApplyPinnedLevel` y la restauración de la ruta (`q`) recorren solo los niveles
+que siguen al zoom: un recorte cuya geografía coincide solo con las ubicaciones
+no debe volverlas el nivel automático.
 
 ### Resumen y ranking (panel derecho)
 
@@ -221,6 +236,15 @@ horizontal, K/A/D áreas y densidad, T total), incluida la comparación entre
 versiones. `SegmentedMap.RefreshSummaries()` / `InvalidateSummaries()` los
 coordinan ante cambios de encuadre. El panel derecho (`summaryPanel` →
 `metricItem` → widgets de `widgets/summary/`) presenta esos objetos.
+
+El ranking se muestra dentro del detalle de la variable activa: `metric.vue` lo pasa por la ranura de
+`metricVariables.vue`, que lo ubica al final de `.variableDetail`, debajo de los valores. `.variableDetail`
+tiene 10px de relleno a cada lado, de modo que gráfico, valores y ranking comparten el mismo margen. Con el
+detalle de categorías colapsado el ranking sigue visible, porque el colapso solo alcanza al gráfico y a los
+valores. La ranura (`.detailSlot`) deja 12px debajo solo si se ve la fila de otra variable más abajo
+(`isFollowedByVariable`); si el ranking es lo último, no agrega espacio. En los
+indicadores simples de un solo nivel, que no usan `metricVariables`, el ranking queda al
+final de la cabecera.
 
 ### De dónde salen los datos
 
@@ -365,6 +389,116 @@ variable por índice posicional; defaults omitidos**. Estos routers son la
 definición canónica del formato de URL del visor; el `MapUrlBuilder` de la
 tabla los replica y para aquel módulo son de solo lectura.
 
+La variable (`i`) guarda la posición de la serie activa, pero el estado en memoria la lleva a todas las
+series **por nombre**: elegirla en el panel (`metricVariables.selectVariable`) y restaurarla desde la ruta
+(`RestoreMetricState`) usan el mismo `ActiveMetric.SelectVariableInAllVersions(level, index, onlyBottomLevel)`.
+Así, al moverse por la serie la variable elegida se conserva aunque cada serie ordene distinto sus variables.
+Si la restauración la fijara solo en la serie activa, al moverse por la serie parecería perderse. Con el nivel
+de ubicaciones aparte solo se toca ese nivel; si no, los niveles que siguen al zoom. Una serie o un nivel sin
+una variable con ese nombre queda como estaba, y deseleccionar (-1) deselecciona en todas.
+
+### Anotaciones (en reactivación)
+
+Dibujar sobre el mapa (puntos, líneas, polígonos y comentarios). Hoy solo está reactivada la interfaz; la
+persistencia y las listas de elementos están **pendientes de diseño** y el código heredado sigue a medio
+camino.
+
+- **Barra superior derecha** (`widgets/summary/toolbar.vue`): un único botón «Anotaciones» (lápiz) con un menú
+  desplegable de texto e ícono: Punto, Línea, Polígono y Comentario. Con una herramienta activa, el botón figura
+  seleccionado (`mpDropdownMenu` prop `selected`) y el menú suma «Dejar de anotar». Se muestra con
+  `Use.UseAnnotations` (`MapSettings->UseAnnotations`, desactivado por defecto), sin depender de las listas del work.
+- **«Pregunta» (`Q`) ya no se ofrece.** Queda en el modelo de datos (`ann_allowed_types`) y en `ActiveAnnotations`
+  hasta cerrar el diseño de las listas.
+- **Sin sesión**: elegir una herramienta abre `popups/annotationsLogin.vue` («Para hacer anotaciones en el mapa
+  tenés que iniciar sesión…», con Ingresar, Registrarse y Cancelar) y no activa el dibujo. Las anotaciones se
+  guardan en la cuenta de quien las hace.
+- **Heredado y sin terminar**: el visor llama a `CreateAnnotationForType`, `AnnotationUpdateItem`,
+  `AnnotationDeleteItem` y `GetAnnotationItems`, que **no existen en servicios**; `LeafletApi` tiene un error
+  (`window.SegMap.Annotations` es un arreglo, no un objeto con `UpdateItem`) y `CreateAnnotationForType` no
+  devuelve la promesa. En servicios existen `draft_annotation` (lista por cartografía: título, acceso de
+  invitados, tipos permitidos) y `draft_annotation_item`, más `AnnotationsModel` (solo lecturas, sin endpoints).
+
+### Deshacer y rehacer
+
+Dos botones, a la izquierda del resto de la barra superior derecha (`widgets/summary/toolbar.vue`, junto a
+guardar, compartir y ayuda), recorren el historial de acciones del usuario. Leen su estado de
+`toolbarStates.history`, que publica `UndoHistory`. Están grisados mientras no haya nada para deshacer o
+rehacer; el tooltip dice qué se va a deshacer o rehacer («Deshacer: Quitar «Pobreza» (Ctrl+Z)»). Una acción
+nueva borra lo que se podía rehacer. El historial guarda hasta 50 acciones y no se persiste: se pierde al
+recargar.
+
+**Qué es deshacible.** Todo cambio de estado que se serializa en la ruta (sección 6) y resulta de una
+decisión del usuario, más la baja de recientes:
+
+| Grupo | Acciones | Rótulo del tooltip |
+|---|---|---|
+| Capas | Agregar un indicador o una delimitación (desde el selector, el popup, la búsqueda, las sugerencias, los recientes o la ficha de un elemento) | Agregar «X» |
+| | Quitar una capa | Quitar «X» |
+| | Cambiar el orden de las capas | Reordenar las capas |
+| | Mostrar u ocultar una delimitación | Ocultar «X» / Mostrar «X» |
+| | Cambiar de serie; activar, cambiar o dejar la comparación entre series | Cambiar la serie de «X», Comparar series de «X», Cambiar las series comparadas de «X», Salir de la comparación de «X» |
+| | Elegir otra variable, otro nivel (incluida la alternancia entre ubicaciones y niveles agregados) o fijar/liberar el nivel | Cambiar la variable de «X», Cambiar el nivel de «X» |
+| | Cambiar la medida del resumen, la partición o el filtro de urbanidad | Cambiar la medida de «X», … la partición de «X», … el filtro de urbanidad de «X» |
+| | Ocultar o mostrar categorías (clic en una categoría, deseleccionar o seleccionar todas) | Cambiar las categorías visibles de «X», Seleccionar todas las categorías de «X» |
+| | Abrir el ranking, cambiar su tamaño o sentido, o cerrarlo | Abrir el ranking de «X», Cambiar el ranking de «X», Cerrar el ranking de «X» |
+| | Opciones de la capa: descripciones, valores, perímetro, trama de fondo, opacidad, gradiente, pasos de una secuencia, gráfico | Cambiar las opciones de «X» |
+| Recorte | Seleccionar, cambiar o quitar las regiones del recorte | Seleccionar un recorte, Cambiar el recorte, Quitar el recorte |
+| | Dibujar, mover o quitar el círculo | Seleccionar un círculo, Cambiar el círculo, Quitar el círculo |
+| Elemento | Clic en un elemento del mapa, de una lista, de la búsqueda o de los recientes: abre su panel y puede mover el encuadre y el zoom; cerrar ese panel | Seleccionar un elemento, Cerrar el panel del elemento |
+| Mapa base | Cambiar el tipo de mapa, las capas activas del mapa base (relieve, indicadores y delimitaciones de fondo) o mostrar/ocultar las etiquetas | Cambiar el mapa base, Cambiar las capas del mapa base, Ocultar/Mostrar las etiquetas del mapa |
+| Paneles | Cerrar o abrir el panel de estadísticas de la derecha | Cerrar el panel de estadísticas, Abrir el panel de estadísticas |
+| | Cerrar el panel de una lista de elementos, y ocultar o mostrar el panel de información de la izquierda | Cerrar el panel de «X», Cerrar el panel de información, Abrir el panel de información |
+| Recientes | Eliminar un ítem de «Visto recientemente» | Quitar «X» de recientes |
+
+Varias capas cambiadas a la vez se resumen («Cambiar las capas», «Agregar 2 capas»).
+
+**Qué no es deshacible.**
+
+- Mover el mapa (arrastre, teclado) y cambiar el zoom (rueda, botones, doble clic). El encuadre solo se
+  restaura junto con las acciones de recorte y de elemento seleccionado, que lo pueden mover.
+- Cerrar ventanas y paneles de la barra lateral: buscar, filtrar, agregar indicador, mapa base y los popups.
+  Son paneles que se reabren con su botón y no guardan información del usuario.
+- Colapsar o expandir secciones dentro de un panel (categorías de una variable).
+- El nivel que sigue al zoom: cuando el nivel elegido coincide con el automático antes y después, el
+  cambio no es una acción, y tampoco lo que depende del nivel visible (variables, categorías, tramas).
+- El nivel del recorte, que lo resuelve el zoom.
+- Cargar la ruta (arranque, enlace compartido, botón atrás del navegador) y las respuestas tardías del servidor.
+- Abrir popups informativos (metadatos, descargas, tutorial), buscar, exportar, mover la barra lateral
+  y las preferencias guardadas en el navegador.
+- Lo que se registra por efecto de otra acción, como los recientes que se agregan al sumar una capa.
+
+**Cómo funciona.**
+
+- `UndoHistory` (pilas, tooltips, límite) no conoce el visor: usa un *driver* con `Capture()`, `Pick()` y
+  `Apply()`. `RouteStateDriver` lo implementa con los routers de `SaveRoute` (`subscribersByName`).
+- Cada `SaveRoute.UpdateRoute()` que cambia la ruta llama a `History.OnRouteChanged()`: se captura el
+  estado (capas con su estado por clave, mapa base, recorte, elemento, encuadre) y `UndoClassifier`
+  decide, comparando con el anterior, si es una acción y cómo se llama. Es lógica pura. Una acción nueva
+  no requiere tocar la interfaz: basta que actualice la ruta. Para que sea deshacible hay que revisar la
+  tabla de arriba; para excluir una clave de una capa, agregarla a `IGNORED_LAYER_KEYS`.
+- Solo cuenta si llega dentro de los 30 s de una interacción del usuario (`pointerdown` o `keydown`): así
+  no se registran las cargas ni los cambios automáticos. `Rebase()` toma el estado actual sin registrarlo
+  y reinicia esa ventana; lo llaman `RestoreRoute.LoadRoute` y `LoadInfos`.
+- Cada entrada guarda la ruta anterior y los bloques afectados. Deshacer restaura solo esos bloques y
+  deja en rehacer lo que había; rehacer hace lo inverso. Los bloques se restauran por `FromRoute` de cada
+  router; donde la ruta no puede expresar «ninguno» se usan las operaciones de la interfaz
+  (`ResetClippingCircle`, `ResetClippingRegion`, `FeatureInfoRouter.Clear`, mapa base predeterminado).
+  Mientras se aplica no se registra nada y los botones quedan deshabilitados.
+- `History.NoteFrame()` guarda el encuadre antes de una acción que puede moverlo
+  (`InfoRequestedInteractive`, `SetClippingRegion`, `SetClippingCircle`); vale 10 s.
+- Paneles con contenido: se deshace el cierre del panel de estadísticas de la derecha (`App.doToggle`) y
+  el de los paneles de información de la izquierda: el de un elemento por la ruta (`FeatureInfoRouter`),
+  y el de una lista y el ocultar/mostrar del panel (`leftPanel.vue`) con `RecordCustom`. Si el panel de un
+  elemento se cierra junto con otra acción (quitar la capa a la que pertenecía), se restaura con ella.
+  `RecordCustom` se ignora mientras se aplica otra entrada, para que lo que dispare un deshacer no se
+  registre como una acción nueva.
+- Atajos: Ctrl/Cmd+Z deshace; Ctrl/Cmd+Y o Ctrl/Cmd+Shift+Z rehacen (`UndoHistory.HandleKeyDown`, enlazado
+  en `SegmentedMap.BindUserInputToHistory`). En campos de texto se deja el deshacer del navegador. Los
+  tooltips de los botones indican el atajo.
+- Una acción que no pasa por la ruta se registra con `History.RecordCustom(rótulo, deshacer, rehacer)`.
+- Los cambios de capas se restauran volviendo a pedir las capas al servidor (`GetSelectedInfos`) y
+  recreándolas, igual que el botón atrás del navegador.
+
 ---
 
 ## 7. Estructura de carpetas
@@ -386,6 +520,7 @@ tabla los replica y para aquel módulo son de solo lectura.
         TileRequest.js         Pedido dato+cartografía de un tile (cancelable, en bloque, paginado)
         Queue.js               Cola de requests con tope de concurrencia
         Clipping.js            Recorte por región / círculo / canvas
+        UndoHistory.js / UndoClassifier.js / RouteStateDriver.js  Deshacer y rehacer (ver sección 6)
         Compare.js             Comparación entre versiones (deltas, labels comparables)
         Summary.js             Cálculo de valores del panel de resumen (N/I/P/K/A/D/T)
         InfoWindow.js          Fichas de elementos y navegación
@@ -412,6 +547,8 @@ tabla los replica y para aquel módulo son de solo lectura.
                                FeatureSelector (selección por click sobre tiles),
                                LeafletAnnotator, ContextMenuTools, MarkerFactory,
                                deck-gl/ (capa de puntos), pegman/ (street view)
+                               BasemapLayers (mapa base raster o vectorial según la URL; también lo usa
+                               `Relocate.vue` del backoffice, sin ocultar los nombres de lugares)
       overlays/                Overlays genéricos (TextOverlay, IconOverlay, PolygonOverlay)
       annotations/             MapAnnotator (alta/edición de anotaciones)
       js/                      Helpers puros: helper.js (params de servicios, formatos),
@@ -689,7 +826,22 @@ desde la raíz del módulo con:
   - `bottomLevelApart.test.mjs` — indicadores con nivel de ubicaciones aparte:
     `HasSeparateBottomLevel`/`MultilevelCount`, opciones y selector de nivel sin
     las ubicaciones, filas de variables de ambos bloques (incluida la variable
-    única sin nombre y el modo solo lectura) y alternancia entre bloques.
+    única sin nombre y el modo solo lectura), alternancia entre bloques e
+    invariante del nivel automático ante recortes y niveles fijados.
+  - `comparePoints.test.mjs` — comparación de ubicaciones: emparejamiento de
+    niveles por tipo, habilitación del nivel aparte, filas visibles del bloque
+    de ubicaciones, URL y parámetros de `GetMetricDataCompare` y filtrado por
+    las categorías de variación.
+  - `panelsHistory.test.mjs` — cierre y ocultamiento del panel izquierdo (listas, disposición, rótulos) y
+    registro del cierre del panel de estadísticas. El arnés stubea `split.js`.
+  - `annotationsMenu.test.mjs` — menú «Anotaciones» de la barra superior (ítems sin «Pregunta», aviso de
+    inicio de sesión, estado activo) y popup `annotationsLogin`.
+  - `toolbarHistory.test.mjs` — botones de deshacer y rehacer de la barra superior derecha (estado,
+    tooltips con atajo, delegación en el historial). El arnés stubea `MapExport` y `authentication`.
+  - `undoHistory.test.mjs` — deshacer y rehacer: clasificación de las acciones (capas,
+    mapa base, recorte, elemento; lo que no es acción), pilas, tooltips, ventana de
+    interacción del usuario, acciones propias, atajos de teclado, y captura y restauración
+    por bloques del driver con routers falsos.
   - `segmentsComposer.test.mjs` — caracterización de la presentación de
     segmentos previa al desarrollo: geometría tomada del dato, clase `ls`,
     filtro por categoría con caché, escape de descripciones, formato del valor

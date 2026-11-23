@@ -58,6 +58,7 @@ Clipping.prototype.SetClippingCircleKms = function (center, radius) {
 };
 
 Clipping.prototype.SetClippingCircle = function (clippingCircle) {
+	window.SegMap.History.NoteFrame();
 	this.frame.ClippingCircle = clippingCircle;
 	window.SegMap.Session.Content.SelectCircle(clippingCircle);
 	window.SegMap.ClearMyLocation();
@@ -120,6 +121,7 @@ Clipping.prototype.SetClippingRegion = function (clippingRegionId, moveCenter, c
 		appendSelection = false;
 	}
 
+	window.SegMap.History.NoteFrame();
 	this.frame.ClippingCircle = null;
 	window.SegMap.ClearMyLocation();
 	window.SegMap.Session.Content.SelectRegion([clippingRegionId]);

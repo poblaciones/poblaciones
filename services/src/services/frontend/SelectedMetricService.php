@@ -5,6 +5,7 @@ namespace helena\services\frontend;
 use helena\caches\SelectedMetricsMetadataCache;
 use helena\services\common\BaseService;
 use helena\classes\Session;
+use helena\classes\App;
 use helena\classes\LevelZoom;
 use helena\db\frontend\MetricVersionModel;
 use helena\db\frontend\VariableModel;
@@ -187,6 +188,7 @@ class SelectedMetricService extends BaseService
 	{
 		// Cuando ya tiene todas las versiones, se fija si con comparables
 		$datasets = [];
+		$datasetIdsWithCode = $this->GetDatasetIdsWithCode($selectedMetric);
 		// Arma la lista de datasets por nombre de nivel (provincia, departamento, etc)
 		foreach($selectedMetric->Versions as $version)
 		{
@@ -194,13 +196,14 @@ class SelectedMetricService extends BaseService
 			{
 				if ($level->Partitions === null) // hasta que sea compatible es una restricción
 				{
-					$levelName = $level->ShortName;
+					$levelName = $this->GetComparisonGroupName($level);
 					if (!array_key_exists($levelName, $datasets))
 					{
 						$datasets[$levelName] = [];
 					}
 					$datasetId = $level->Dataset->Id;
-					if (!Arr::InArrayByNamedValue($datasets[$levelName], $datasetId, 'datasetId') && $level->Dataset->Type == "D")
+					if (!Arr::InArrayByNamedValue($datasets[$levelName], $datasetId, 'datasetId') &&
+						$this->IsComparableDataset($level, $datasetIdsWithCode))
 					{
 						$datasets[$levelName][] = ['datasetId' => $datasetId, 'level' => $level];
 					}
@@ -215,13 +218,17 @@ class SelectedMetricService extends BaseService
 			foreach ($datasetIds as $dataset)
 			{
 				$datasetId = $dataset['datasetId'];
-				$listOfIds[] = $dataset['level']->GeographyId;
 				$level = $dataset['level'];
+				if ($level->Dataset->Type === 'D')
+				{
+					// Solo la comparación por geografía usa tuplas; la de ubicaciones y zonas, el código
+					$listOfIds[] = $level->GeographyId;
+				}
 				foreach ($datasetIds as $datasetCompare)
 				{
 					$datasetCompareId = $datasetCompare['datasetId'];
 					$levelCompare = $datasetCompare['level'];
-					if ($datasetId != $datasetCompareId)
+					if ($datasetId != $datasetCompareId && $this->CanLinkLevels($level, $levelCompare))
 					{
 						// Obtiene las variables comparables
 						$variablePairs = $merger->GetComparableVariables($datasetId, $datasetCompareId, false, $selectedMetric->Metric->Id);
@@ -241,6 +248,63 @@ class SelectedMetricService extends BaseService
 		$metadataInfo = $merger->GetTuplesMetadata($listOfIds);
 		$selectedMetric->ComparableMetadata = $metadataInfo;
 		$selectedMetric->Comparable = $foundComparable; // && sizeof($metadataInfo['TupleGeography']) > 0;
+	}
+
+	// Los datasets estándar se comparan por equivalencias entre geografías, de a un nivel (provincias,
+	// departamentos...). Las ubicaciones y las zonas propias, por código, con independencia de su geografía.
+	private function GetComparisonGroupName($level): string
+	{
+		if ($level->Dataset->Type === 'D')
+		{
+			return $level->ShortName;
+		}
+		return '#' . $level->Dataset->Type;
+	}
+
+	// Ubicaciones y zonas se vinculan por código; los niveles estándar, por equivalencias geográficas.
+	private function CanLinkLevels($level, $levelCompare): bool
+	{
+		if ($level->Dataset->Type !== 'D')
+		{
+			return true;
+		}
+		return MergeSnapshotsByDatasetModel::HasGeographyRelation($level->GeographyId, $levelCompare->GeographyId);
+	}
+
+	private function IsComparableDataset($level, array $datasetIdsWithCode): bool
+	{
+		if ($level->Dataset->Type === 'D')
+		{
+			return true;
+		}
+		return in_array((int)$level->Dataset->Id, $datasetIdsWithCode, true);
+	}
+
+	// Ids de los datasets de ubicaciones o zonas del indicador que declaran columna de código
+	public function GetDatasetIdsWithCode($selectedMetric): array
+	{
+		$datasetIds = [];
+		foreach($selectedMetric->Versions as $version)
+		{
+			foreach($version->Levels as $level)
+			{
+				if ($level->Dataset->Type !== 'D')
+				{
+					$datasetIds[] = $level->Dataset->Id;
+				}
+			}
+		}
+		if (sizeof($datasetIds) === 0)
+		{
+			return [];
+		}
+		$sql = "SELECT dat_id FROM dataset WHERE dat_code_column_id IS NOT NULL AND dat_id IN (" . Str::JoinInts($datasetIds) . ")";
+		$ret = [];
+		foreach(App::Db()->fetchAll($sql) as $row)
+		{
+			$ret[] = (int)$row['dat_id'];
+		}
+		return $ret;
 	}
 
 	private function FlagAllVariablesAsComparable($level, $variablePairs)
